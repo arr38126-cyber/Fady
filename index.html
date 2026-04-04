@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dr: Fady Adel | Physics Platform</title>
+    <link rel="icon" href="https://i.ibb.co/nMB0QD7k/fady-logo.png" type="image/png" />
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --navy: #0d1b2a; --navy-mid: #1b2e42; --gold: #c9972b; --gold-lt: #e8b84b;
+            --bg: #0a1520; --card-bg: #111e2d; --card-brd: #1e3248; --white: #f0f4f8;
+            --gray: #6a7f96; --shadow: 0 24px 70px rgba(0,0,0,.55); --radius: 20px;
+        }
+        body {
+            font-family: 'Cairo', sans-serif; background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 24px 16px; overflow-x: hidden; position: relative;
+        }
+        /* Background Effects */
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background: radial-gradient(ellipse 70% 55% at 15% 15%, rgba(201,151,43,.07) 0%, transparent 65%),
+                        radial-gradient(ellipse 100% 80% at 50% 0%, rgba(27,46,66,.5) 0%, transparent 60%);
+            z-index: 0;
+        }
+        .wrapper { position: relative; z-index: 1; width: 100%; max-width: 450px; animation: fadeUp .75s ease both; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+
+        /* Header & Logo */
+        .header { text-align: center; margin-bottom: 25px; }
+        .logo-img-wrap {
+            width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 15px;
+            border: 3px solid var(--gold); background: var(--navy);
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,.6);
+        }
+        .logo-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .site-title { font-size: 1.8rem; color: var(--white); font-weight: 900; }
+        .site-title span { color: var(--gold); }
+        .tagline { font-family: 'Amiri', serif; color: var(--gold-lt); font-style: italic; font-size: 1.1rem; margin-top: 10px; display: block; }
+
+        /* Card & Tabs */
+        .card { background: var(--card-bg); border: 1px solid var(--card-brd); border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow); position: relative; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gold); border-radius: 20px 20px 0 0; }
+        .tabs { display: flex; background: rgba(255,255,255,.05); border-radius: 12px; padding: 5px; margin-bottom: 25px; gap: 5px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--gray); cursor: pointer; font-weight: 600; border-radius: 8px; transition: .3s; }
+        .tab-btn.active { background: var(--gold); color: var(--navy); }
+
+        /* Forms */
+        .form-group { margin-bottom: 15px; }
+        input {
+            width: 100%; padding: 14px; background: #162333; border: 1px solid var(--card-brd);
+            border-radius: 10px; color: var(--white); text-align: right; font-family: 'Cairo';
+        }
+        input:focus { outline: none; border-color: var(--gold); background: #1c2d42; }
+        button {
+            width: 100%; padding: 15px; background: linear-gradient(135deg, var(--gold), var(--gold-dk));
+            color: var(--navy); border: none; border-radius: 10px; font-weight: 800; font-size: 1.1rem;
+            cursor: pointer; transition: .3s; margin-top: 10px;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(201,151,43,.3); }
+        .forgot-link { color: var(--red); display: block; margin-top: 15px; font-size: 0.9rem; text-decoration: none; font-weight: 600; text-align: center; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="header">
+        <div class="logo-img-wrap"><img src="https://i.ibb.co/nMB0QD7k/fady-logo.png" alt="Logo"></div>
+        <h1 class="site-title">Dr: <span>Fady Adel</span></h1>
+        <span class="tagline">"وَمَن لا يُحِبّ صُعُودَ الجِبَالِ يَعِش أَبَدَ الدَّهرِ بَينَ الحُفَرِ"</span>
+    </div>
+
+    <div class="card">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('login')">تسجيل الدخول</button>
+            <button class="tab-btn" onclick="switchTab('reg')">حساب جديد</button>
+        </div>
+
+        <div id="loginForm">
+            <div class="form-group"><input type="tel" id="lPhone" placeholder="رقم الموبايل"></div>
+            <div class="form-group"><input type="password" id="lPass" placeholder="كلمة المرور"></div>
+            <button onclick="handleLogin()">دخول المنصة</button>
+            <a href="#" onclick="forgotPW()" class="forgot-link">نسيت كلمة المرور؟ تواصل معنا</a>
+        </div>
+
+        <div id="regForm" class="hidden">
+            <div class="form-group"><input type="text" id="rName" placeholder="الاسم الثلاثي"></div>
+            <div class="form-group"><input type="tel" id="rPhone" placeholder="رقم الموبايل"></div>
+            <div class="form-group"><input type="tel" id="rParent" placeholder="رقم ولي الأمر"></div>
+            <div class="form-group"><input type="password" id="rPass" placeholder="كلمة المرور"></div>
+            <button onclick="handleRegister()">تأكيد الاشتراك</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
+
+    function switchTab(type) {
+        document.getElementById('loginForm').classList.toggle('hidden', type === 'reg');
+        document.getElementById('regForm').classList.toggle('hidden', type === 'login');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active'));
+    }
+
+    async function handleRegister() {
+        const data = {
+            full_name: document.getElementById('rName').value,
+            student_phone: document.getElementById('rPhone').value,
+            parent_phone: document.getElementById('rParent').value,
+            password: document.getElementById('rPass').value,
+            is_logged_in: false
+        };
+        if(!data.full_name || !data.student_phone || !data.password) return alert("أكمل البيانات");
+        const { error } = await _supabase.from('students').insert([data]);
+        if(error) alert("خطأ: " + error.message);
+        else { alert("تم الاشتراك بنجاح!"); switchTab('login'); }
+    }
+
+    async function handleLogin() {
+        const p = document.getElementById('lPhone').value, pw = document.getElementById('lPass').value;
+        const { data, error } = await _supabase.from('students').select('*').eq('student_phone', p).eq('password', pw).maybeSingle();
+        if(error || !data) alert("البيانات غير صحيحة");
+        else {
+            if(data.is_logged_in) alert("الحساب مفتوح من جهاز آخر");
+            else {
+                await _supabase.from('students').update({ is_logged_in: true }).eq('student_phone', p);
+                alert("أهلاً بك يا " + data.full_name);
+            }
+        }
+    }
+
+    function forgotPW() {
+        const msg = encodeURIComponent("دكتور فادي، أحتاج مساعدة في استعادة باسوورد المنصة الخاص بي.");
+        window.open(`https://wa.me/201000000000?text=${msg}`, '_blank');
+    }
+</script>
+</body>
+</html>
