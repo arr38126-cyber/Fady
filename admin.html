@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم المؤمنة | Dr: Fady Adel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --gold: #c9972b; --navy: #050a0f; --card: #0d1621; --danger: #ff4d4d; }
+        body { font-family: 'Cairo', sans-serif; background: var(--navy); color: white; padding: 20px; }
+        .hidden { display: none !important; }
+        .section { background: var(--card); border: 1px solid var(--gold); padding: 25px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #1a2635; border: 1px solid #333; color: white; border-radius: 10px; outline: none; }
+        input:focus { border-color: var(--gold); }
+        .btn { background: var(--gold); color: var(--navy); border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 900; width: 100%; transition: 0.3s; }
+        .btn:hover { transform: scale(1.02); opacity: 0.9; }
+        
+        /* شاشة القفل */
+        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--navy); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+
+    <div id="lockScreen">
+        <img src="https://i.ibb.co/nMB0QD7k/fady-logo.png" style="width: 100px; margin-bottom: 20px;">
+        <h2 style="color:var(--gold)">منطقة محظورة 🛡️</h2>
+        <p>برجاء إدخال كود الوصول للإدارة</p>
+        <input type="password" id="adminAccessCode" placeholder="كود الوصول السرّي" style="width: 250px; text-align: center;">
+        <button class="btn" onclick="checkAccess()" style="width: 200px;">دخول</button>
+    </div>
+
+    <div id="adminContent" class="hidden">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; border-bottom:2px solid var(--gold); padding-bottom:10px;">
+            <h2 style="color:var(--gold)">🛡️ إدارة المنصة</h2>
+            <button class="btn" style="width:auto; background:var(--danger); color:white;" onclick="logoutAdmin()">تسجيل خروج</button>
+        </header>
+
+        <div class="section">
+            <h3>1. إضافة كورس جديد 📚</h3>
+            <input type="text" id="cTitle" placeholder="اسم الكورس">
+            <textarea id="cDesc" placeholder="وصف الكورس"></textarea>
+            <button class="btn" onclick="addCourse()">حفظ الكورس</button>
+        </div>
+
+        <div class="section">
+            <h3>2. إضافة محاضرة فيديو 🎥</h3>
+            <select id="courseSelect"><option>اختر الكورس...</option></select>
+            <input type="text" id="lTitle" placeholder="عنوان المحاضرة">
+            <input type="text" id="lVideo" placeholder="YouTube Video ID (مثال: 7pI0p03H7L8)">
+            <input type="text" id="lPdf" placeholder="رابط ملف الـ PDF">
+            <button class="btn" onclick="addLesson()">رفع المحاضرة</button>
+        </div>
+
+        <div class="section">
+            <h3>3. إضافة امتحان الكتروني 📝</h3>
+            <select id="lessonSelect"><option>اختر المحاضرة...</option></select>
+            <div id="questionsContainer">
+                <div class="q-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px;">
+                    <input type="text" id="qText" placeholder="السؤال؟">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <input type="text" id="optA" placeholder="الاختيار أ (الإجابة الصحيحة)">
+                        <input type="text" id="optB" placeholder="الاختيار ب">
+                        <input type="text" id="optC" placeholder="الاختيار ج">
+                        <input type="text" id="optD" placeholder="الاختيار د">
+                    </div>
+                </div>
+            </div>
+            <button class="btn" style="margin-top:15px;" onclick="addExam()">حفظ الامتحان</button>
+        </div>
+    </div>
+
+    <script>
+        const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
+
+        // كود الوصول السرّي (تستطيع تغييره من هنا)
+        const MASTER_CODE = "FADY_2026_ADMIN";
+
+        function checkAccess() {
+            const inputCode = document.getElementById('adminAccessCode').value;
+            const savedUser = JSON.parse(localStorage.getItem('physics_user'));
+
+            // شرط الدخول: الكود السري صح + يكون الشخص مسجل حساب "أدمن" فعلياً
+            if (inputCode === MASTER_CODE && savedUser && savedUser.role === 'admin') {
+                document.getElementById('lockScreen').classList.add('hidden');
+                document.getElementById('adminContent').classList.remove('hidden');
+                loadAllData();
+            } else {
+                alert("غير مسموح لك بالدخول! تأكد من الكود ومن صلاحية حسابك.");
+            }
+        }
+
+        async function loadAllData() {
+            const { data: courses } = await _supabase.from('courses').select('*');
+            document.getElementById('courseSelect').innerHTML = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+
+            const { data: lessons } = await _supabase.from('lessons').select('*');
+            document.getElementById('lessonSelect').innerHTML = lessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+        }
+
+        async function addCourse() {
+            const title = document.getElementById('cTitle').value;
+            const { error } = await _supabase.from('courses').insert([{ title, description: document.getElementById('cDesc').value }]);
+            if(!error) { alert("تم الحفظ!"); loadAllData(); }
+        }
+
+        async function addLesson() {
+            const { error } = await _supabase.from('lessons').insert([{ 
+                course_id: document.getElementById('courseSelect').value,
+                title: document.getElementById('lTitle').value,
+                video_id: document.getElementById('lVideo').value,
+                pdf_url: document.getElementById('lPdf').value
+            }]);
+            if(!error) { alert("تمت إضافة المحاضرة!"); loadAllData(); }
+        }
+
+        async function addExam() {
+            const lid = document.getElementById('lessonSelect').value;
+            const questionsJson = [{
+                q: document.getElementById('qText').value,
+                options: [
+                    document.getElementById('optA').value,
+                    document.getElementById('optB').value,
+                    document.getElementById('optC').value,
+                    document.getElementById('optD').value
+                ],
+                correct: 0 // الاختيار الأول هو الصحيح دائماً
+            }];
+            const { error } = await _supabase.from('exams').insert([{ lesson_id: lid, questions: questionsJson }]);
+            if(!error) alert("تم حفظ الامتحان!");
+        }
+
+        function logoutAdmin() { location.reload(); }
+    </script>
+</body>
+</html>
