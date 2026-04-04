@@ -2,275 +2,224 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Dr: Fady Adel | Physics Platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Amiri:ital@1&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Panel | Dr: Fady Adel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --navy: #050a0f; --gold: #c9972b; --white: #fff; --card: #0d1621; --brd: rgba(201, 151, 43, 0.3); }
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Cairo', sans-serif; background: var(--navy); color: var(--white); overflow-x: hidden; }
-        
-        /* منع النسخ والتصوير */
-        body { user-select: none; -webkit-user-select: none; }
-        
-        .amiri { font-family: 'Amiri', serif; color: var(--gold); font-size: 1.2rem; text-align: center; margin: 20px 0; font-style: italic; }
-        
-        .container { max-width: 600px; margin: auto; padding: 20px; }
-        .card { background: var(--card); border: 1px solid var(--brd); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        input { width: 100%; padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--brd); border-radius: 12px; color: white; font-size: 1rem; text-align: center; outline: none; }
-        .btn-gold { width: 100%; padding: 15px; background: var(--gold); border: none; border-radius: 12px; color: var(--navy); font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
-        
-        .course-card { background: var(--card); border: 1px solid var(--brd); border-radius: 15px; margin-bottom: 20px; overflow: hidden; transition: 0.3s; }
-        .course-img { width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid var(--brd); }
-        .course-info { padding: 15px; text-align: center; }
-        
-        #watermark { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.15; font-size: 12px; color: #fff; display: none; }
-        
-        .exam-area { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--navy); z-index: 10000; display: none; padding: 20px; overflow-y: auto; }
-        .locked { filter: grayscale(1); opacity: 0.7; position: relative; }
-        .locked::after { content: "🔒 محتوى مدفوع"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--gold); color: #000; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        body { font-family: 'Cairo', sans-serif; background: var(--navy); color: var(--white); padding: 20px; text-align: right; }
+        .container { max-width: 900px; margin: auto; }
+        .section { background: var(--card); border: 1px solid var(--brd); padding: 20px; border-radius: 15px; margin-bottom: 25px; }
+        h2, h3 { color: var(--gold); margin-bottom: 15px; border-bottom: 1px solid var(--brd); padding-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--brd); border-radius: 8px; color: white; outline: none; font-family: 'Cairo'; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 5px; font-family: 'Cairo'; }
+        .btn-gold { background: var(--gold); color: var(--navy); }
+        .btn-red { background: #e74c3c; color: white; }
+        .btn-blue { background: #3498db; color: white; }
+        .btn-orange { background: #f39c12; color: white; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 3px solid var(--gold); }
+        .course-img-preview { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; margin-left: 10px; border: 1px solid var(--gold); }
+        .question-block { border: 1px dashed var(--gold); padding: 15px; margin-bottom: 15px; border-radius: 10px; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-<div id="watermark"></div>
+<div class="container">
+    <h1 style="text-align:center; color:var(--gold); margin-bottom:30px;">لوحة تحكم المنصة 🛠️</h1>
 
-<div id="loginPage" class="container" style="margin-top: 10vh;">
-    <div class="card">
-        <h1 style="text-align:center; color:var(--gold); margin-bottom:10px;">Dr: Fady Adel</h1>
-        <p style="text-align:center; opacity:0.7; margin-bottom:25px;">منصة الفيزياء للثانوية العامة</p>
-        
-        <input type="tel" id="loginPhone" placeholder="رقم الموبايل">
-        <input type="password" id="loginPass" placeholder="كلمة المرور">
-        <button class="btn-gold" onclick="doLogin()">دخول للمنصة</button>
-        
-        <a style="display:block; text-align:center; margin-top:20px; color:#ff6b6b; font-size:0.85rem; cursor:pointer; text-decoration:none;" 
-        
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            onclick="window.open('https://wa.me/20102744?text=نسيت كلمة المرور الخاصة بحسابي', '_blank')">
-           نسيت كلمة المرور؟ تواصل معنا
-        </a>
+    <div class="section">
+        <h3>📂 إدارة الكورسات والأسعار</h3>
+        <input type="text" id="courseTitle" placeholder="عنوان الكورس الجديد">
+        <input type="number" id="coursePrice" placeholder="سعر الكورس (0 للمجاني)">
+        <input type="text" id="courseImage" placeholder="رابط صورة الكورس (ImgBB)">
+        <button class="btn btn-gold" onclick="addCourse()">إضافة كورس جديد</button>
+        <div id="coursesList" style="margin-top:15px;"></div>
     </div>
-    <p class="amiri">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</p>
-</div>
 
-<div id="mainPage" class="container" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 id="welcomeName" style="color:var(--gold);">أهلاً بك</h2>
-        <button onclick="location.reload()" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:5px 10px; border-radius:8px;">خروج</button>
+    <div class="section">
+        <h3>🎥 إضافة محاضرة جديدة</h3>
+        <select id="targetCourse"></select>
+        <input type="text" id="lessonTitle" placeholder="عنوان المحاضرة">
+        <input type="text" id="videoId" placeholder="ضع رابط الفيديو من يوتيوب مباشرة هنا">
+        <input type="text" id="pdfUrl" placeholder="رابط ملف الـ PDF (اختياري)">
+        <button class="btn btn-gold" onclick="addLesson()">حفظ المحاضرة</button>
     </div>
-    <div id="coursesContainer"></div>
-</div>
 
-<div id="lessonsPage" class="container" style="display:none;">
-    <button onclick="showMain()" style="color:var(--gold); margin-bottom:15px; background:none; border:none; cursor:pointer;">← العودة للكورسات</button>
-    <div id="lessonsContainer"></div>
-</div>
+    <div class="section" style="border-color: #f39c12;">
+        <h3 style="color:#f39c12">📋 إدارة المحاضرات الحالية</h3>
+        <select id="courseFilter" onchange="loadLessonsList()"></select>
+        <div id="allLessonsList" style="margin-top:15px;"></div>
+    </div>
 
-<div id="examArea" class="exam-area">
-    <div id="examContent"></div>
+    <div class="section">
+        <h3>🔓 تفعيل اشتراك طالب</h3>
+        <input type="tel" id="studentPhone" placeholder="رقم موبايل الطالب">
+        <select id="courseToActivate"></select>
+        <button class="btn btn-blue" onclick="activateCourse()">تفعيل الآن</button>
+    </div>
+
+    <div class="section" style="border-color: #3498db;">
+        <h3 style="color:#3498db">📱 تصفير أجهزة الطلاب</h3>
+        <input type="tel" id="logoutStudentPhone" placeholder="رقم الموبايل">
+        <button class="btn btn-blue" onclick="forceLogout()">السماح بالدخول من جهاز جديد</button>
+    </div>
+
+    <div class="section">
+        <h3>📝 إضافة امتحان لمحاضرة</h3>
+        <select id="targetLesson"></select>
+        <input type="number" id="examDuration" placeholder="مدة الامتحان بالدقائق">
+        <div id="questionsArea">
+            <div class="question-block">
+                <input type="text" placeholder="نص السؤال" class="q-text">
+                <input type="text" placeholder="رابط صورة السؤال" class="q-img">
+                <input type="text" placeholder="اختيار 1" class="opt">
+                <input type="text" placeholder="اختيار 2" class="opt">
+                <input type="text" placeholder="اختيار 3" class="opt">
+                <input type="text" placeholder="اختيار 4" class="opt">
+                <input type="number" placeholder="رقم الإجابة الصحيحة (0-3)" class="correct-idx">
+            </div>
+        </div>
+        <button class="btn btn-blue" onclick="addQuestionField()">+ إضافة سؤال آخر</button>
+        <button class="btn btn-gold" style="margin-top:15px;" onclick="saveExam()">حفظ الامتحان</button>
+    </div>
+
+    <div class="section" style="border-color: #e74c3c;">
+        <h3 style="color:#e74c3c">⚠️ منطقة الخطر</h3>
+        <button class="btn btn-red" onclick="clearResults()">حذف جميع نتائج الطلاب</button>
+    </div>
 </div>
 
 <script>
     const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
-    
-    let currentUser = null;
-    let userAccess = [];
 
-    // توليد بصمة الجهاز
-    async function getDeviceId() {
-        return btoa(navigator.userAgent + navigator.language + screen.width);
+    // دالة استخراج الـ ID من الرابط
+    function extractVideoID(url) {
+        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[7].length == 11) ? match[7] : url;
     }
 
-    async function doLogin() {
-        const phone = document.getElementById('loginPhone').value;
-        const pass = document.getElementById('loginPass').value;
-        const devId = await getDeviceId();
-
-        if(!phone || !pass) return alert("برجاء إدخال البيانات");
-
-        const { data: user, error } = await _supabase.from('students').select('*').eq('student_phone', phone).single();
-
-        if(!user || user.password !== pass) return alert("بيانات الدخول غير صحيحة");
-
-        if(user.last_device_id && user.last_device_id !== devId) {
-            return alert("عذراً، هذا الحساب مسجل على جهاز آخر. تواصل مع المستر لتغيير الجهاز.");
-        }
-
-        await _supabase.from('students').update({ last_device_id: devId }).eq('id', user.id);
-        
-        currentUser = user;
-        startWatermark(user.student_name, user.student_phone);
-        showMain();
+    async function initAdmin() {
+        const pass = prompt("MASTER CODE:");
+        if(pass !== "123456") { window.location.href = "index.html"; } else { loadData(); }
     }
 
-    function startWatermark(name, phone) {
-        const wm = document.getElementById('watermark');
-        wm.style.display = 'block';
-        setInterval(() => {
-            wm.innerHTML = `<div style="position:absolute; top:${Math.random()*90}%; left:${Math.random()*70}%;">${name} - ${phone}</div>`;
-        }, 3000);
-    }
-
-    async function showMain() {
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('lessonsPage').style.display = 'none';
-        document.getElementById('mainPage').style.display = 'block';
-        document.getElementById('welcomeName').innerText = "يا " + currentUser.student_name.split(' ')[0];
-
-        const { data: access } = await _supabase.from('student_access').select('course_id').eq('student_phone', currentUser.student_phone);
-        userAccess = access.map(a => a.course_id);
-
+    async function loadData() {
         const { data: courses } = await _supabase.from('courses').select('*');
-        let html = '';
-        courses.forEach(c => {
-            const isLocked = c.price > 0 && !userAccess.includes(c.id);
-            html += `
-                <div class="course-card ${isLocked ? 'locked' : ''}" onclick="${isLocked ? "alert('تواصل مع المستر لتفعيل هذا الكورس')" : `showLessons('${c.id}')`}">
-                    <img src="${c.image_url || 'https://via.placeholder.com/400x200/0d1621/c9972b?text=Physics'}" class="course-img">
-                    <div class="course-info">
-                        <h3>${c.title}</h3>
-                        <p>${c.price === 0 ? 'محتوى مجاني' : `السعر: ${c.price} ج.م`}</p>
-                    </div>
-                </div>`;
-        });
-        document.getElementById('coursesContainer').innerHTML = html;
-    }
+        const { data: lessons } = await _supabase.from('lessons').select('*');
 
-    async function showLessons(courseId) {
-        document.getElementById('mainPage').style.display = 'none';
-        document.getElementById('lessonsPage').style.display = 'block';
+        let courseOpts = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+        document.getElementById('targetCourse').innerHTML = courseOpts;
+        document.getElementById('courseToActivate').innerHTML = courseOpts;
+        document.getElementById('courseFilter').innerHTML = `<option value="">-- اختر كورس لعرض محاضراته --</option>` + courseOpts;
+        document.getElementById('targetLesson').innerHTML = lessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
 
-        const { data: lessons } = await _supabase.from('lessons').select('*').eq('course_id', courseId);
-        let html = '';
-        lessons.forEach(l => {
-            html += `
-                <div class="card" style="margin-bottom:15px; border-right:4px solid var(--gold);">
-                    <h3>${l.title}</h3>
-                    <div style="margin:15px 0; position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:10px;">
-                        <iframe style="position:absolute; top:0; left:0; width:100%; height:100%;" 
-                                src="https://www.youtube.com/embed/${l.video_id}?rel=0&modestbranding=1" 
-                                frameborder="0" allowfullscreen></iframe>
-                    </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        ${l.pdf_url ? `<button class="btn-gold" style="background:#34495e; color:#fff;" onclick="window.open('${l.pdf_url}')">PDF الملزمة</button>` : ''}
-                        <button class="btn-gold" onclick="openExam('${l.id}')">بدء الامتحان 📝</button>
-                    </div>
-                </div>`;
-        });
-        document.getElementById('lessonsContainer').innerHTML = html || '<p>لا توجد محاضرات حالياً.</p>';
-    }
-
-    // الدالة المعدلة لفتح الامتحان لضمان التحميل
-    async function openExam(lessonId) {
-        const { data: exam, error } = await _supabase.from('exams').select('*').eq('lesson_id', lessonId).maybeSingle();
-
-        if (error || !exam) return alert("لا يوجد امتحان متاح لهذه المحاضرة.");
-
-        let questions = typeof exam.questions === 'string' ? JSON.parse(exam.questions) : exam.questions;
-        if (!questions || questions.length === 0) return alert("الامتحان فارغ حالياً.");
-
-        // لخبطة الأسئلة
-        questions = questions.sort(() => Math.random() - 0.5);
-
-        const examArea = document.getElementById('examArea');
-        const examContent = document.getElementById('examContent');
-        examArea.style.display = 'block';
-
-        let currentQ = 0;
-        let score = 0;
-
-        function showQuestion() {
-            const q = questions[currentQ];
-            examContent.innerHTML = `
-                <h2 style="color:var(--gold); text-align:center; margin-bottom:20px;">سؤال ${currentQ + 1} من ${questions.length}</h2>
-                <div class="card">
-                    <p style="font-size:1.2rem; margin-bottom:20px;">${q.q}</p>
-                    ${q.img ? `<img src="${q.img}" style="width:100%; border-radius:10px; margin-bottom:15px;">` : ''}
-                    ${q.options.map((opt, idx) => `
-                        <button class="btn-gold" style="background:rgba(255,255,255,0.05); color:white; text-align:right; margin-bottom:10px; border:1px solid var(--brd);" 
-                                onclick="checkAns(${idx})">${opt}</button>
-                    `).join('')}
+        document.getElementById('coursesList').innerHTML = courses.map(c => `
+            <div class="list-item">
+                <div style="display:flex; align-items:center;">
+                    ${c.image_url ? `<img src="${c.image_url}" class="course-img-preview">` : '📂 '}
+                    <span>${c.title} (${c.price || 0} ج.م)</span>
                 </div>
-            `;
+                <button class="btn btn-red" style="width:auto; padding:5px 10px;" onclick="deleteCourse('${c.id}')">حذف الكورس</button>
+            </div>`).join('');
+    }
+
+    async function addCourse() {
+        const t = document.getElementById('courseTitle').value;
+        const p = document.getElementById('coursePrice').value || 0;
+        const img = document.getElementById('courseImage').value;
+        if(!t) return alert("أدخل اسم الكورس");
+        await _supabase.from('courses').insert([{ title: t, price: parseInt(p), image_url: img }]);
+        location.reload();
+    }
+
+    async function deleteCourse(id) {
+        if(confirm("سيتم حذف الكورس نهائياً، متأكد؟")) {
+            await _supabase.from('courses').delete().eq('id', id);
+            location.reload();
         }
+    }
 
-        window.checkAns = (idx) => {
-            if(idx === questions[currentQ].correct) score++;
-            currentQ++;
-            if(currentQ < questions.length) showQuestion();
-            else finishExam();
-        };
+    async function addLesson() {
+        const cId = document.getElementById('targetCourse').value;
+        const title = document.getElementById('lessonTitle').value;
+        const rawUrl = document.getElementById('videoId').value;
+        const pdf = document.getElementById('pdfUrl').value;
+        
+        const vId = extractVideoID(rawUrl);
 
-        async function finishExam() {
-            const finalScore = Math.round((score/questions.length)*100);
-            await _supabase.from('exam_results').insert([{ 
-                student_phone: currentUser.student_phone, 
-                lesson_id: lessonId, 
-                score: finalScore 
-            }]);
-            
-            examContent.innerHTML = `
-                <div class="card" style="text-align:center;">
-                    <h2 style="color:var(--gold);">انتهى الامتحان!</h2>
-                    <p style="font-size:2rem; margin:20px 0;">درجتك: ${finalScore}%</p>
-                    <button class="btn-gold" onclick="document.getElementById('examArea').style.display='none'">إغلاق</button>
-                </div>`;
+        if(!title || !vId) return alert("أكمل بيانات المحاضرة ورابط يوتيوب");
+        
+        await _supabase.from('lessons').insert([{ course_id: cId, title, video_id: vId, pdf_url: pdf }]);
+        alert("تمت إضافة المحاضرة بنجاح!");
+        document.getElementById('lessonTitle').value = "";
+        document.getElementById('videoId').value = "";
+        loadData();
+    }
+
+    async function loadLessonsList() {
+        const cId = document.getElementById('courseFilter').value;
+        if(!cId) { document.getElementById('allLessonsList').innerHTML = ""; return; }
+        const { data: lessons } = await _supabase.from('lessons').select('*').eq('course_id', cId);
+        document.getElementById('allLessonsList').innerHTML = lessons.map(l => `
+            <div class="list-item" style="border-left-color: #f39c12;">
+                <span>🎥 ${l.title}</span>
+                <button class="btn btn-orange" style="width:auto; padding:5px 10px;" onclick="deleteLesson('${l.id}')">حذف المحاضرة</button>
+            </div>`).join('');
+    }
+
+    async function deleteLesson(id) {
+        if(confirm("حذف المحاضرة؟")) {
+            await _supabase.from('exams').delete().eq('lesson_id', id);
+            await _supabase.from('lessons').delete().eq('id', id);
+            alert("تم الحذف!");
+            loadLessonsList();
+            loadData();
         }
-
-        showQuestion();
     }
 
-// --- ترسانة الحماية المتقدمة ---
-
-// 1. منع الكليك يمين نهائياً
-document.addEventListener('contextmenu', event => event.preventDefault());
-
-// 2. منع اختصارات لوحة المفاتيح (F12, Ctrl+U, Ctrl+Shift+I, وغيرها)
-document.onkeydown = function(e) {
-    if (e.keyCode == 123) return false; // F12
-    if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Inspect
-    if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false; // Elements
-    if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // Console
-    if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // View Source
-    if (e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) return false; // Save Page
-};
-
-// 3. كشف محاولة تسجيل الشاشة أو استخدام PrintScreen
-document.addEventListener('keyup', (e) => {
-    if (e.key === "PrintScreen") {
-        navigator.clipboard.writeText("المحتوى محمي!");
-        alert("تصوير الشاشة ممنوع لحماية الحقوق.");
+    async function activateCourse() {
+        const p = document.getElementById('studentPhone').value;
+        const cId = document.getElementById('courseToActivate').value;
+        await _supabase.from('student_access').insert([{ student_phone: p, course_id: cId }]);
+        alert("تم تفعيل الكورس للطالب!");
     }
-});
 
-// 4. تعطيل الكيبورد داخل الـ iframe (اليوتيوب) لزيادة الأمان
-const frames = document.getElementsByTagName('iframe');
-for (let f of frames) {
-    f.setAttribute('disablekb', '1');
-}
-
-// 5. ميزة الشاشة السوداء: تعطيل العرض إذا تم فتح أدوات المطور
-setInterval(function() {
-    if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
-        document.body.innerHTML = "<div style='background:#000; color:#fff; height:100vh; display:flex; align-items:center; justify-content:center; text-align:center;'><h2>عذراً، لا يمكن العرض أثناء استخدام أدوات المطور أو برامج التسجيل.</h2></div>";
+    async function forceLogout() {
+        const p = document.getElementById('logoutStudentPhone').value;
+        await _supabase.from('students').update({ last_device_id: null }).eq('student_phone', p);
+        alert("تم تصفير جهاز الطالب!");
     }
-}, 1000);
 
+    function addQuestionField() {
+        const div = document.createElement('div');
+        div.className = "question-block";
+        div.innerHTML = `<input type="text" placeholder="السؤال" class="q-text"><input type="text" placeholder="رابط الصورة" class="q-img"><input type="text" placeholder="اختيار 1" class="opt"><input type="text" placeholder="اختيار 2" class="opt"><input type="text" placeholder="اختيار 3" class="opt"><input type="text" placeholder="اختيار 4" class="opt"><input type="number" placeholder="رقم الإجابة (0-3)" class="correct-idx">`;
+        document.getElementById('questionsArea').appendChild(div);
+    }
+
+    async function saveExam() {
+        const lId = document.getElementById('targetLesson').value;
+        const dur = document.getElementById('examDuration').value;
+        const qBlocks = document.querySelectorAll('.question-block');
+        let questions = [];
+        qBlocks.forEach(b => {
+            const opts = Array.from(b.querySelectorAll('.opt')).map(i => i.value);
+            questions.push({ q: b.querySelector('.q-text').value, img: b.querySelector('.q-img').value, options: opts, correct: parseInt(b.querySelector('.correct-idx').value) });
+        });
+        await _supabase.from('exams').insert([{ lesson_id: lId, duration_minutes: dur, questions: questions }]);
+        alert("تم حفظ الامتحان!");
+    }
+
+    async function clearResults() {
+        if(confirm("حذف كل نتائج الطلاب؟")) {
+            await _supabase.from('exam_results').delete().neq('id', 0);
+            alert("تم تنظيف النتائج.");
+        }
+    }
+
+    initAdmin();
 </script>
 </body>
 </html>
-
-
-
-
