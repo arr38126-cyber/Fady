@@ -2,154 +2,196 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>إدارة المنصة الاحترافية | Dr: Fady Adel</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Panel | Dr: Fady Adel</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --gold: #c9972b; --navy: #050a0f; --card: #0d1621; --danger: #ff4d4d; }
-        body { font-family: 'Cairo', sans-serif; background: var(--navy); color: white; padding: 20px; }
-        .section { background: var(--card); border: 1px solid var(--gold); padding: 20px; border-radius: 15px; margin-bottom: 25px; }
-        input, select { width: 100%; padding: 10px; margin: 8px 0; background: #1a2635; border: 1px solid #333; color: white; border-radius: 8px; }
-        .btn { background: var(--gold); color: var(--navy); border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-        .btn-del { background: var(--danger); color: white; width: auto; padding: 5px 10px; margin-top: 5px; cursor: pointer; border: none; border-radius: 5px; }
-        .q-card { border: 1px dashed var(--gold); padding: 10px; margin-top: 10px; border-radius: 10px; }
-        .hidden { display: none; }
+        :root { --navy: #050a0f; --gold: #c9972b; --white: #fff; --card: #0d1621; --brd: rgba(201, 151, 43, 0.3); }
+        body { font-family: 'Cairo', sans-serif; background: var(--navy); color: var(--white); padding: 20px; }
+        .container { max-width: 900px; margin: auto; }
+        .section { background: var(--card); border: 1px solid var(--brd); padding: 20px; border-radius: 15px; margin-bottom: 25px; }
+        h2, h3 { color: var(--gold); margin-bottom: 15px; border-bottom: 1px solid var(--brd); padding-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--brd); border-radius: 8px; color: white; outline: none; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 5px; }
+        .btn-gold { background: var(--gold); color: var(--navy); }
+        .btn-red { background: #e74c3c; color: white; }
+        .btn-blue { background: #3498db; color: white; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 3px solid var(--gold); }
     </style>
 </head>
 <body>
 
-    <div id="lockScreen" style="text-align:center; margin-top:100px;">
-        <h2>🛡️ منطقة محظورة</h2>
-        <input type="password" id="mCode" placeholder="كود الوصول" style="width:200px;">
-        <button class="btn" onclick="checkAuth()" style="width:100px;">دخول</button>
+<div class="container">
+    <h1 style="text-align:center; color:var(--gold); margin-bottom:30px;">لوحة تحكم المنصة 🛠️</h1>
+
+    <div class="section">
+        <h3>📂 إدارة الكورسات</h3>
+        <input type="text" id="courseTitle" placeholder="عنوان الكورس الجديد">
+        <button class="btn btn-gold" onclick="addCourse()">إضافة كورس</button>
+        <div id="coursesList" style="margin-top:15px;"></div>
     </div>
 
-    <div id="mainContent" class="hidden">
-        <h1>🛠️ لوحة الإدارة الشاملة</h1>
+    <div class="section">
+        <h3>🎥 إضافة محاضرة جديدة</h3>
+        <select id="targetCourse"></select>
+        <input type="text" id="lessonTitle" placeholder="عنوان المحاضرة">
+        <input type="text" id="videoId" placeholder="ID فيديو اليوتيوب (مثال: dQw4w9WgXcQ)">
+        <input type="text" id="pdfUrl" placeholder="رابط ملف الـ PDF (اختياري)">
+        <button class="btn btn-gold" onclick="addLesson()">إضافة المحاضرة</button>
+    </div>
 
-        <div class="section" style="border-color: var(--danger);">
-            <h3 style="color:var(--danger)">🗑️ تنظيف المنصة (نهاية السنة)</h3>
-            <button class="btn-del" onclick="cleanPlatform('all')">حذف كل شيء (ماعدا الأدمن)</button>
-            <button class="btn-del" onclick="cleanPlatform('results')">حذف نتائج الامتحانات فقط</button>
-        </div>
+    <div class="section">
+        <h3>🔓 تفعيل اشتراك طالب</h3>
+        <input type="tel" id="studentPhone" placeholder="رقم موبايل الطالب">
+        <select id="courseToActivate"></select>
+        <button class="btn btn-blue" onclick="activateCourse()">تفعيل الآن</button>
+    </div>
 
-        <div class="section">
-            <h3>📚 الكورسات</h3>
-            <input type="text" id="cTitle" placeholder="عنوان الكورس الجديد">
-            <button class="btn" onclick="addCourse()">إضافة كورس</button>
-            <hr style="margin:20px 0; border:0.5px solid #333;">
-            <div id="coursesList">جاري التحميل...</div>
-        </div>
+    <div class="section" style="border-color: #3498db;">
+        <h3 style="color:#3498db">📱 إدارة أجهزة الطلاب</h3>
+        <p style="font-size: 0.8rem; margin-bottom: 10px;">استخدم هذا الخيار لإتاحة الدخول للطالب من جهاز جديد (سيتم تسجيل خروجه من الجهاز القديم).</p>
+        <input type="tel" id="logoutStudentPhone" placeholder="رقم موبايل الطالب">
+        <button class="btn btn-blue" onclick="forceLogout()">تسجيل خروج من جميع الأجهزة</button>
+    </div>
 
-        <div class="section">
-            <h3>📝 إضافة امتحان (نظام احترافي)</h3>
-            <select id="lSelect"><option>اختر المحاضرة</option></select>
-            <input type="number" id="eTime" placeholder="مدة الامتحان بالدقائق (مثلاً: 30)">
-            <div id="questionsArea">
-                <div class="q-card">
-                    <input type="text" class="q-txt" placeholder="نص السؤال">
-                    <input type="text" class="q-img" placeholder="رابط الصورة (اختياري)">
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
-                        <input type="text" class="q-a" placeholder="أ (الإجابة الصح)">
-                        <input type="text" class="q-b" placeholder="ب">
-                        <input type="text" class="q-c" placeholder="ج">
-                        <input type="text" class="q-d" placeholder="د">
-                    </div>
-                </div>
+    <div class="section">
+        <h3>📝 إضافة امتحان لمحاضرة</h3>
+        <select id="targetLesson"></select>
+        <input type="number" id="examDuration" placeholder="مدة الامتحان بالدقائق">
+        <div id="questionsArea">
+            <div class="question-block" style="border:1px dashed var(--gold); padding:10px; margin-bottom:10px;">
+                <input type="text" placeholder="السؤال الأول" class="q-text">
+                <input type="text" placeholder="رابط صورة السؤال (إن وجد)" class="q-img">
+                <input type="text" placeholder="الاختيار 1" class="opt">
+                <input type="text" placeholder="الاختيار 2" class="opt">
+                <input type="text" placeholder="الاختيار 3" class="opt">
+                <input type="text" placeholder="الاختيار 4" class="opt">
+                <input type="number" placeholder="رقم الإجابة الصحيحة (0، 1، 2، 3)" class="correct-idx">
             </div>
-            <button class="btn" onclick="saveFullExam()">حفظ الامتحان والوقت</button>
         </div>
-
-        <div class="section">
-            <h3>🔑 فتح كورس لطالب محدد</h3>
-            <input type="tel" id="stPhone" placeholder="رقم موبايل الطالب">
-            <select id="cSelectGrant"><option>اختر الكورس</option></select>
-            <button class="btn" onclick="grantAccess()">تفعيل الكورس للطالب</button>
-        </div>
+        <button class="btn btn-blue" onclick="addQuestionField()">+ إضافة سؤال آخر</button>
+        <button class="btn btn-gold" style="margin-top:15px;" onclick="saveExam()">حفظ الامتحان بالكامل</button>
     </div>
+
+    <div class="section" style="border-color: #e74c3c;">
+        <h3 style="color:#e74c3c">⚠️ منطقة الخطر</h3>
+        <button class="btn btn-red" onclick="clearResults()">حذف جميع نتائج امتحانات الطلاب</button>
+    </div>
+</div>
 
 <script>
     const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    function checkAuth() {
-        if(document.getElementById('mCode').value === "FADY_2026_ADMIN") {
-            document.getElementById('lockScreen').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-            loadData();
+    async function initAdmin() {
+        const pass = prompt("يرجى إدخال كود الأدمن (MASTER CODE):");
+        if(pass !== "123456") { // يمكنك تغيير الكود هنا
+            alert("كود خاطئ!"); window.location.href = "index.html";
         }
+        loadData();
     }
 
     async function loadData() {
         const { data: courses } = await _supabase.from('courses').select('*');
-        let cHtml = '';
-        courses.forEach(c => {
-            cHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span>- ${c.title}</span>
-                <button class="btn-del" onclick="deleteItem('courses', '${c.id}')">حذف الكورس</button>
-            </div>`;
-        });
-        document.getElementById('coursesList').innerHTML = cHtml;
-        document.getElementById('cSelectGrant').innerHTML = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
-
         const { data: lessons } = await _supabase.from('lessons').select('*');
-        document.getElementById('lSelect').innerHTML = lessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+
+        // تحديث قوائم الاختيار
+        let courseOpts = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+        document.getElementById('targetCourse').innerHTML = courseOpts;
+        document.getElementById('courseToActivate').innerHTML = courseOpts;
+        document.getElementById('targetLesson').innerHTML = lessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+
+        // عرض قائمة الكورسات للحذف
+        document.getElementById('coursesList').innerHTML = courses.map(c => `
+            <div class="list-item">
+                <span>${c.title}</span>
+                <button class="btn btn-red" style="width:auto; padding:5px 10px;" onclick="deleteCourse('${c.id}')">حذف</button>
+            </div>`).join('');
     }
 
     async function addCourse() {
-        const title = document.getElementById('cTitle').value;
-        await _supabase.from('courses').insert([{ title }]);
-        loadData();
+        const t = document.getElementById('courseTitle').value;
+        await _supabase.from('courses').insert([{ title: t }]);
+        location.reload();
     }
 
-    async function deleteItem(table, id) {
-        if(confirm("هل أنت متأكد من الحذف؟ سيتم حذف كل ما هو مرتبط بهذا العنصر.")) {
-            await _supabase.from(table).delete().eq('id', id);
-            loadData();
+    async function deleteCourse(id) {
+        if(confirm("سيتم حذف الكورس وكل محاضراته، متأكد؟")) {
+            await _supabase.from('courses').delete().eq('id', id);
+            location.reload();
         }
     }
 
-    async function saveFullExam() {
-        const lid = document.getElementById('lSelect').value;
-        const time = document.getElementById('eTime').value;
-        const questions = [{
-            q: document.querySelector('.q-txt').value,
-            img: document.querySelector('.q-img').value,
-            options: [document.querySelector('.q-a').value, document.querySelector('.q-b').value, document.querySelector('.q-c').value, document.querySelector('.q-d').value],
-            correct: 0
-        }];
-
-        await _supabase.from('exams').insert([{ 
-            lesson_id: lid, 
-            questions: questions, 
-            duration_minutes: parseInt(time) 
-        }]);
-        alert("تم حفظ الامتحان بنجاح!");
+    async function addLesson() {
+        const cId = document.getElementById('targetCourse').value;
+        const title = document.getElementById('lessonTitle').value;
+        const vId = document.getElementById('videoId').value;
+        const pdf = document.getElementById('pdfUrl').value;
+        await _supabase.from('lessons').insert([{ course_id: cId, title, video_id: vId, pdf_url: pdf }]);
+        alert("تمت إضافة المحاضرة!");
     }
 
-    async function grantAccess() {
-        const phone = document.getElementById('stPhone').value;
-        const cid = document.getElementById('cSelectGrant').value;
-        const { error } = await _supabase.from('student_access').insert([{ student_phone: phone, course_id: cid }]);
-        if(error) alert("الطالب لديه صلاحية بالفعل أو الرقم خطأ");
-        else alert("تم تفعيل الكورس للطالب بنجاح!");
+    async function activateCourse() {
+        const p = document.getElementById('studentPhone').value;
+        const cId = document.getElementById('courseToActivate').value;
+        await _supabase.from('student_access').insert([{ student_phone: p, course_id: cId }]);
+        alert("تم تفعيل الكورس للطالب!");
     }
 
-    async function cleanPlatform(type) {
-        if(!confirm("⚠️ تحذير: هذا الإجراء لا يمكن التراجع عنه! هل أنت متأكد؟")) return;
-        
-        if(type === 'results') {
-            await _supabase.from('exam_results').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        } else if(type === 'all') {
-            // حذف كل شيء ماعدا الطلاب الذين لديهم role = admin
-            await _supabase.from('exam_results').delete().neq('id', '0');
-            await _supabase.from('exams').delete().neq('id', '0');
-            await _supabase.from('lessons').delete().neq('id', '0');
-            await _supabase.from('courses').delete().neq('id', '0');
-            await _supabase.from('students').delete().eq('role', 'student');
+    // ميزة تسجيل الخروج الإجباري
+    async function forceLogout() {
+        const p = document.getElementById('logoutStudentPhone').value;
+        if(!p) return alert("أدخل رقم الطالب");
+        if(confirm("هل تريد السماح للطالب بالدخول من جهاز جديد؟")) {
+            await _supabase.from('students').update({ last_device_id: null }).eq('student_phone', p);
+            alert("تم التصفير! يمكن للطالب الآن تسجيل الدخول من جهاز آخر.");
         }
-        alert("تمت عملية التنظيف بنجاح!");
-        loadData();
     }
+
+    function addQuestionField() {
+        const div = document.createElement('div');
+        div.className = "question-block";
+        div.style = "border:1px dashed var(--gold); padding:10px; margin-bottom:10px;";
+        div.innerHTML = `
+            <input type="text" placeholder="السؤال" class="q-text">
+            <input type="text" placeholder="رابط الصورة" class="q-img">
+            <input type="text" placeholder="الاختيار 1" class="opt">
+            <input type="text" placeholder="الاختيار 2" class="opt">
+            <input type="text" placeholder="الاختيار 3" class="opt">
+            <input type="text" placeholder="الاختيار 4" class="opt">
+            <input type="number" placeholder="رقم الإجابة الصحيحة (0-3)" class="correct-idx">
+        `;
+        document.getElementById('questionsArea').appendChild(div);
+    }
+
+    async function saveExam() {
+        const lId = document.getElementById('targetLesson').value;
+        const dur = document.getElementById('examDuration').value;
+        const qBlocks = document.querySelectorAll('.question-block');
+        let questions = [];
+
+        qBlocks.forEach(b => {
+            const opts = Array.from(b.querySelectorAll('.opt')).map(i => i.value);
+            questions.push({
+                q: b.querySelector('.q-text').value,
+                img: b.querySelector('.q-img').value,
+                options: opts,
+                correct: parseInt(b.querySelector('.correct-idx').value)
+            });
+        });
+
+        const { error } = await _supabase.from('exams').insert([{ lesson_id: lId, duration_minutes: dur, questions: questions }]);
+        if(error) alert("خطأ في الحفظ"); else alert("تم رفع الامتحان بنجاح!");
+    }
+
+    async function clearResults() {
+        if(confirm("هل أنت متأكد من حذف جميع نتائج الطلاب؟ لا يمكن التراجع!")) {
+            await _supabase.from('exam_results').delete().neq('id', 0);
+            alert("تم تنظيف النتائج.");
+        }
+    }
+
+    initAdmin();
 </script>
 </body>
 </html>
