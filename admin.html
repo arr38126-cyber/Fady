@@ -12,12 +12,15 @@
         .container { max-width: 900px; margin: auto; }
         .section { background: var(--card); border: 1px solid var(--brd); padding: 20px; border-radius: 15px; margin-bottom: 25px; }
         h2, h3 { color: var(--gold); margin-bottom: 15px; border-bottom: 1px solid var(--brd); padding-bottom: 5px; }
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--brd); border-radius: 8px; color: white; outline: none; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--brd); border-radius: 8px; color: white; outline: none; font-family: 'Cairo'; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 5px; font-family: 'Cairo'; }
         .btn-gold { background: var(--gold); color: var(--navy); }
         .btn-red { background: #e74c3c; color: white; }
         .btn-blue { background: #3498db; color: white; }
+        .btn-orange { background: #f39c12; color: white; }
         .list-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 3px solid var(--gold); }
+        .course-img-preview { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; margin-left: 10px; border: 1px solid var(--gold); }
+        .question-block { border: 1px dashed var(--gold); padding: 15px; margin-bottom: 15px; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -28,8 +31,9 @@
     <div class="section">
         <h3>📂 إدارة الكورسات والأسعار</h3>
         <input type="text" id="courseTitle" placeholder="عنوان الكورس الجديد">
-        <input type="number" id="coursePrice" placeholder="سعر الكورس (اكتب 0 للمجاني)">
-        <button class="btn btn-gold" onclick="addCourse()">إضافة كورس</button>
+        <input type="number" id="coursePrice" placeholder="سعر الكورس (0 للمجاني)">
+        <input type="text" id="courseImage" placeholder="رابط صورة الكورس (URL من ImgBB مثلاً)">
+        <button class="btn btn-gold" onclick="addCourse()">إضافة كورس جديد</button>
         <div id="coursesList" style="margin-top:15px;"></div>
     </div>
 
@@ -39,20 +43,26 @@
         <input type="text" id="lessonTitle" placeholder="عنوان المحاضرة">
         <input type="text" id="videoId" placeholder="ID فيديو اليوتيوب">
         <input type="text" id="pdfUrl" placeholder="رابط ملف الـ PDF (اختياري)">
-        <button class="btn btn-gold" onclick="addLesson()">إضافة المحاضرة</button>
+        <button class="btn btn-gold" onclick="addLesson()">حفظ المحاضرة</button>
+    </div>
+
+    <div class="section" style="border-color: #f39c12;">
+        <h3 style="color:#f39c12">📋 إدارة المحاضرات الحالية</h3>
+        <select id="courseFilter" onchange="loadLessonsList()"></select>
+        <div id="allLessonsList" style="margin-top:15px;"></div>
     </div>
 
     <div class="section">
-        <h3>🔓 تفعيل اشتراك طالب (للكورسات المدفوعة)</h3>
+        <h3>🔓 تفعيل اشتراك طالب</h3>
         <input type="tel" id="studentPhone" placeholder="رقم موبايل الطالب">
         <select id="courseToActivate"></select>
         <button class="btn btn-blue" onclick="activateCourse()">تفعيل الآن</button>
     </div>
 
     <div class="section" style="border-color: #3498db;">
-        <h3 style="color:#3498db">📱 إدارة أجهزة الطلاب (تصفير الدخول)</h3>
-        <input type="tel" id="logoutStudentPhone" placeholder="رقم موبايل الطالب">
-        <button class="btn btn-blue" onclick="forceLogout()">تسجيل خروج من جميع الأجهزة</button>
+        <h3 style="color:#3498db">📱 تصفير أجهزة الطلاب</h3>
+        <input type="tel" id="logoutStudentPhone" placeholder="رقم الموبايل">
+        <button class="btn btn-blue" onclick="forceLogout()">السماح بالدخول من جهاز جديد</button>
     </div>
 
     <div class="section">
@@ -60,23 +70,23 @@
         <select id="targetLesson"></select>
         <input type="number" id="examDuration" placeholder="مدة الامتحان بالدقائق">
         <div id="questionsArea">
-            <div class="question-block" style="border:1px dashed var(--gold); padding:10px; margin-bottom:10px;">
+            <div class="question-block">
                 <input type="text" placeholder="نص السؤال" class="q-text">
-                <input type="text" placeholder="رابط الصورة (اختياري)" class="q-img">
-                <input type="text" placeholder="الاختيار 1" class="opt">
-                <input type="text" placeholder="الاختيار 2" class="opt">
-                <input type="text" placeholder="الاختيار 3" class="opt">
-                <input type="text" placeholder="الاختيار 4" class="opt">
+                <input type="text" placeholder="رابط صورة السؤال" class="q-img">
+                <input type="text" placeholder="اختيار 1" class="opt">
+                <input type="text" placeholder="اختيار 2" class="opt">
+                <input type="text" placeholder="اختيار 3" class="opt">
+                <input type="text" placeholder="اختيار 4" class="opt">
                 <input type="number" placeholder="رقم الإجابة الصحيحة (0-3)" class="correct-idx">
             </div>
         </div>
         <button class="btn btn-blue" onclick="addQuestionField()">+ إضافة سؤال آخر</button>
-        <button class="btn btn-gold" style="margin-top:15px;" onclick="saveExam()">حفظ الامتحان بالكامل</button>
+        <button class="btn btn-gold" style="margin-top:15px;" onclick="saveExam()">حفظ الامتحان</button>
     </div>
 
     <div class="section" style="border-color: #e74c3c;">
         <h3 style="color:#e74c3c">⚠️ منطقة الخطر</h3>
-        <button class="btn btn-red" onclick="clearResults()">حذف جميع نتائج امتحانات الطلاب</button>
+        <button class="btn btn-red" onclick="clearResults()">حذف جميع نتائج الطلاب</button>
     </div>
 </div>
 
@@ -84,10 +94,8 @@
     const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
     async function initAdmin() {
-        const pass = prompt("يرجى إدخال كود الأدمن (MASTER CODE):");
-        if(pass !== "FADY_2026_ADMIN") { 
-            alert("كود خاطئ!"); window.location.href = "index.html";
-        } else { loadData(); }
+        const pass = prompt("MASTER CODE:");
+        if(pass !== "123456") { window.location.href = "index.html"; } else { loadData(); }
     }
 
     async function loadData() {
@@ -97,11 +105,15 @@
         let courseOpts = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
         document.getElementById('targetCourse').innerHTML = courseOpts;
         document.getElementById('courseToActivate').innerHTML = courseOpts;
+        document.getElementById('courseFilter').innerHTML = `<option value="">-- اختر كورس --</option>` + courseOpts;
         document.getElementById('targetLesson').innerHTML = lessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
 
         document.getElementById('coursesList').innerHTML = courses.map(c => `
             <div class="list-item">
-                <span>${c.title} - (${c.price || 0} ج.م)</span>
+                <div style="display:flex; align-items:center;">
+                    ${c.image_url ? `<img src="${c.image_url}" class="course-img-preview">` : '📂 '}
+                    <span>${c.title} (${c.price || 0} ج.م)</span>
+                </div>
                 <button class="btn btn-red" style="width:auto; padding:5px 10px;" onclick="deleteCourse('${c.id}')">حذف</button>
             </div>`).join('');
     }
@@ -109,13 +121,14 @@
     async function addCourse() {
         const t = document.getElementById('courseTitle').value;
         const p = document.getElementById('coursePrice').value || 0;
-        if(!t) return alert("أدخل عنوان الكورس");
-        await _supabase.from('courses').insert([{ title: t, price: parseInt(p) }]);
+        const img = document.getElementById('courseImage').value;
+        if(!t) return alert("أدخل اسم الكورس");
+        await _supabase.from('courses').insert([{ title: t, price: parseInt(p), image_url: img }]);
         location.reload();
     }
 
     async function deleteCourse(id) {
-        if(confirm("سيتم حذف الكورس ومحتوياته نهائياً، هل أنت متأكد؟")) {
+        if(confirm("سيتم حذف الكورس نهائياً، متأكد؟")) {
             await _supabase.from('courses').delete().eq('id', id);
             location.reload();
         }
@@ -128,27 +141,47 @@
         const pdf = document.getElementById('pdfUrl').value;
         await _supabase.from('lessons').insert([{ course_id: cId, title, video_id: vId, pdf_url: pdf }]);
         alert("تمت إضافة المحاضرة!");
+        loadData();
+    }
+
+    async function loadLessonsList() {
+        const cId = document.getElementById('courseFilter').value;
+        if(!cId) { document.getElementById('allLessonsList').innerHTML = ""; return; }
+        const { data: lessons } = await _supabase.from('lessons').select('*').eq('course_id', cId);
+        document.getElementById('allLessonsList').innerHTML = lessons.map(l => `
+            <div class="list-item" style="border-left-color: #f39c12;">
+                <span>🎥 ${l.title}</span>
+                <button class="btn btn-orange" style="width:auto; padding:5px 10px;" onclick="deleteLesson('${l.id}')">حذف</button>
+            </div>`).join('');
+    }
+
+    async function deleteLesson(id) {
+        if(confirm("حذف المحاضرة؟")) {
+            await _supabase.from('exams').delete().eq('lesson_id', id);
+            await _supabase.from('lessons').delete().eq('id', id);
+            alert("تم الحذف!");
+            loadLessonsList();
+            loadData();
+        }
     }
 
     async function activateCourse() {
         const p = document.getElementById('studentPhone').value;
         const cId = document.getElementById('courseToActivate').value;
         await _supabase.from('student_access').insert([{ student_phone: p, course_id: cId }]);
-        alert("تم تفعيل الكورس للطالب!");
+        alert("تم التفعيل!");
     }
 
     async function forceLogout() {
         const p = document.getElementById('logoutStudentPhone').value;
-        if(!p) return alert("أدخل رقم الطالب");
         await _supabase.from('students').update({ last_device_id: null }).eq('student_phone', p);
-        alert("تم تصفير الجهاز بنجاح!");
+        alert("تم التصفير!");
     }
 
     function addQuestionField() {
         const div = document.createElement('div');
         div.className = "question-block";
-        div.style = "border:1px dashed var(--gold); padding:10px; margin-bottom:10px;";
-        div.innerHTML = `<input type="text" placeholder="السؤال" class="q-text"><input type="text" placeholder="رابط الصورة" class="q-img"><input type="text" placeholder="الاختيار 1" class="opt"><input type="text" placeholder="الاختيار 2" class="opt"><input type="text" placeholder="الاختيار 3" class="opt"><input type="text" placeholder="الاختيار 4" class="opt"><input type="number" placeholder="رقم الإجابة الصحيحة (0-3)" class="correct-idx">`;
+        div.innerHTML = `<input type="text" placeholder="السؤال" class="q-text"><input type="text" placeholder="رابط الصورة" class="q-img"><input type="text" placeholder="اختيار 1" class="opt"><input type="text" placeholder="اختيار 2" class="opt"><input type="text" placeholder="اختيار 3" class="opt"><input type="text" placeholder="اختيار 4" class="opt"><input type="number" placeholder="0-3" class="correct-idx">`;
         document.getElementById('questionsArea').appendChild(div);
     }
 
@@ -162,7 +195,7 @@
             questions.push({ q: b.querySelector('.q-text').value, img: b.querySelector('.q-img').value, options: opts, correct: parseInt(b.querySelector('.correct-idx').value) });
         });
         await _supabase.from('exams').insert([{ lesson_id: lId, duration_minutes: dur, questions: questions }]);
-        alert("تم رفع الامتحان!");
+        alert("تم حفظ الامتحان!");
     }
 
     async function clearResults() {
