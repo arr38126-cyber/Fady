@@ -5,127 +5,139 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dr: Fady Adel | Physics Platform</title>
     <link rel="icon" href="https://i.ibb.co/nMB0QD7k/fady-logo.png" type="image/png" />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Amiri:wght@700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --navy: #0d1b2a; --gold: #c9972b; --gold-lt: #e8b84b; --gold-dk: #a87820; 
-            --bg: #0a1520; --card-bg: #111e2d; --card-brd: #1e3248; --white: #f0f4f8; --gray: #6a7f96; 
+            --navy-dark: #050a0f; --navy-card: #0d1621; --gold: #c9972b;
+            --gold-gradient: linear-gradient(135deg, #a87820, #c9972b, #e8b84b);
+            --white: #ffffff; --text-gray: #a0aec0; --brd: rgba(201, 151, 43, 0.2);
         }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); min-height: 100vh; padding: 20px; color: var(--white); overflow-x: hidden; }
-        body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 70% 55% at 15% 15%, rgba(201,151,43,.05) 0%, transparent 65%); z-index: -1; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body { font-family: 'Cairo', sans-serif; background: var(--navy-dark); color: var(--white); overflow-x: hidden; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
 
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo-wrap { width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 10px; border: 2px solid var(--gold); background: var(--navy); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
-        .logo-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .site-title { font-size: 1.6rem; font-weight: 900; }
-        .site-title span { color: var(--gold); }
+        /* Navbar */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--brd); margin-bottom: 30px; }
+        .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 900; }
+        .nav-logo img { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--gold); }
+        .yt-btn { background: #ff0000; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.8rem; }
 
         /* Auth Card */
-        .auth-card { background: var(--card-bg); border: 1px solid var(--card-brd); border-radius: 20px; padding: 30px; max-width: 400px; margin: 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
-        .auth-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gold); }
-        .tabs { display: flex; background: rgba(255,255,255,.05); border-radius: 12px; padding: 5px; margin-bottom: 20px; gap: 5px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; background: transparent; color: var(--gray); cursor: pointer; font-weight: 700; border-radius: 8px; transition: .3s; font-family: 'Cairo'; }
-        .tab-btn.active { background: var(--gold); color: var(--navy); }
-        input { width: 100%; padding: 14px; background: #162333; border: 1px solid var(--card-brd); border-radius: 10px; color: var(--white); text-align: right; font-family: 'Cairo'; margin-bottom: 12px; }
-        .gold-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--gold-dk), var(--gold), var(--gold-lt)); color: var(--navy); border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: .3s; font-family: 'Cairo'; font-size: 1rem; }
-        .gold-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(201, 151, 43, 0.4); }
-        .forgot-link { display: block; text-align: center; margin-top: 15px; color: #ff6b6b; text-decoration: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+        .auth-container { max-width: 450px; margin: 50px auto; background: var(--navy-card); border-radius: 24px; padding: 40px; border: 1px solid var(--brd); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; background: rgba(255,255,255,0.03); padding: 5px; border-radius: 15px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: transparent; color: var(--text-gray); cursor: pointer; font-weight: 700; border-radius: 10px; transition: 0.3s; font-family: 'Cairo'; }
+        .tab-btn.active { background: var(--gold-gradient); color: var(--navy-dark); }
+        input { width: 100%; padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.02); border: 1px solid var(--brd); border-radius: 12px; color: white; font-family: 'Cairo'; outline: none; }
 
-        /* Dashboard & Quote Section */
-        .dashboard { max-width: 1000px; margin: 0 auto; display: none; }
-        .quote-box { 
-            background: rgba(201, 151, 43, 0.1); 
-            border-right: 4px solid var(--gold); 
-            padding: 20px; 
-            margin: 25px auto; 
-            border-radius: 12px; 
-            max-width: 650px; 
-            text-align: center; 
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
-        }
-        .quote-text { 
-            font-size: 1.15rem; 
-            font-weight: 700; 
-            color: var(--gold-lt); 
-            line-height: 1.8;
-            font-family: 'Amiri', serif; /* لمسة جمالية لبيت الشعر */
-        }
-        
-        .course-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
-        .course-card { background: var(--card-bg); border: 1px solid var(--card-brd); border-radius: 18px; padding: 20px; position: relative; overflow: hidden; transition: .3s; }
-        .course-card img { width: 100%; height: 160px; border-radius: 12px; object-fit: cover; margin-bottom: 15px; }
-        .course-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 10px; display: block; color: var(--gold-lt); }
-        
-        .locked-overlay { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 18px; }
-        .lock-icon { font-size: 45px; color: var(--gold); margin-bottom: 10px; }
-        .lock-text { font-weight: 700; color: var(--white); background: rgba(0,0,0,0.6); padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; }
+        /* Video System */
+        .video-player-box { position: relative; width: 100%; max-width: 850px; margin: 20px auto; border-radius: 20px; overflow: hidden; border: 2px solid var(--gold); background: #000; }
+        .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 10; background: transparent; }
+        .shield-bottom { position: absolute; bottom: 0; right: 0; width: 120px; height: 50px; z-index: 10; background: transparent; }
+        #watermark { position: absolute; z-index: 100; color: rgba(255, 255, 255, 0.25); font-size: 14px; font-weight: bold; pointer-events: none; white-space: nowrap; transition: all 2s ease-in-out; text-shadow: 1px 1px 2px #000; }
+        iframe { width: 100%; aspect-ratio: 16/9; border: none; }
 
+        /* Dashboard Elements */
+        .page { display: none; animation: fadeIn 0.6s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .instructor-card { display: flex; align-items: center; gap: 15px; background: var(--navy-card); padding: 20px; border-radius: 20px; border: 1px solid var(--brd); margin-bottom: 25px; }
+        .quote-box { background: rgba(201, 151, 43, 0.05); padding: 20px; border-radius: 15px; text-align: center; border: 1px dashed var(--gold); margin-bottom: 30px; font-family: 'Amiri', serif; font-size: 1.3rem; color: var(--gold); }
+        
+        .btn-gold { padding: 12px 25px; background: var(--gold-gradient); border: none; border-radius: 10px; color: var(--navy-dark); font-weight: 800; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,151,43,0.3); }
         .hidden { display: none; }
-        .logout-btn { background: #ff4d4d; margin-top: 30px; max-width: 200px; color: white; }
+
+        /* Grades Table */
+        .table-wrap { background: var(--navy-card); border-radius: 15px; padding: 20px; border: 1px solid var(--brd); overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        th { color: var(--gold); padding: 12px; border-bottom: 1px solid var(--brd); }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-    <div class="header">
-        <div class="logo-wrap"><img src="https://i.ibb.co/nMB0QD7k/fady-logo.png" alt="Logo"></div>
-        <h1 class="site-title">Dr: <span>Fady Adel</span></h1>
-    </div>
-
-    <div id="authSection" class="auth-card">
-        <div class="tabs">
-            <button class="tab-btn active" id="t-login" onclick="showAuth('login')">تسجيل الدخول</button>
-            <button class="tab-btn" id="t-reg" onclick="showAuth('reg')">حساب جديد</button>
-        </div>
-        <div id="loginArea">
-            <input type="tel" id="lp" placeholder="رقم الموبايل">
-            <input type="password" id="lw" placeholder="كلمة المرور">
-            <button class="gold-btn" onclick="doLogin()">دخول المنصة</button>
-            <a onclick="goWA()" class="forgot-link">نسيت كلمة المرور؟ تواصل مع الدعم</a>
-        </div>
-        <div id="regArea" class="hidden">
-            <input type="text" id="rn" placeholder="الاسم الثلاثي">
-            <input type="tel" id="rp" placeholder="رقم الموبايل">
-            <input type="tel" id="rj" placeholder="رقم ولي الأمر">
-            <input type="password" id="rw" placeholder="كلمة المرور">
-            <button class="gold-btn" onclick="doReg()">إنشاء حساب</button>
-        </div>
-    </div>
-
-    <div id="dashboardSection" class="dashboard">
-        <h2 style="text-align: center;">مرحباً بك يا <span id="userNameDisplay" style="color:var(--gold);"></span></h2>
-        
-        <div class="quote-box">
-            <p class="quote-text">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ.. يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</p>
-        </div>
-
-        <div class="course-grid">
-            <div class="course-card">
-                <img src="https://images.unsplash.com/photo-1636466483764-2e04717ce08b?w=500" alt="Physics">
-                <span class="course-title">منهج الفيزياء كاملاً</span>
-                <button class="gold-btn">فتح المحتوى</button>
+    <div class="container">
+        <nav>
+            <div class="nav-logo">
+                <img src="https://i.ibb.co/nMB0QD7k/fady-logo.png" alt="Logo">
+                <span>Dr: Fady Adel</span>
             </div>
-            <div class="course-card">
-                <div class="locked-overlay">
-                    <div class="lock-icon">🔒</div>
-                    <div class="lock-text">اشترك لفتح المراجعة</div>
+            <a href="https://youtube.com/@drfadyadel-w8l?si=sgCT0tDyKaXr_W_C" target="_blank" class="yt-btn">اليوتيوب 🎥</a>
+        </nav>
+
+        <div id="authSection" class="auth-container">
+            <div class="tabs">
+                <button class="tab-btn active" id="t-login" onclick="showAuth('login')">دخول</button>
+                <button class="tab-btn" id="t-reg" onclick="showAuth('reg')">حساب جديد</button>
+            </div>
+            <div id="loginArea">
+                <input type="tel" id="lp" placeholder="رقم الموبايل">
+                <input type="password" id="lw" placeholder="كلمة المرور">
+                <button class="btn-gold" style="width:100%" onclick="doLogin()">دخول المنصة</button>
+            </div>
+            <div id="regArea" class="hidden">
+                <input type="text" id="rn" placeholder="الاسم الثلاثي">
+                <input type="tel" id="rp" placeholder="رقم الموبايل">
+                <input type="password" id="rw" placeholder="كلمة المرور">
+                <button class="btn-gold" style="width:100%" onclick="doReg()">إنشاء حساب</button>
+            </div>
+        </div>
+
+        <div id="studentDash" class="page">
+            <div class="instructor-card">
+                <img src="https://i.ibb.co/nMB0QD7k/fady-logo.png" style="width:70px; height:70px; border-radius:50%; border:2px solid var(--gold);">
+                <div>
+                    <h3 style="color:var(--gold)">د/ فادي عادل</h3>
+                    <p style="font-size:0.8rem; color:var(--text-gray)">مرحباً بك يا <span id="sName" style="color:white; font-weight:700;"></span></p>
                 </div>
-                <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=500" alt="Revision">
-                <span class="course-title">المراجعات النهائية</span>
-                <button class="gold-btn" disabled>مغلق</button>
+                <button class="btn-gold" style="margin-right:auto; background:red; color:white; padding:5px 15px;" onclick="logout()">خروج</button>
+            </div>
+
+            <div class="quote-box">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ.. يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</div>
+
+            <h3 style="margin-bottom:15px;">المحاضرات المتاحة 🎥</h3>
+            <div class="instructor-card" style="cursor:pointer;" onclick="openLecture('VIDEO_ID_HERE')">
+                <div style="background:var(--gold); color:var(--navy-dark); padding:15px; border-radius:12px; font-weight:900;">01</div>
+                <div>
+                    <p style="font-weight:700;">المحاضرة الأولى: مقدمة في الفيزياء الكهربية</p>
+                    <p style="font-size:0.75rem; color:var(--text-gray);">اضغط للمشاهدة الآن</p>
+                </div>
+            </div>
+
+            <h3 style="margin-top:30px;">نتائج امتحاناتك 📊</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>الامتحان</th><th>الدرجة</th><th>الحالة</th></tr></thead>
+                    <tbody id="gradesBody">
+                        <tr><td>امتحان الفصل الأول</td><td>28/30</td><td style="color:#00ff00">ممتاز</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <center><button class="gold-btn logout-btn" onclick="logout()">تسجيل الخروج</button></center>
+
+        <div id="videoPage" class="page">
+            <div class="video-player-box">
+                <div class="shield-top"></div>
+                <div class="shield-bottom"></div>
+                <div id="watermark"></div>
+                <iframe id="player" src="" allowfullscreen></iframe>
+            </div>
+            <center style="margin-top:20px;"><button class="btn-gold" onclick="closeLecture()">إغلاق الفيديو</button></center>
+        </div>
     </div>
 
     <script>
         const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-        window.onload = function() {
-            const saved = localStorage.getItem('physics_user');
-            if (saved) { launch(JSON.parse(saved).full_name); }
+        // الحماية من الاختصارات
+        document.onkeydown = (e) => {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) return false;
+        };
+
+        window.onload = () => {
+            const user = JSON.parse(localStorage.getItem('physics_user'));
+            if(user) launch(user);
         };
 
         function showAuth(v) {
@@ -137,35 +149,47 @@
         }
 
         async function doReg() {
-            const d = { full_name: document.getElementById('rn').value, student_phone: document.getElementById('rp').value, parent_phone: document.getElementById('rj').value, password: document.getElementById('rw').value, is_logged_in: false };
-            if(!d.full_name || !d.student_phone || !d.password) return alert("أكمل بياناتك");
+            const d = { full_name: document.getElementById('rn').value, student_phone: document.getElementById('rp').value, password: document.getElementById('rw').value };
+            if(!d.full_name || !d.student_phone) return alert("أكمل البيانات");
             const { error } = await _supabase.from('students').insert([d]);
-            if(error) alert("حدث خطأ في التسجيل");
-            else { alert("تم الاشتراك بنجاح! سجل دخولك الآن."); showAuth('login'); }
+            if(!error) { alert("تم التسجيل!"); showAuth('login'); }
+            else alert("الرقم مسجل مسبقاً");
         }
 
         async function doLogin() {
             const p = document.getElementById('lp').value, w = document.getElementById('lw').value;
-            const { data, error } = await _supabase.from('students').select('*').eq('student_phone', p).eq('password', w).maybeSingle();
-            if(error || !data) alert("الرقم أو كلمة المرور غير صحيحة");
-            else {
-                localStorage.setItem('physics_user', JSON.stringify({ full_name: data.full_name }));
-                launch(data.full_name);
-            }
+            const { data } = await _supabase.from('students').select('*').eq('student_phone', p).eq('password', w).maybeSingle();
+            if(data) {
+                const user = { full_name: data.full_name, phone: data.student_phone };
+                localStorage.setItem('physics_user', JSON.stringify(user));
+                launch(user);
+            } else alert("خطأ في البيانات");
         }
 
-        function launch(name) {
+        function launch(user) {
             document.getElementById('authSection').style.display = 'none';
-            document.getElementById('dashboardSection').style.display = 'block';
-            document.getElementById('userNameDisplay').innerText = name;
+            document.getElementById('studentDash').style.display = 'block';
+            document.getElementById('sName').innerText = user.full_name;
         }
 
+        function openLecture(id) {
+            const user = JSON.parse(localStorage.getItem('physics_user'));
+            document.getElementById('studentDash').style.display = 'none';
+            document.getElementById('videoPage').style.display = 'block';
+            document.getElementById('player').src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&controls=1&disablekb=1`;
+            
+            // تشغيل العلامة المائية
+            const mark = document.getElementById('watermark');
+            mark.innerText = `${user.full_name} - ${user.phone}`;
+            setInterval(() => {
+                const x = Math.random() * (window.innerWidth - 200);
+                const y = Math.random() * (window.innerHeight - 100);
+                mark.style.left = x + 'px'; mark.style.top = y + 'px';
+            }, 4000);
+        }
+
+        function closeLecture() { location.reload(); }
         function logout() { localStorage.removeItem('physics_user'); location.reload(); }
-
-        function goWA() {
-            const m = encodeURIComponent("أحتاج مساعدة في استعادة بيانات الدخول الخاصة بي للمنصة.");
-            window.open(`https://wa.me/201021422744?text=${m}`, '_blank');
-        }
     </script>
 </body>
 </html>
