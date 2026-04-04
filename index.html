@@ -2,237 +2,212 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Dr: Fady Adel | Physics Platform</title>
-    <link rel="icon" href="https://i.ibb.co/nMB0QD7k/fady-logo.png" type="image/png" />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Amiri:wght@700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Amiri:ital@1&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --navy: #050a0f; --card: #0d1621; --gold: #c9972b; --gold-gradient: linear-gradient(135deg, #a87820, #c9972b, #e8b84b); --white: #fff; --brd: rgba(201, 151, 43, 0.2); }
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { font-family: 'Cairo', sans-serif; background: var(--navy); color: var(--white); min-height: 100vh; overflow-x: hidden; }
-        .container { max-width: 1000px; margin: auto; padding: 20px; }
-        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--brd); margin-bottom: 30px; }
-        .user-nav { display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--gold); font-weight: 700; border: 1px solid var(--gold); padding: 5px 15px; border-radius: 20px; }
-        .auth-container { max-width: 420px; margin: 40px auto; background: var(--card); border-radius: 24px; padding: 30px; border: 1px solid var(--brd); box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; }
-        input { width: 100%; padding: 14px; margin-bottom: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--brd); border-radius: 12px; color: white; font-family: 'Cairo'; text-align: center; outline: none; }
-        .btn-gold { padding: 12px 25px; background: var(--gold-gradient); border: none; border-radius: 12px; color: var(--navy); font-weight: 800; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; width: 100%; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .item-card { background: var(--card); border: 1px solid var(--brd); padding: 25px; border-radius: 20px; cursor: pointer; text-align: center; position: relative; transition: 0.3s; }
-        .locked { filter: grayscale(1) opacity(0.6); }
-        .locked::after { content: "🔒 مطلوب الاشتراك"; position: absolute; top: 10px; right: 10px; background: #ff4d4d; color: white; padding: 2px 10px; border-radius: 10px; font-size: 0.7rem; }
-        .video-box { position: relative; width: 100%; max-width: 850px; margin: 20px auto; border-radius: 20px; overflow: hidden; border: 2px solid var(--gold); background: #000; }
-        #watermark { position: absolute; z-index: 100; color: rgba(255, 255, 255, 0.15); pointer-events: none; transition: 3s linear; font-weight: bold; white-space: nowrap; }
-        .page { display: none; animation: fadeIn 0.5s ease; }
-        .hidden { display: none; }
-        .amiri { font-family: 'Amiri', serif; line-height: 1.6; color: var(--gold); }
-        .q-option { display: block; background: #1a2635; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; cursor: pointer; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        :root { --navy: #050a0f; --gold: #c9972b; --white: #fff; --card: #0d1621; --brd: rgba(201, 151, 43, 0.3); }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        body { font-family: 'Cairo', sans-serif; background: var(--navy); color: var(--white); overflow-x: hidden; }
+
+        /* منع تصوير الشاشة - محاكاة الشاشة السوداء */
+        @media screen { video, iframe, .exam-area { filter: opacity(1); -webkit-filter: opacity(1); } }
+        @media print { body { display: none !important; } }
+
+        .amiri { font-family: 'Amiri', serif; color: var(--gold); font-size: 1.2rem; text-align: center; margin: 20px 0; font-style: italic; }
+        .container { max-width: 600px; margin: auto; padding: 20px; }
+        .card { background: var(--card); border: 1px solid var(--brd); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+        
+        input { width: 100%; padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--brd); border-radius: 12px; color: white; font-size: 1rem; text-align: center; outline: none; }
+        .btn-gold { width: 100%; padding: 15px; background: var(--gold); border: none; border-radius: 12px; color: var(--navy); font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        
+        /* البصمة المتحركة الذكية */
+        #watermark { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99999; opacity: 0.15; font-size: 12px; color: #fff; display: none; }
+        
+        .course-card { background: var(--card); border: 1px solid var(--brd); border-radius: 15px; margin-bottom: 20px; overflow: hidden; transition: 0.3s; }
+        .course-img { width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid var(--brd); }
+        
+        .exam-area { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--navy); z-index: 10000; display: none; padding: 20px; overflow-y: auto; }
+        .locked { filter: grayscale(1); opacity: 0.6; pointer-events: none; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<div class="container">
-    <nav>
-        <div id="userNav" class="user-nav hidden" onclick="logout()">
-            <span id="userNameDisplay">طالب</span> 👤
-        </div>
-        <div style="font-weight: 900; font-size: 1.3rem;">Dr: <span style="color:var(--gold)">FADY ADEL</span></div>
-    </nav>
+<div id="watermark"></div>
 
-    <div id="authPage" class="auth-container">
-        <img src="https://i.ibb.co/nMB0QD7k/fady-logo.png" style="width:80px; margin-bottom:20px;">
-        <div id="loginForm">
-            <h3>تسجيل الدخول</h3>
-            <input type="tel" id="lp" placeholder="رقم الموبايل">
-            <input type="password" id="lw" placeholder="كلمة المرور">
-            <button class="btn-gold" onclick="doLogin()">دخول</button>
-
-
-
-
-
-
+<div id="loginPage" class="container" style="margin-top: 10vh;">
+    <div class="card">
+        <h1 style="text-align:center; color:var(--gold); margin-bottom:10px; font-weight:900;">Dr: Fady Adel</h1>
+        <p style="text-align:center; opacity:0.7; margin-bottom:25px;">منصة الفيزياء للثانوية العامة</p>
+        
+        <input type="tel" id="loginPhone" placeholder="رقم الموبايل">
+        <input type="password" id="loginPass" placeholder="كلمة المرور">
+        <button class="btn-gold" onclick="doLogin()">دخول للمنصة</button>
+        
+        <a style="display:block; text-align:center; margin-top:20px; color:#ff6b6b; font-size:0.85rem; cursor:pointer; text-decoration:none;" 
+   
             
-
-
-            <a style="display:block; margin-top:15px; color:#ff6b6b; font-size:0.8rem; cursor:pointer;" 
-   onclick="window.open('https://wa.me/201000000004?text=نسيت كلمة المرور الخاصة بحسابي', '_blank')">
-   نسيت كلمة المرور؟ تواصل معنا
-</a>
-
-            <p style="margin-top:15px; font-size:0.9rem;">ليس لديك حساب؟ <span style="color:var(--gold); cursor:pointer;" onclick="toggleAuth(true)">إنشاء حساب جديد</span></p>
-        </div>
-        <div id="registerForm" class="hidden">
-            <h3>إنشاء حساب جديد</h3>
-            <input type="text" id="rn" placeholder="الاسم بالكامل">
-            <input type="tel" id="rp" placeholder="رقم الموبايل">
-            <input type="password" id="rw" placeholder="كلمة المرور">
-            <button class="btn-gold" onclick="doRegister()">تسجيل</button>
-            <p style="margin-top:15px; font-size:0.9rem;">لديك حساب؟ <span style="color:var(--gold); cursor:pointer;" onclick="toggleAuth(false)">دخول</span></p>
-        </div>
+            
+            
+            
+            
+            
+            onclick="window.open('https://wa.me/2010000000004?text=أهلاً مستر فادي، نسيت كلمة المرور الخاصة بحسابي', '_blank')">
+           نسيت كلمة المرور؟ تواصل معنا
+        </a>
     </div>
+    <p class="amiri">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</p>
+</div>
 
-    <div id="coursesPage" class="page">
-        <div style="background:rgba(201,151,43,0.05); padding:20px; border-radius:15px; border:1px dashed var(--gold); text-align:center; margin-bottom:30px;">
-            <p class="amiri" style="font-size:1.4rem;">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ.. يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</p>
-        </div>
-        <div id="coursesList" class="grid"></div>
+<div id="mainPage" class="container" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 id="welcomeName" style="color:var(--gold); font-weight:900;"></h2>
+        <button onclick="location.reload()" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:5px 10px; border-radius:8px; font-size:0.8rem;">خروج</button>
     </div>
+    <div id="coursesContainer"></div>
+</div>
 
-    <div id="lessonsPage" class="page">
-        <button onclick="showPage('coursesPage')" style="color:var(--gold); background:none; border:none; cursor:pointer; margin-bottom:15px;">← العودة</button>
-        <div id="lessonsList" class="grid"></div>
-    </div>
+<div id="lessonsPage" class="container" style="display:none;">
+    <button onclick="showMain()" style="color:var(--gold); background:none; border:none; margin-bottom:15px; cursor:pointer; font-weight:bold;">← العودة للكورسات</button>
+    <div id="lessonsContainer"></div>
+</div>
 
-    <div id="contentPage" class="page">
-        <button onclick="showPage('lessonsPage')" style="color:var(--gold); background:none; border:none; cursor:pointer; margin-bottom:15px;">← العودة</button>
-        <h3 id="lessonTitle" style="margin-bottom:20px;"></h3>
-        <div id="videoArea" class="video-box"><div id="watermark"></div><iframe id="mainPlayer" width="100%" style="aspect-ratio:16/9;" frameborder="0" allowfullscreen></iframe></div>
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-gold" style="background:#2ecc71;" onclick="loadExamData()">📝 ابدأ الامتحان</button>
-            <button id="pdfBtn" class="btn-gold" style="background:#3498db; display:none;">📄 الملخص</button>
-        </div>
-    </div>
-
-    <div id="examActivePage" class="page">
-        <div id="timerDisplay" style="text-align:center; padding:10px; border-bottom:2px solid var(--gold); color:#ff4d4d; font-weight:900;"></div>
-        <div id="examQuestionsBody"></div>
-        <button class="btn-gold" style="margin-top:20px;" onclick="confirmSubmit()">تسليم</button>
-    </div>
+<div id="examArea" class="exam-area">
+    <div id="examContent"></div>
 </div>
 
 <script>
     const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
-    let currentUser = null, activeExam = [], timerInt = null, currentLessonId = null;
-    let deviceId = localStorage.getItem('device_fingerprint') || (Math.random().toString(36).substring(2) + Date.now());
-    localStorage.setItem('device_fingerprint', deviceId);
+    
+    let currentUser = null;
 
-    window.onload = () => {
-        const saved = localStorage.getItem('physics_user');
-        if(saved) { currentUser = JSON.parse(saved); launchApp(); }
-    };
-
-    function showPage(id) {
-        document.querySelectorAll('.page, #authPage').forEach(p => p.classList.add('hidden', 'page'));
-        document.getElementById(id).style.display = 'block';
-        document.getElementById(id).classList.remove('hidden');
-    }
-
-    function toggleAuth(isReg) {
-        document.getElementById('loginForm').classList.toggle('hidden', isReg);
-        document.getElementById('registerForm').classList.toggle('hidden', !isReg);
-    }
-
-    async function doRegister() {
-        const n = document.getElementById('rn').value, p = document.getElementById('rp').value, w = document.getElementById('rw').value;
-        const { error } = await _supabase.from('students').insert([{ full_name: n, student_phone: p, password: w, role: 'student', last_device_id: deviceId }]);
-        if(error) alert("الرقم مسجل مسبقاً"); else { alert("تم! سجل دخولك"); toggleAuth(false); }
-    }
+    // حماية: تعطيل اختصارات الكيبورد
+    document.addEventListener('keydown', (e) => {
+        if (e.key === "PrintScreen" || e.keyCode === 44) {
+            navigator.clipboard.writeText("محتوى محمي!");
+            alert("تصوير الشاشة ممنوع.");
+        }
+        if (e.ctrlKey && (e.key === 'u' || e.key === 'i' || e.key === 's')) e.preventDefault();
+        if (e.keyCode === 123) e.preventDefault();
+    });
 
     async function doLogin() {
-        const p = document.getElementById('lp').value, w = document.getElementById('lw').value;
-        const { data: user } = await _supabase.from('students').select('*').eq('student_phone', p).eq('password', w).maybeSingle();
-        if(!user) return alert("خطأ في البيانات");
-        if(user.role !== 'admin' && user.last_device_id && user.last_device_id !== deviceId) return alert("الحساب مفتوح على جهاز آخر");
-        await _supabase.from('students').update({ last_device_id: deviceId }).eq('student_phone', p);
-        currentUser = { name: user.full_name, phone: user.student_phone, role: user.role };
-        localStorage.setItem('physics_user', JSON.stringify(currentUser));
-        launchApp();
+        const phone = document.getElementById('loginPhone').value;
+        const pass = document.getElementById('loginPass').value;
+        const devId = btoa(navigator.userAgent + screen.width); // بصمة الجهاز
+
+        if(!phone || !pass) return alert("برجاء إدخال البيانات");
+
+        const { data: user, error } = await _supabase.from('students').select('*').eq('student_phone', phone).single();
+
+        if(!user || user.password !== pass) return alert("بيانات الدخول غير صحيحة");
+
+        // نظام الجهاز الواحد
+        if(user.last_device_id && user.last_device_id !== devId) {
+            return alert("هذا الحساب مسجل على جهاز آخر. تواصل مع المستر.");
+        }
+
+        await _supabase.from('students').update({ last_device_id: devId }).eq('id', user.id);
+        currentUser = user;
+        startWatermark(user.student_name, user.student_phone);
+        showMain();
     }
 
-    function launchApp() {
-        document.getElementById('userNameDisplay').innerText = currentUser.name;
-        document.getElementById('userNav').classList.remove('hidden');
-        loadCourses();
+    // بصمة متحركة (واتر مارك) قوية جداً
+    function startWatermark(name, phone) {
+        const wm = document.getElementById('watermark');
+        wm.style.display = 'block';
+        setInterval(() => {
+            wm.innerHTML = `<div style="position:absolute; top:${Math.random()*90}%; left:${Math.random()*60}%; color:rgba(255,255,255,0.25); transform:rotate(-20deg); white-space:nowrap;">
+                ${name} - ${phone}
+            </div>`;
+        }, 2500);
     }
 
-    async function loadCourses() {
+    async function showMain() {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('lessonsPage').style.display = 'none';
+        document.getElementById('mainPage').style.display = 'block';
+        document.getElementById('welcomeName').innerText = "يا " + currentUser.student_name.split(' ')[0];
+
+        const { data: access } = await _supabase.from('student_access').select('course_id').eq('student_phone', currentUser.student_phone);
+        const userAccess = access.map(a => a.course_id);
+
         const { data: courses } = await _supabase.from('courses').select('*');
-        const { data: access } = await _supabase.from('student_access').select('course_id').eq('student_phone', currentUser.phone);
-        const allowedIds = access ? access.map(a => a.course_id) : [];
-
         let html = '';
         courses.forEach(c => {
-            const isFree = !c.price || c.price === 0;
-            const hasAccess = currentUser.role === 'admin' || isFree || allowedIds.includes(c.id);
-            html += `<div class="item-card ${!hasAccess ? 'locked' : ''}" onclick="${!hasAccess ? `alert('سعر الكورس ${c.price} ج.م - تواصل مع الإدارة')` : `loadLessons('${c.id}')`}">
-                <div style="font-size:2.5rem;">${isFree ? '🔓' : '📂'}</div>
-                <h3>${c.title}</h3>
-                <p style="color:var(--gold); font-size:0.9rem;">${isFree ? 'محتوى مجاني ✨' : `السعر: ${c.price} ج.م`}</p>
-            </div>`;
+            const isLocked = c.price > 0 && !userAccess.includes(c.id);
+            html += `
+                <div class="course-card ${isLocked ? 'locked' : ''}" onclick="${isLocked ? "alert('تواصل مع السكرتارية لتفعيل الكورس')" : `showLessons('${c.id}')`}">
+                    <img src="${c.image_url || 'https://via.placeholder.com/400x200/0d1621/c9972b?text=Physics'}" class="course-img">
+                    <div style="padding:15px; text-align:center;">
+                        <h3 style="color:var(--gold);">${c.title}</h3>
+                        <p style="font-size:0.9rem; opacity:0.8;">${c.price === 0 ? 'محتوى مجاني' : `السعر: ${c.price} ج.م`}</p>
+                    </div>
+                </div>`;
         });
-        document.getElementById('coursesList').innerHTML = html;
-        showPage('coursesPage');
+        document.getElementById('coursesContainer').innerHTML = html;
     }
 
-    async function loadLessons(cId) {
-        const { data } = await _supabase.from('lessons').select('*').eq('course_id', cId);
-        document.getElementById('lessonsList').innerHTML = data.map(l => `<div class="item-card" onclick="viewLesson('${l.id}')"><h4>${l.title}</h4></div>`).join('');
-        showPage('lessonsPage');
-    }
+    async function showLessons(courseId) {
+        document.getElementById('mainPage').style.display = 'none';
+        document.getElementById('lessonsPage').style.display = 'block';
 
-    async function viewLesson(id) {
-        currentLessonId = id;
-        const { data } = await _supabase.from('lessons').select('*').eq('id', id).single();
-        document.getElementById('lessonTitle').innerText = data.title;
-        document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${data.video_id}?rel=0`;
-        if(data.pdf_url) { document.getElementById('pdfBtn').style.display='block'; document.getElementById('pdfBtn').onclick=()=>window.open(data.pdf_url); }
-        startWatermark(); showPage('contentPage');
-    }
-
-    function startWatermark() {
-        const m = document.getElementById('watermark');
-        m.innerText = `${currentUser.name} - ${currentUser.phone}`;
-        if(window.wInt) clearInterval(window.wInt);
-        window.wInt = setInterval(() => { m.style.left = Math.random()*70+'%'; m.style.top = Math.random()*70+'%'; }, 4000);
-    }
-
-    async function loadExamData() {
-        const { data: exam } = await _supabase.from('exams').select('*').eq('lesson_id', currentLessonId).maybeSingle();
-        if(!exam) return alert("لا يوجد امتحان");
-        activeExam = exam.questions.sort(() => Math.random() - 0.5);
-        renderExam(exam.duration_minutes);
-    }
-
-    function renderExam(m) {
-        let h = '';
-        activeExam.forEach((q, i) => {
-            h += `<div style="margin-bottom:20px; padding:15px; background:rgba(255,255,255,0.02); border-radius:10px;">
-                <p>س${i+1}: ${q.q}</p>
-                ${q.img ? `<img src="${q.img}" style="width:100%; border-radius:10px; margin:10px 0;">` : ''}
-                ${q.options.map((o, oi) => `<label class="q-option"><input type="radio" name="q${i}" value="${oi}"> ${o}</label>`).join('')}
-            </div>`;
+        const { data: lessons } = await _supabase.from('lessons').select('*').eq('course_id', courseId);
+        let html = '';
+        lessons.forEach(l => {
+            html += `
+                <div class="card" style="margin-bottom:15px; border-right:4px solid var(--gold);">
+                    <h3 style="margin-bottom:15px;">🎥 ${l.title}</h3>
+                    <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:10px; margin-bottom:15px;">
+                        <iframe style="position:absolute; top:0; left:0; width:100%; height:100%;" 
+                                src="https://www.youtube.com/embed/${l.video_id}?rel=0&modestbranding=1&disablekb=1" 
+                                frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        ${l.pdf_url ? `<button class="btn-gold" style="background:#34495e; color:#fff;" onclick="window.open('${l.pdf_url}')">PDF الملزمة</button>` : '<div></div>'}
+                        <button class="btn-gold" onclick="openExam('${l.id}')">بدء الامتحان 📝</button>
+                    </div>
+                </div>`;
         });
-        document.getElementById('examQuestionsBody').innerHTML = h;
-        showPage('examActivePage');
-        let sec = m * 60;
-        timerInt = setInterval(() => {
-            let mm = Math.floor(sec/60), ss = sec%60;
-            document.getElementById('timerDisplay').innerText = `الوقت: ${mm}:${ss<10?'0':''}${ss}`;
-            if(sec-- <= 0) confirmSubmit();
-        }, 1000);
+        document.getElementById('lessonsContainer').innerHTML = html || '<p style="text-align:center;">لا توجد محاضرات حالياً.</p>';
     }
 
-    async function confirmSubmit() {
-        clearInterval(timerInt);
-        let score = 0, results = [];
-        activeExam.forEach((q, i) => {
-            const sel = document.querySelector(`input[name="q${i}"]:checked`);
-            const ans = sel ? parseInt(sel.value) : null;
-            if(ans === q.correct) score++;
-            results.push({ q: q.q, sel: sel ? q.options[ans] : "لم يحل", cor: q.options[q.correct], ok: ans === q.correct });
-        });
-        await _supabase.from('exam_results').insert([{ student_phone: currentUser.phone, score, total: activeExam.length }]);
-        let resH = `<h2 style="text-align:center; color:var(--gold);">النتيجة: ${score} / ${activeExam.length}</h2><br>`;
-        results.forEach(r => { resH += `<div style="border-right:4px solid ${r.ok?'#2ecc71':'#ff4d4d'}; padding:10px; background:#1a2635; margin-bottom:5px;"><p>${r.q}</p><small style="color:${r.ok?'#2ecc71':'#ff4d4d'}">إجابتك: ${r.sel}</small>${!r.ok?`<br><small style="color:#2ecc71">الصح: ${r.cor}</small>`:''}</div>`; });
-        document.getElementById('examActivePage').innerHTML = resH + `<button class="btn-gold" onclick="location.reload()">العودة</button>`;
-    }
+    async function openExam(lessonId) {
+        const { data: exam, error } = await _supabase.from('exams').select('*').eq('lesson_id', lessonId).maybeSingle();
+        if (error || !exam) return alert("لا يوجد امتحان لهذه المحاضرة.");
 
-    function logout() {
-        _supabase.from('students').update({ last_device_id: null }).eq('student_phone', currentUser.phone).then(() => {
-            localStorage.removeItem('physics_user'); location.reload();
-        });
+        let questions = typeof exam.questions === 'string' ? JSON.parse(exam.questions) : exam.questions;
+        if (!questions || questions.length === 0) return alert("الامتحان فارغ.");
+
+        const examArea = document.getElementById('examArea');
+        examArea.style.display = 'block';
+        
+        let currentQ = 0, score = 0;
+
+        function renderQ() {
+            const q = questions[currentQ];
+            document.getElementById('examContent').innerHTML = `
+                <h2 style="color:var(--gold); text-align:center; margin-bottom:20px;">سؤال ${currentQ+1} من ${questions.length}</h2>
+                <div class="card">
+                    <p style="font-size:1.2rem; margin-bottom:20px;">${q.q}</p>
+                    ${q.img ? `<img src="${q.img}" style="width:100%; border-radius:10px; margin-bottom:15px;">` : ''}
+                    ${q.options.map((opt, i) => `<button class="btn-gold" style="background:rgba(255,255,255,0.05); color:white; text-align:right;" onclick="ans(${i})">${opt}</button>`).join('')}
+                </div>`;
+        }
+
+        window.ans = (idx) => {
+            if(idx === questions[currentQ].correct) score++;
+            currentQ++;
+            if(currentQ < questions.length) renderQ();
+            else {
+                const final = Math.round((score/questions.length)*100);
+                _supabase.from('exam_results').insert([{ student_phone: currentUser.student_phone, lesson_id: lessonId, score: final }]);
+                document.getElementById('examContent').innerHTML = `<div class="card" style="text-align:center;"><h2 style="color:var(--gold);">درجتك: ${final}%</h2><button class="btn-gold" onclick="location.reload()">إغلاق</button></div>`;
+            }
+        };
+        renderQ();
     }
 </script>
 </body>
