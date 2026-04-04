@@ -15,38 +15,37 @@
             --white: #ffffff; --text-gray: #a0aec0; --brd: rgba(201, 151, 43, 0.2);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { font-family: 'Cairo', sans-serif; background: var(--navy-dark); color: var(--white); overflow-x: hidden; }
+        body { font-family: 'Cairo', sans-serif; background: var(--navy-dark); color: var(--white); overflow-x: hidden; min-height: 100vh; }
         .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
 
         /* Navbar */
         nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--brd); margin-bottom: 30px; }
-        .user-trigger { display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--gold); font-weight: 700; transition: 0.3s; }
-        .user-trigger:hover { opacity: 0.8; }
-        .platform-name { font-weight: 900; font-size: 1.2rem; }
+        .user-trigger { display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--gold); font-weight: 700; border: 1px solid var(--gold); padding: 5px 15px; border-radius: 20px; }
+        .platform-name { font-weight: 900; font-size: 1.3rem; }
 
-        /* الستارة الجانبية (Side Menu) */
-        .side-menu { position: fixed; top: 0; right: -350px; width: 320px; height: 100%; background: var(--navy-card); border-left: 2px solid var(--gold); z-index: 1000; transition: 0.4s; padding: 30px; box-shadow: -10px 0 30px rgba(0,0,0,0.8); overflow-y: auto; }
+        /* الأيقونة في المنتصف */
+        .brand-logo-mid { display: block; width: 80px; height: 80px; margin: 0 auto 20px auto; border-radius: 50%; border: 2px solid var(--gold); box-shadow: 0 0 15px rgba(201,151,43,0.3); }
+
+        /* الستارة الجانبية */
+        .side-menu { position: fixed; top: 0; right: -350px; width: 320px; height: 100%; background: var(--navy-card); border-left: 2px solid var(--gold); z-index: 1000; transition: 0.4s; padding: 30px; box-shadow: -10px 0 30px rgba(0,0,0,0.8); }
         .side-menu.active { right: 0; }
-        .close-menu { color: red; font-weight: 900; cursor: pointer; margin-bottom: 20px; display: block; text-align: left; }
-        .menu-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--brd); }
-        .menu-item label { color: var(--gold); font-size: 0.8rem; display: block; margin-bottom: 5px; }
+        .close-menu { color: #ff4d4d; font-weight: 900; cursor: pointer; margin-bottom: 25px; display: block; text-align: left; }
 
         /* Auth Card */
-        .auth-container { max-width: 450px; margin: 50px auto; background: var(--navy-card); border-radius: 24px; padding: 40px; border: 1px solid var(--brd); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        .tabs { display: flex; gap: 10px; margin-bottom: 30px; background: rgba(255,255,255,0.03); padding: 5px; border-radius: 15px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; background: transparent; color: var(--text-gray); cursor: pointer; font-weight: 700; border-radius: 10px; transition: 0.3s; font-family: 'Cairo'; }
+        .auth-container { max-width: 450px; margin: 30px auto; background: var(--navy-card); border-radius: 24px; padding: 30px; border: 1px solid var(--brd); box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; background: rgba(255,255,255,0.03); padding: 5px; border-radius: 15px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--text-gray); cursor: pointer; font-weight: 700; border-radius: 10px; font-family: 'Cairo'; }
         .tab-btn.active { background: var(--gold-gradient); color: var(--navy-dark); }
-        input { width: 100%; padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.02); border: 1px solid var(--brd); border-radius: 12px; color: white; font-family: 'Cairo'; outline: none; }
+        
+        input { width: 100%; padding: 14px; margin-bottom: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--brd); border-radius: 12px; color: white; font-family: 'Cairo'; outline: none; text-align: center; }
+        .forgot-pass { display: block; margin-top: 15px; color: #ff6b6b; font-size: 0.85rem; text-decoration: none; cursor: pointer; font-weight: 600; }
 
-        /* Video & Protection */
+        /* Video System */
         .video-box { position: relative; width: 100%; max-width: 850px; margin: 20px auto; border-radius: 20px; overflow: hidden; border: 2px solid var(--gold); background: #000; }
-        .shield { position: absolute; z-index: 10; background: transparent; }
-        #watermark { position: absolute; z-index: 100; color: rgba(255, 255, 255, 0.2); font-size: 14px; pointer-events: none; white-space: nowrap; transition: 3s; font-weight: bold; }
+        #watermark { position: absolute; z-index: 100; color: rgba(255, 255, 255, 0.2); font-size: 14px; pointer-events: none; white-space: nowrap; transition: 3s linear; font-weight: bold; }
         iframe { width: 100%; aspect-ratio: 16/9; border: none; }
 
-        /* Buttons & Utility */
-        .btn-gold { padding: 12px 25px; background: var(--gold-gradient); border: none; border-radius: 10px; color: var(--navy-dark); font-weight: 800; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; }
-        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,151,43,0.3); }
+        .btn-gold { padding: 12px 25px; background: var(--gold-gradient); border: none; border-radius: 12px; color: var(--navy-dark); font-weight: 800; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; width: 100%; }
         .page { display: none; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .hidden { display: none; }
@@ -56,71 +55,72 @@
 
     <div id="sideMenu" class="side-menu">
         <span class="close-menu" onclick="toggleMenu()">إغلاق ✕</span>
-        <h3 style="color:var(--gold); margin-bottom:20px;">ملف الطالب</h3>
-        <div class="menu-item">
-            <label>الاسم بالكامل</label>
-            <p id="menuName">--</p>
-        </div>
-        <div id="menuContent">
+        <img src="https://i.ibb.co/nMB0QD7k/fady-logo.png" class="brand-logo-mid" style="width:60px; height:60px;">
+        <h3 style="color:var(--gold); text-align:center; margin-bottom:20px;">ملف الطالب</h3>
+        <div id="menuContent" style="border-top: 1px solid var(--brd); padding-top:15px;">
+            <p id="menuName" style="text-align:center; font-weight:700; margin-bottom:20px;"></p>
             </div>
-        <button class="btn-gold" style="background:red; color:white; width:100%;" onclick="logout()">تسجيل الخروج</button>
+        <button class="btn-gold" style="background:#ff4d4d; color:white; margin-top:30px;" onclick="logout()">تسجيل الخروج</button>
     </div>
 
     <div class="container">
         <nav>
             <div id="userInfo" class="user-trigger hidden" onclick="toggleMenu()">
-                <span id="navStudentName">جاري التحميل...</span>
-                <span style="font-size: 1.2rem;">👤</span>
+                <span id="navStudentName">طالب</span>
+                <span>👤</span>
             </div>
             <div class="platform-name">Dr: <span style="color:var(--gold)">Fady Adel</span></div>
         </nav>
 
         <div id="authSection" class="auth-container">
+            <img src="https://i.ibb.co/nMB0QD7k/fady-logo.png" alt="Logo" class="brand-logo-mid">
             <div class="tabs">
-                <button class="tab-btn active" onclick="showAuth('login')">دخول</button>
-                <button class="tab-btn" onclick="showAuth('reg')">حساب جديد</button>
+                <button class="tab-btn active" id="btn-l" onclick="showAuth('login')">دخول</button>
+                <button class="tab-btn" id="btn-r" onclick="showAuth('reg')">حساب جديد</button>
             </div>
+            
             <div id="loginArea">
                 <input type="tel" id="lp" placeholder="رقم الموبايل">
                 <input type="password" id="lw" placeholder="كلمة المرور">
-                <button class="btn-gold" style="width:100%" onclick="doLogin()">دخول المنصة</button>
+                <button class="btn-gold" onclick="doLogin()">دخول المنصة</button>
+                <a class="forgot-pass" onclick="window.open('https://wa.me/201021422744?text=نسيت كلمة المرور الخاصة بي', '_blank')">نسيت كلمة المرور؟ تواصل معنا 💬</a>
             </div>
+
             <div id="regArea" class="hidden">
                 <input type="text" id="rn" placeholder="الاسم الثلاثي">
                 <input type="tel" id="rp" placeholder="رقم الموبايل">
                 <input type="password" id="rw" placeholder="كلمة المرور">
-                <button class="btn-gold" style="width:100%" onclick="doReg()">إنشاء حساب</button>
+                <button class="btn-gold" onclick="doReg()">إنشاء حساب</button>
             </div>
         </div>
 
         <div id="studentPage" class="page">
             <div style="background:rgba(201,151,43,0.05); padding:20px; border-radius:15px; border:1px dashed var(--gold); text-align:center; margin-bottom:30px;">
-                <p class="amiri" style="font-size:1.4rem; color:var(--gold)">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ.. يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</p>
+                <p style="font-family:'Amiri'; font-size:1.3rem; color:var(--gold)">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ.. يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</p>
             </div>
-            <h3>المحاضرات المتاحة</h3>
-            <div style="background:var(--navy-card); padding:20px; border-radius:15px; margin-top:15px; cursor:pointer; border:1px solid var(--brd);" onclick="openVideo('VIDEO_ID')">
-                <p>🎥 المحاضرة 1: أساسيات الكهربية</p>
+            <h3 style="margin-bottom:15px;">المحاضرات المتاحة 🎥</h3>
+            <div style="background:var(--navy-card); padding:20px; border-radius:15px; cursor:pointer; border:1px solid var(--brd);" onclick="openVideo('7pI0p03H7L8')">
+                <p>🎥 المحاضرة 1: أساسيات الفيزياء الكهربية</p>
             </div>
         </div>
 
         <div id="videoPage" class="page">
             <div class="video-box">
-                <div class="shield" style="top:0; width:100%; height:60px;"></div>
-                <div class="shield" style="bottom:0; right:0; width:100px; height:50px;"></div>
+                <div style="position:absolute; top:0; left:0; width:100%; height:60px; z-index:10;"></div>
+                <div style="position:absolute; bottom:0; right:0; width:120px; height:50px; z-index:10;"></div>
                 <div id="watermark"></div>
-                <iframe id="mainPlayer" src="" allowfullscreen></iframe>
+                <iframe id="mainPlayer" src="" allow="autoplay" allowfullscreen></iframe>
             </div>
-            <center><button class="btn-gold" style="margin-top:20px" onclick="closeVideo()">العودة للرئيسية</button></center>
+            <center><button class="btn-gold" style="margin-top:20px; width:auto;" onclick="closeVideo()">العودة للرئيسية</button></center>
         </div>
 
         <div id="adminPage" class="page">
             <h2 style="color:var(--gold)">لوحة تحكم الأدمن 🛡️</h2>
-            <div style="background:var(--navy-card); padding:25px; border-radius:20px; margin-top:20px; border:1px solid var(--gold);">
-                <h4>إضافة درجة طالب</h4>
-                <input type="tel" id="admPhone" placeholder="رقم موبايل الطالب" style="margin-top:10px;">
+            <div style="background:var(--navy-card); padding:25px; border-radius:20px; border:1px solid var(--gold); margin-top:20px;">
+                <input type="tel" id="admPhone" placeholder="رقم موبايل الطالب">
                 <input type="text" id="admExam" placeholder="اسم الامتحان">
-                <input type="text" id="admGrade" placeholder="الدرجة (مثال: 25/30)">
-                <button class="btn-gold" style="width:100%" onclick="saveGrade()">حفظ البيانات</button>
+                <input type="text" id="admGrade" placeholder="الدرجة">
+                <button class="btn-gold" onclick="saveGrade()">حفظ الدرجة</button>
             </div>
         </div>
     </div>
@@ -128,14 +128,14 @@
     <script>
         const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-        // الحماية
-        document.onkeydown = (e) => { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false; };
+        document.onkeydown = (e) => { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false; };
 
         window.onload = () => {
-            const u = JSON.parse(localStorage.getItem('physics_user'));
-            if(u) {
+            const saved = localStorage.getItem('physics_user');
+            if(saved) {
+                const u = JSON.parse(saved);
                 if(u.role === 'admin') showAdmin();
-                else launchStudent(u);
+                else if(u.name) launchStudent(u);
             }
         };
 
@@ -143,18 +143,24 @@
             const isL = v === 'login';
             document.getElementById('loginArea').classList.toggle('hidden', !isL);
             document.getElementById('regArea').classList.toggle('hidden', isL);
+            document.getElementById('btn-l').classList.toggle('active', isL);
+            document.getElementById('btn-r').classList.toggle('active', !isL);
+        }
+
+        async function doReg() {
+            const d = { full_name: document.getElementById('rn').value, student_phone: document.getElementById('rp').value, password: document.getElementById('rw').value };
+            const { error } = await _supabase.from('students').insert([d]);
+            if(!error) { alert("تم التسجيل!"); showAuth('login'); } else alert("الرقم مسجل مسبقاً");
         }
 
         async function doLogin() {
             const p = document.getElementById('lp').value, w = document.getElementById('lw').value;
-            // تسجيل دخول الأدمن يدوياً (مؤقت)
             if(p === '01021422744' && w === 'admin123') return showAdmin();
-
             const { data } = await _supabase.from('students').select('*').eq('student_phone', p).eq('password', w).maybeSingle();
             if(data) {
-                const user = { name: data.full_name, phone: data.student_phone, role: 'student' };
-                localStorage.setItem('physics_user', JSON.stringify(user));
-                launchStudent(user);
+                const u = { name: data.full_name, phone: data.student_phone, role: 'student' };
+                localStorage.setItem('physics_user', JSON.stringify(u));
+                launchStudent(u);
             } else alert("بيانات خاطئة");
         }
 
@@ -164,16 +170,15 @@
             document.getElementById('userInfo').classList.remove('hidden');
             document.getElementById('navStudentName').innerText = u.name;
             document.getElementById('menuName').innerText = u.name;
-            loadStudentData(u.phone);
+            loadData(u.phone);
         }
 
-        async function loadStudentData(phone) {
-            const { data: grades } = await _supabase.from('grades').select('*').eq('student_phone', phone);
-            let html = '<label>درجات الامتحانات</label>';
-            if(grades && grades.length > 0) {
-                grades.forEach(g => html += `<p style="font-size:0.9rem; margin-bottom:5px;">• ${g.exam_name}: <span style="color:var(--gold)">${g.score}</span></p>`);
-            } else html += '<p>لا توجد درجات مسجلة بعد</p>';
-            document.getElementById('menuContent').innerHTML = html;
+        async function loadData(phone) {
+            const { data } = await _supabase.from('grades').select('*').eq('student_phone', phone);
+            let h = '<b>درجاتك:</b><br>';
+            if(data && data.length > 0) data.forEach(g => h += `<p>• ${g.exam_name}: ${g.score}</p>`);
+            else h += '<p>لا يوجد درجات حالياً</p>';
+            document.getElementById('menuContent').innerHTML = h;
         }
 
         function showAdmin() {
@@ -184,8 +189,8 @@
 
         async function saveGrade() {
             const p = document.getElementById('admPhone').value, e = document.getElementById('admExam').value, g = document.getElementById('admGrade').value;
-            const { error } = await _supabase.from('grades').insert([{ student_phone: p, exam_name: e, score: g }]);
-            if(!error) alert("تم الحفظ!"); else alert("خطأ في البيانات");
+            await _supabase.from('grades').insert([{ student_phone: p, exam_name: e, score: g }]);
+            alert("تم الحفظ!");
         }
 
         function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
@@ -194,17 +199,13 @@
             const u = JSON.parse(localStorage.getItem('physics_user'));
             document.getElementById('studentPage').style.display = 'none';
             document.getElementById('videoPage').style.display = 'block';
-            document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`;
-            
-            const mark = document.getElementById('watermark');
-            mark.innerText = `${u.name} - ${u.phone}`;
-            setInterval(() => {
-                mark.style.left = Math.random() * 70 + '%';
-                mark.style.top = Math.random() * 70 + '%';
-            }, 3000);
+            document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`;
+            const m = document.getElementById('watermark');
+            m.innerText = `${u.name} - ${u.phone}`;
+            window.mTimer = setInterval(() => { m.style.left = Math.random()*60+'%'; m.style.top = Math.random()*60+'%'; }, 4000);
         }
 
-        function closeVideo() { location.reload(); }
+        function closeVideo() { clearInterval(window.mTimer); location.reload(); }
         function logout() { localStorage.removeItem('physics_user'); location.reload(); }
     </script>
 </body>
