@@ -26,8 +26,9 @@
     <h1 style="text-align:center; color:var(--gold); margin-bottom:30px;">لوحة تحكم المنصة 🛠️</h1>
 
     <div class="section">
-        <h3>📂 إدارة الكورسات</h3>
+        <h3>📂 إدارة الكورسات والأسعار</h3>
         <input type="text" id="courseTitle" placeholder="عنوان الكورس الجديد">
+        <input type="number" id="coursePrice" placeholder="سعر الكورس (اكتب 0 للمجاني)">
         <button class="btn btn-gold" onclick="addCourse()">إضافة كورس</button>
         <div id="coursesList" style="margin-top:15px;"></div>
     </div>
@@ -36,21 +37,20 @@
         <h3>🎥 إضافة محاضرة جديدة</h3>
         <select id="targetCourse"></select>
         <input type="text" id="lessonTitle" placeholder="عنوان المحاضرة">
-        <input type="text" id="videoId" placeholder="ID فيديو اليوتيوب (مثال: dQw4w9WgXcQ)">
+        <input type="text" id="videoId" placeholder="ID فيديو اليوتيوب">
         <input type="text" id="pdfUrl" placeholder="رابط ملف الـ PDF (اختياري)">
         <button class="btn btn-gold" onclick="addLesson()">إضافة المحاضرة</button>
     </div>
 
     <div class="section">
-        <h3>🔓 تفعيل اشتراك طالب</h3>
+        <h3>🔓 تفعيل اشتراك طالب (للكورسات المدفوعة)</h3>
         <input type="tel" id="studentPhone" placeholder="رقم موبايل الطالب">
         <select id="courseToActivate"></select>
         <button class="btn btn-blue" onclick="activateCourse()">تفعيل الآن</button>
     </div>
 
     <div class="section" style="border-color: #3498db;">
-        <h3 style="color:#3498db">📱 إدارة أجهزة الطلاب</h3>
-        <p style="font-size: 0.8rem; margin-bottom: 10px;">استخدم هذا الخيار لإتاحة الدخول للطالب من جهاز جديد (سيتم تسجيل خروجه من الجهاز القديم).</p>
+        <h3 style="color:#3498db">📱 إدارة أجهزة الطلاب (تصفير الدخول)</h3>
         <input type="tel" id="logoutStudentPhone" placeholder="رقم موبايل الطالب">
         <button class="btn btn-blue" onclick="forceLogout()">تسجيل خروج من جميع الأجهزة</button>
     </div>
@@ -61,13 +61,13 @@
         <input type="number" id="examDuration" placeholder="مدة الامتحان بالدقائق">
         <div id="questionsArea">
             <div class="question-block" style="border:1px dashed var(--gold); padding:10px; margin-bottom:10px;">
-                <input type="text" placeholder="السؤال الأول" class="q-text">
-                <input type="text" placeholder="رابط صورة السؤال (إن وجد)" class="q-img">
+                <input type="text" placeholder="نص السؤال" class="q-text">
+                <input type="text" placeholder="رابط الصورة (اختياري)" class="q-img">
                 <input type="text" placeholder="الاختيار 1" class="opt">
                 <input type="text" placeholder="الاختيار 2" class="opt">
                 <input type="text" placeholder="الاختيار 3" class="opt">
                 <input type="text" placeholder="الاختيار 4" class="opt">
-                <input type="number" placeholder="رقم الإجابة الصحيحة (0، 1، 2، 3)" class="correct-idx">
+                <input type="number" placeholder="رقم الإجابة الصحيحة (0-3)" class="correct-idx">
             </div>
         </div>
         <button class="btn btn-blue" onclick="addQuestionField()">+ إضافة سؤال آخر</button>
@@ -85,38 +85,37 @@
 
     async function initAdmin() {
         const pass = prompt("يرجى إدخال كود الأدمن (MASTER CODE):");
-        if(pass !== "FADY_2026_ADMIN") { // يمكنك تغيير الكود هنا
+        if(pass !== "123456") { 
             alert("كود خاطئ!"); window.location.href = "index.html";
-        }
-        loadData();
+        } else { loadData(); }
     }
 
     async function loadData() {
         const { data: courses } = await _supabase.from('courses').select('*');
         const { data: lessons } = await _supabase.from('lessons').select('*');
 
-        // تحديث قوائم الاختيار
         let courseOpts = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
         document.getElementById('targetCourse').innerHTML = courseOpts;
         document.getElementById('courseToActivate').innerHTML = courseOpts;
         document.getElementById('targetLesson').innerHTML = lessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
 
-        // عرض قائمة الكورسات للحذف
         document.getElementById('coursesList').innerHTML = courses.map(c => `
             <div class="list-item">
-                <span>${c.title}</span>
+                <span>${c.title} - (${c.price || 0} ج.م)</span>
                 <button class="btn btn-red" style="width:auto; padding:5px 10px;" onclick="deleteCourse('${c.id}')">حذف</button>
             </div>`).join('');
     }
 
     async function addCourse() {
         const t = document.getElementById('courseTitle').value;
-        await _supabase.from('courses').insert([{ title: t }]);
+        const p = document.getElementById('coursePrice').value || 0;
+        if(!t) return alert("أدخل عنوان الكورس");
+        await _supabase.from('courses').insert([{ title: t, price: parseInt(p) }]);
         location.reload();
     }
 
     async function deleteCourse(id) {
-        if(confirm("سيتم حذف الكورس وكل محاضراته، متأكد؟")) {
+        if(confirm("سيتم حذف الكورس ومحتوياته نهائياً، هل أنت متأكد؟")) {
             await _supabase.from('courses').delete().eq('id', id);
             location.reload();
         }
@@ -138,29 +137,18 @@
         alert("تم تفعيل الكورس للطالب!");
     }
 
-    // ميزة تسجيل الخروج الإجباري
     async function forceLogout() {
         const p = document.getElementById('logoutStudentPhone').value;
         if(!p) return alert("أدخل رقم الطالب");
-        if(confirm("هل تريد السماح للطالب بالدخول من جهاز جديد؟")) {
-            await _supabase.from('students').update({ last_device_id: null }).eq('student_phone', p);
-            alert("تم التصفير! يمكن للطالب الآن تسجيل الدخول من جهاز آخر.");
-        }
+        await _supabase.from('students').update({ last_device_id: null }).eq('student_phone', p);
+        alert("تم تصفير الجهاز بنجاح!");
     }
 
     function addQuestionField() {
         const div = document.createElement('div');
         div.className = "question-block";
         div.style = "border:1px dashed var(--gold); padding:10px; margin-bottom:10px;";
-        div.innerHTML = `
-            <input type="text" placeholder="السؤال" class="q-text">
-            <input type="text" placeholder="رابط الصورة" class="q-img">
-            <input type="text" placeholder="الاختيار 1" class="opt">
-            <input type="text" placeholder="الاختيار 2" class="opt">
-            <input type="text" placeholder="الاختيار 3" class="opt">
-            <input type="text" placeholder="الاختيار 4" class="opt">
-            <input type="number" placeholder="رقم الإجابة الصحيحة (0-3)" class="correct-idx">
-        `;
+        div.innerHTML = `<input type="text" placeholder="السؤال" class="q-text"><input type="text" placeholder="رابط الصورة" class="q-img"><input type="text" placeholder="الاختيار 1" class="opt"><input type="text" placeholder="الاختيار 2" class="opt"><input type="text" placeholder="الاختيار 3" class="opt"><input type="text" placeholder="الاختيار 4" class="opt"><input type="number" placeholder="رقم الإجابة الصحيحة (0-3)" class="correct-idx">`;
         document.getElementById('questionsArea').appendChild(div);
     }
 
@@ -169,25 +157,18 @@
         const dur = document.getElementById('examDuration').value;
         const qBlocks = document.querySelectorAll('.question-block');
         let questions = [];
-
         qBlocks.forEach(b => {
             const opts = Array.from(b.querySelectorAll('.opt')).map(i => i.value);
-            questions.push({
-                q: b.querySelector('.q-text').value,
-                img: b.querySelector('.q-img').value,
-                options: opts,
-                correct: parseInt(b.querySelector('.correct-idx').value)
-            });
+            questions.push({ q: b.querySelector('.q-text').value, img: b.querySelector('.q-img').value, options: opts, correct: parseInt(b.querySelector('.correct-idx').value) });
         });
-
-        const { error } = await _supabase.from('exams').insert([{ lesson_id: lId, duration_minutes: dur, questions: questions }]);
-        if(error) alert("خطأ في الحفظ"); else alert("تم رفع الامتحان بنجاح!");
+        await _supabase.from('exams').insert([{ lesson_id: lId, duration_minutes: dur, questions: questions }]);
+        alert("تم رفع الامتحان!");
     }
 
     async function clearResults() {
-        if(confirm("هل أنت متأكد من حذف جميع نتائج الطلاب؟ لا يمكن التراجع!")) {
+        if(confirm("حذف كل النتائج؟")) {
             await _supabase.from('exam_results').delete().neq('id', 0);
-            alert("تم تنظيف النتائج.");
+            alert("تم التنظيف.");
         }
     }
 
