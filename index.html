@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dr: Fady Adel | Physics Platform</title>
+    <title>Dr: Fady  | Physics Platform</title>
     <link rel="icon" href="https://i.ibb.co/nMB0QD7k/fady-logo.png" type="image/png" />
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,16 +11,24 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --navy: #0d1b2a; --navy-mid: #1b2e42; --gold: #c9972b; --gold-lt: #e8b84b;
-            --bg: #0a1520; --card-bg: #111e2d; --card-brd: #1e3248; --white: #f0f4f8;
-            --gray: #6a7f96; --shadow: 0 24px 70px rgba(0,0,0,.55); --radius: 20px;
+            --navy: #0d1b2a; 
+            --navy-mid: #1b2e42; 
+            --gold: #c9972b; /* اللون الذهبي الأساسي */
+            --gold-lt: #e8b84b; /* ذهبي فاتح للإضاءة */
+            --gold-dk: #a87820; /* ذهبي غامق للظل */
+            --bg: #0a1520; 
+            --card-bg: #111e2d; 
+            --card-brd: #1e3248; 
+            --white: #f0f4f8;
+            --gray: #6a7f96; 
+            --shadow: 0 24px 70px rgba(0,0,0,.55); 
+            --radius: 20px;
         }
         body {
             font-family: 'Cairo', sans-serif; background: var(--bg);
             display: flex; align-items: center; justify-content: center;
             min-height: 100vh; padding: 24px 16px; overflow-x: hidden; position: relative;
         }
-        /* Background Effects */
         body::before {
             content: ''; position: fixed; inset: 0;
             background: radial-gradient(ellipse 70% 55% at 15% 15%, rgba(201,151,43,.07) 0%, transparent 65%),
@@ -30,7 +38,6 @@
         .wrapper { position: relative; z-index: 1; width: 100%; max-width: 450px; animation: fadeUp .75s ease both; }
         @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
 
-        /* Header & Logo */
         .header { text-align: center; margin-bottom: 25px; }
         .logo-img-wrap {
             width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 15px;
@@ -43,27 +50,37 @@
         .site-title span { color: var(--gold); }
         .tagline { font-family: 'Amiri', serif; color: var(--gold-lt); font-style: italic; font-size: 1.1rem; margin-top: 10px; display: block; }
 
-        /* Card & Tabs */
         .card { background: var(--card-bg); border: 1px solid var(--card-brd); border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow); position: relative; }
         .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gold); border-radius: 20px 20px 0 0; }
+        
         .tabs { display: flex; background: rgba(255,255,255,.05); border-radius: 12px; padding: 5px; margin-bottom: 25px; gap: 5px; }
         .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--gray); cursor: pointer; font-weight: 600; border-radius: 8px; transition: .3s; }
+        
+        /* زر التبديل النشط باللون الذهبي */
         .tab-btn.active { background: var(--gold); color: var(--navy); }
 
-        /* Forms */
         .form-group { margin-bottom: 15px; }
         input {
             width: 100%; padding: 14px; background: #162333; border: 1px solid var(--card-brd);
             border-radius: 10px; color: var(--white); text-align: right; font-family: 'Cairo';
         }
         input:focus { outline: none; border-color: var(--gold); background: #1c2d42; }
-        button {
-            width: 100%; padding: 15px; background: linear-gradient(135deg, var(--gold), var(--gold-dk));
+
+        /* تعديل ألوان الأزرار للذهبي الفخم */
+        button.main-btn {
+            width: 100%; padding: 15px; 
+            background: linear-gradient(135deg, var(--gold-dk) 0%, var(--gold) 50%, var(--gold-lt) 100%);
             color: var(--navy); border: none; border-radius: 10px; font-weight: 800; font-size: 1.1rem;
-            cursor: pointer; transition: .3s; margin-top: 10px;
+            cursor: pointer; transition: .4s; margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(201, 151, 43, 0.2);
         }
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(201,151,43,.3); }
-        .forgot-link { color: var(--red); display: block; margin-top: 15px; font-size: 0.9rem; text-decoration: none; font-weight: 600; text-align: center; }
+        button.main-btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 25px rgba(201, 151, 43, 0.4);
+            filter: brightness(1.1);
+        }
+        
+        .forgot-link { color: #ff6b6b; display: block; margin-top: 15px; font-size: 0.9rem; text-decoration: none; font-weight: 600; text-align: center; }
         .hidden { display: none; }
     </style>
 </head>
@@ -78,14 +95,14 @@
 
     <div class="card">
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('login')">تسجيل الدخول</button>
-            <button class="tab-btn" onclick="switchTab('reg')">حساب جديد</button>
+            <button class="tab-btn active" id="loginTab" onclick="switchTab('login')">تسجيل الدخول</button>
+            <button class="tab-btn" id="regTab" onclick="switchTab('reg')">حساب جديد</button>
         </div>
 
         <div id="loginForm">
             <div class="form-group"><input type="tel" id="lPhone" placeholder="رقم الموبايل"></div>
             <div class="form-group"><input type="password" id="lPass" placeholder="كلمة المرور"></div>
-            <button onclick="handleLogin()">دخول المنصة</button>
+            <button class="main-btn" onclick="handleLogin()">دخول المنصة</button>
             <a href="#" onclick="forgotPW()" class="forgot-link">نسيت كلمة المرور؟ تواصل معنا</a>
         </div>
 
@@ -94,7 +111,7 @@
             <div class="form-group"><input type="tel" id="rPhone" placeholder="رقم الموبايل"></div>
             <div class="form-group"><input type="tel" id="rParent" placeholder="رقم ولي الأمر"></div>
             <div class="form-group"><input type="password" id="rPass" placeholder="كلمة المرور"></div>
-            <button onclick="handleRegister()">تأكيد الاشتراك</button>
+            <button class="main-btn" onclick="handleRegister()">تأكيد الاشتراك</button>
         </div>
     </div>
 </div>
@@ -103,9 +120,11 @@
     const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
     function switchTab(type) {
-        document.getElementById('loginForm').classList.toggle('hidden', type === 'reg');
-        document.getElementById('regForm').classList.toggle('hidden', type === 'login');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active'));
+        const isLogin = type === 'login';
+        document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
+        document.getElementById('regForm').classList.toggle('hidden', isLogin);
+        document.getElementById('loginTab').classList.toggle('active', isLogin);
+        document.getElementById('regTab').classList.toggle('active', !isLogin);
     }
 
     async function handleRegister() {
