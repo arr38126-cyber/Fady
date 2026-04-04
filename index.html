@@ -8,28 +8,33 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --navy: #050a0f; --gold: #c9972b; --white: #fff; --card: #0d1621; --brd: rgba(201, 151, 43, 0.3); }
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--navy); color: var(--white); overflow-x: hidden; }
-
-        /* منع تصوير الشاشة - محاكاة الشاشة السوداء */
+        
+        /* [تعديل حماية] منع النسخ والتصوير */
+        body { user-select: none; -webkit-user-select: none; }
+        
+        /* [تعديل حماية] محاولة جعل الشاشة سوداء عند التسجيل */
         @media screen { video, iframe, .exam-area { filter: opacity(1); -webkit-filter: opacity(1); } }
         @media print { body { display: none !important; } }
 
         .amiri { font-family: 'Amiri', serif; color: var(--gold); font-size: 1.2rem; text-align: center; margin: 20px 0; font-style: italic; }
+        
         .container { max-width: 600px; margin: auto; padding: 20px; }
-        .card { background: var(--card); border: 1px solid var(--brd); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+        .card { background: var(--card); border: 1px solid var(--brd); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
         input { width: 100%; padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--brd); border-radius: 12px; color: white; font-size: 1rem; text-align: center; outline: none; }
-        .btn-gold { width: 100%; padding: 15px; background: var(--gold); border: none; border-radius: 12px; color: var(--navy); font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        
-        /* البصمة المتحركة الذكية */
-        #watermark { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99999; opacity: 0.15; font-size: 12px; color: #fff; display: none; }
+        .btn-gold { width: 100%; padding: 15px; background: var(--gold); border: none; border-radius: 12px; color: var(--navy); font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
         
         .course-card { background: var(--card); border: 1px solid var(--brd); border-radius: 15px; margin-bottom: 20px; overflow: hidden; transition: 0.3s; }
         .course-img { width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid var(--brd); }
+        .course-info { padding: 15px; text-align: center; }
+        
+        #watermark { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.15; font-size: 12px; color: #fff; display: none; }
         
         .exam-area { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--navy); z-index: 10000; display: none; padding: 20px; overflow-y: auto; }
-        .locked { filter: grayscale(1); opacity: 0.6; pointer-events: none; }
+        .locked { filter: grayscale(1); opacity: 0.7; position: relative; }
+        .locked::after { content: "🔒 محتوى مدفوع"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--gold); color: #000; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -38,7 +43,7 @@
 
 <div id="loginPage" class="container" style="margin-top: 10vh;">
     <div class="card">
-        <h1 style="text-align:center; color:var(--gold); margin-bottom:10px; font-weight:900;">Dr: Fady Adel</h1>
+        <h1 style="text-align:center; color:var(--gold); margin-bottom:10px;">Dr: Fady Adel</h1>
         <p style="text-align:center; opacity:0.7; margin-bottom:25px;">منصة الفيزياء للثانوية العامة</p>
         
         <input type="tel" id="loginPhone" placeholder="رقم الموبايل">
@@ -46,14 +51,13 @@
         <button class="btn-gold" onclick="doLogin()">دخول للمنصة</button>
         
         <a style="display:block; text-align:center; margin-top:20px; color:#ff6b6b; font-size:0.85rem; cursor:pointer; text-decoration:none;" 
-   
+        
             
             
             
             
             
-            
-            onclick="window.open('https://wa.me/2010000000004?text=أهلاً مستر فادي، نسيت كلمة المرور الخاصة بحسابي', '_blank')">
+            onclick="window.open('https://wa.me/20104?text=نسيت كلمة المرور الخاصة بحسابي', '_blank')">
            نسيت كلمة المرور؟ تواصل معنا
         </a>
     </div>
@@ -62,14 +66,14 @@
 
 <div id="mainPage" class="container" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 id="welcomeName" style="color:var(--gold); font-weight:900;"></h2>
-        <button onclick="location.reload()" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:5px 10px; border-radius:8px; font-size:0.8rem;">خروج</button>
+        <h2 id="welcomeName" style="color:var(--gold);">أهلاً بك</h2>
+        <button onclick="location.reload()" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:5px 10px; border-radius:8px;">خروج</button>
     </div>
     <div id="coursesContainer"></div>
 </div>
 
 <div id="lessonsPage" class="container" style="display:none;">
-    <button onclick="showMain()" style="color:var(--gold); background:none; border:none; margin-bottom:15px; cursor:pointer; font-weight:bold;">← العودة للكورسات</button>
+    <button onclick="showMain()" style="color:var(--gold); margin-bottom:15px; background:none; border:none; cursor:pointer;">← العودة للكورسات</button>
     <div id="lessonsContainer"></div>
 </div>
 
@@ -81,21 +85,27 @@
     const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
     
     let currentUser = null;
+    let userAccess = [];
 
-    // حماية: تعطيل اختصارات الكيبورد
+    // [تعديل حماية] منع اختصارات لوحة المفاتيح للتصوير
     document.addEventListener('keydown', (e) => {
         if (e.key === "PrintScreen" || e.keyCode === 44) {
             navigator.clipboard.writeText("محتوى محمي!");
-            alert("تصوير الشاشة ممنوع.");
+            alert("تصوير الشاشة معطل لحماية الحقوق.");
         }
         if (e.ctrlKey && (e.key === 'u' || e.key === 'i' || e.key === 's')) e.preventDefault();
         if (e.keyCode === 123) e.preventDefault();
     });
 
+    // توليد بصمة الجهاز
+    async function getDeviceId() {
+        return btoa(navigator.userAgent + navigator.language + screen.width);
+    }
+
     async function doLogin() {
         const phone = document.getElementById('loginPhone').value;
         const pass = document.getElementById('loginPass').value;
-        const devId = btoa(navigator.userAgent + screen.width); // بصمة الجهاز
+        const devId = await getDeviceId();
 
         if(!phone || !pass) return alert("برجاء إدخال البيانات");
 
@@ -103,25 +113,23 @@
 
         if(!user || user.password !== pass) return alert("بيانات الدخول غير صحيحة");
 
-        // نظام الجهاز الواحد
         if(user.last_device_id && user.last_device_id !== devId) {
-            return alert("هذا الحساب مسجل على جهاز آخر. تواصل مع المستر.");
+            return alert("عذراً، هذا الحساب مسجل على جهاز آخر. تواصل مع المستر لتغيير الجهاز.");
         }
 
         await _supabase.from('students').update({ last_device_id: devId }).eq('id', user.id);
+        
         currentUser = user;
         startWatermark(user.student_name, user.student_phone);
         showMain();
     }
 
-    // بصمة متحركة (واتر مارك) قوية جداً
+    // [تعديل حماية] ووتر مارك متحرك يظهر في أماكن عشوائية لزيادة الأمان
     function startWatermark(name, phone) {
         const wm = document.getElementById('watermark');
         wm.style.display = 'block';
         setInterval(() => {
-            wm.innerHTML = `<div style="position:absolute; top:${Math.random()*90}%; left:${Math.random()*60}%; color:rgba(255,255,255,0.25); transform:rotate(-20deg); white-space:nowrap;">
-                ${name} - ${phone}
-            </div>`;
+            wm.innerHTML = `<div style="position:absolute; top:${Math.random()*90}%; left:${Math.random()*65}%; color:rgba(255,255,255,0.2); transform:rotate(-15deg);">${name} - ${phone}</div>`;
         }, 2500);
     }
 
@@ -132,18 +140,18 @@
         document.getElementById('welcomeName').innerText = "يا " + currentUser.student_name.split(' ')[0];
 
         const { data: access } = await _supabase.from('student_access').select('course_id').eq('student_phone', currentUser.student_phone);
-        const userAccess = access.map(a => a.course_id);
+        userAccess = access.map(a => a.course_id);
 
         const { data: courses } = await _supabase.from('courses').select('*');
         let html = '';
         courses.forEach(c => {
             const isLocked = c.price > 0 && !userAccess.includes(c.id);
             html += `
-                <div class="course-card ${isLocked ? 'locked' : ''}" onclick="${isLocked ? "alert('تواصل مع السكرتارية لتفعيل الكورس')" : `showLessons('${c.id}')`}">
+                <div class="course-card ${isLocked ? 'locked' : ''}" onclick="${isLocked ? "alert('تواصل مع المستر لتفعيل هذا الكورس')" : `showLessons('${c.id}')`}">
                     <img src="${c.image_url || 'https://via.placeholder.com/400x200/0d1621/c9972b?text=Physics'}" class="course-img">
-                    <div style="padding:15px; text-align:center;">
-                        <h3 style="color:var(--gold);">${c.title}</h3>
-                        <p style="font-size:0.9rem; opacity:0.8;">${c.price === 0 ? 'محتوى مجاني' : `السعر: ${c.price} ج.م`}</p>
+                    <div class="course-info">
+                        <h3>${c.title}</h3>
+                        <p>${c.price === 0 ? 'محتوى مجاني' : `السعر: ${c.price} ج.م`}</p>
                     </div>
                 </div>`;
         });
@@ -159,8 +167,8 @@
         lessons.forEach(l => {
             html += `
                 <div class="card" style="margin-bottom:15px; border-right:4px solid var(--gold);">
-                    <h3 style="margin-bottom:15px;">🎥 ${l.title}</h3>
-                    <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:10px; margin-bottom:15px;">
+                    <h3>${l.title}</h3>
+                    <div style="margin:15px 0; position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:10px;">
                         <iframe style="position:absolute; top:0; left:0; width:100%; height:100%;" 
                                 src="https://www.youtube.com/embed/${l.video_id}?rel=0&modestbranding=1&disablekb=1" 
                                 frameborder="0" allowfullscreen></iframe>
@@ -171,43 +179,65 @@
                     </div>
                 </div>`;
         });
-        document.getElementById('lessonsContainer').innerHTML = html || '<p style="text-align:center;">لا توجد محاضرات حالياً.</p>';
+        document.getElementById('lessonsContainer').innerHTML = html || '<p>لا توجد محاضرات حالياً.</p>';
     }
 
     async function openExam(lessonId) {
         const { data: exam, error } = await _supabase.from('exams').select('*').eq('lesson_id', lessonId).maybeSingle();
-        if (error || !exam) return alert("لا يوجد امتحان لهذه المحاضرة.");
+
+        if (error || !exam) return alert("لا يوجد امتحان متاح لهذه المحاضرة.");
 
         let questions = typeof exam.questions === 'string' ? JSON.parse(exam.questions) : exam.questions;
-        if (!questions || questions.length === 0) return alert("الامتحان فارغ.");
+        if (!questions || questions.length === 0) return alert("الامتحان فارغ حالياً.");
+
+        questions = questions.sort(() => Math.random() - 0.5);
 
         const examArea = document.getElementById('examArea');
+        const examContent = document.getElementById('examContent');
         examArea.style.display = 'block';
-        
-        let currentQ = 0, score = 0;
 
-        function renderQ() {
+        let currentQ = 0;
+        let score = 0;
+
+        function showQuestion() {
             const q = questions[currentQ];
-            document.getElementById('examContent').innerHTML = `
-                <h2 style="color:var(--gold); text-align:center; margin-bottom:20px;">سؤال ${currentQ+1} من ${questions.length}</h2>
+            examContent.innerHTML = `
+                <h2 style="color:var(--gold); text-align:center; margin-bottom:20px;">سؤال ${currentQ + 1} من ${questions.length}</h2>
                 <div class="card">
                     <p style="font-size:1.2rem; margin-bottom:20px;">${q.q}</p>
                     ${q.img ? `<img src="${q.img}" style="width:100%; border-radius:10px; margin-bottom:15px;">` : ''}
-                    ${q.options.map((opt, i) => `<button class="btn-gold" style="background:rgba(255,255,255,0.05); color:white; text-align:right;" onclick="ans(${i})">${opt}</button>`).join('')}
+                    ${q.options.map((opt, idx) => `
+                        <button class="btn-gold" style="background:rgba(255,255,255,0.05); color:white; text-align:right; margin-bottom:10px; border:1px solid var(--brd);" 
+                                onclick="checkAns(${idx})">${opt}</button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        window.checkAns = (idx) => {
+            if(idx === questions[currentQ].correct) score++;
+            currentQ++;
+            if(currentQ < questions.length) showQuestion();
+            else finishExam();
+        };
+
+        async function finishExam() {
+            const finalScore = Math.round((score/questions.length)*100);
+            await _supabase.from('exam_results').insert([{ 
+                student_phone: currentUser.student_phone, 
+                lesson_id: lessonId, 
+                score: finalScore 
+            }]);
+            
+            examContent.innerHTML = `
+                <div class="card" style="text-align:center;">
+                    <h2 style="color:var(--gold);">انتهى الامتحان!</h2>
+                    <p style="font-size:2rem; margin:20px 0;">درجتك: ${finalScore}%</p>
+                    <button class="btn-gold" onclick="document.getElementById('examArea').style.display='none'">إغلاق</button>
                 </div>`;
         }
 
-        window.ans = (idx) => {
-            if(idx === questions[currentQ].correct) score++;
-            currentQ++;
-            if(currentQ < questions.length) renderQ();
-            else {
-                const final = Math.round((score/questions.length)*100);
-                _supabase.from('exam_results').insert([{ student_phone: currentUser.student_phone, lesson_id: lessonId, score: final }]);
-                document.getElementById('examContent').innerHTML = `<div class="card" style="text-align:center;"><h2 style="color:var(--gold);">درجتك: ${final}%</h2><button class="btn-gold" onclick="location.reload()">إغلاق</button></div>`;
-            }
-        };
-        renderQ();
+        showQuestion();
     }
 </script>
 </body>
