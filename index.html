@@ -24,28 +24,43 @@
         .site-title span { color: var(--gold); }
 
         /* Auth Card */
-        .auth-card { background: var(--card-bg); border: 1px solid var(--card-brd); border-radius: 20px; padding: 30px; max-width: 400px; margin: 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; overflow: hidden; }
+        .auth-card { background: var(--card-bg); border: 1px solid var(--card-brd); border-radius: 20px; padding: 30px; max-width: 400px; margin: 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
         .auth-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gold); }
         .tabs { display: flex; background: rgba(255,255,255,.05); border-radius: 12px; padding: 5px; margin-bottom: 20px; gap: 5px; }
         .tab-btn { flex: 1; padding: 12px; border: none; background: transparent; color: var(--gray); cursor: pointer; font-weight: 700; border-radius: 8px; transition: .3s; font-family: 'Cairo'; }
         .tab-btn.active { background: var(--gold); color: var(--navy); }
         input { width: 100%; padding: 14px; background: #162333; border: 1px solid var(--card-brd); border-radius: 10px; color: var(--white); text-align: right; font-family: 'Cairo'; margin-bottom: 12px; }
-        input:focus { outline: none; border-color: var(--gold); }
         .gold-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--gold-dk), var(--gold), var(--gold-lt)); color: var(--navy); border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: .3s; font-family: 'Cairo'; font-size: 1rem; }
         .gold-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(201, 151, 43, 0.4); }
-        
-        /* استرجاع الباسورد */
         .forgot-link { display: block; text-align: center; margin-top: 15px; color: #ff6b6b; text-decoration: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 
-        /* Dashboard & Glassmorphism */
+        /* Dashboard & Quote Section */
         .dashboard { max-width: 1000px; margin: 0 auto; display: none; }
+        .quote-box { 
+            background: rgba(201, 151, 43, 0.1); 
+            border-right: 4px solid var(--gold); 
+            padding: 20px; 
+            margin: 25px auto; 
+            border-radius: 12px; 
+            max-width: 650px; 
+            text-align: center; 
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+        }
+        .quote-text { 
+            font-size: 1.15rem; 
+            font-weight: 700; 
+            color: var(--gold-lt); 
+            line-height: 1.8;
+            font-family: 'Amiri', serif; /* لمسة جمالية لبيت الشعر */
+        }
+        
         .course-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
         .course-card { background: var(--card-bg); border: 1px solid var(--card-brd); border-radius: 18px; padding: 20px; position: relative; overflow: hidden; transition: .3s; }
         .course-card img { width: 100%; height: 160px; border-radius: 12px; object-fit: cover; margin-bottom: 15px; }
         .course-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 10px; display: block; color: var(--gold-lt); }
         
         .locked-overlay { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 18px; }
-        .lock-icon { font-size: 45px; color: var(--gold); margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+        .lock-icon { font-size: 45px; color: var(--gold); margin-bottom: 10px; }
         .lock-text { font-weight: 700; color: var(--white); background: rgba(0,0,0,0.6); padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; }
 
         .hidden { display: none; }
@@ -68,7 +83,7 @@
             <input type="tel" id="lp" placeholder="رقم الموبايل">
             <input type="password" id="lw" placeholder="كلمة المرور">
             <button class="gold-btn" onclick="doLogin()">دخول المنصة</button>
-            <a onclick="goWA()" class="forgot-link">نسيت كلمة المرور؟ تواصل مع مارك</a>
+            <a onclick="goWA()" class="forgot-link">نسيت كلمة المرور؟ تواصل مع الدعم</a>
         </div>
         <div id="regArea" class="hidden">
             <input type="text" id="rn" placeholder="الاسم الثلاثي">
@@ -80,20 +95,25 @@
     </div>
 
     <div id="dashboardSection" class="dashboard">
-        <h2 style="text-align: center;">مرحباً بك يا <span id="userNameDisplay" style="color:var(--gold);"></span> 📚</h2>
+        <h2 style="text-align: center;">مرحباً بك يا <span id="userNameDisplay" style="color:var(--gold);"></span></h2>
+        
+        <div class="quote-box">
+            <p class="quote-text">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ.. يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</p>
+        </div>
+
         <div class="course-grid">
             <div class="course-card">
                 <img src="https://images.unsplash.com/photo-1636466483764-2e04717ce08b?w=500" alt="Physics">
-                <span class="course-title">فيزياء الصف الثالث الثانوي</span>
+                <span class="course-title">منهج الفيزياء كاملاً</span>
                 <button class="gold-btn">فتح المحتوى</button>
             </div>
             <div class="course-card">
                 <div class="locked-overlay">
                     <div class="lock-icon">🔒</div>
-                    <div class="lock-text">اشترك لفتح الكورس</div>
+                    <div class="lock-text">اشترك لفتح المراجعة</div>
                 </div>
                 <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=500" alt="Revision">
-                <span class="course-title">ليالي الامتحان</span>
+                <span class="course-title">المراجعات النهائية</span>
                 <button class="gold-btn" disabled>مغلق</button>
             </div>
         </div>
@@ -103,13 +123,9 @@
     <script>
         const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-        // ميكانزم "افتكرني"
         window.onload = function() {
             const saved = localStorage.getItem('physics_user');
-            if (saved) {
-                const user = JSON.parse(saved);
-                launch(user.full_name);
-            }
+            if (saved) { launch(JSON.parse(saved).full_name); }
         };
 
         function showAuth(v) {
@@ -124,14 +140,14 @@
             const d = { full_name: document.getElementById('rn').value, student_phone: document.getElementById('rp').value, parent_phone: document.getElementById('rj').value, password: document.getElementById('rw').value, is_logged_in: false };
             if(!d.full_name || !d.student_phone || !d.password) return alert("أكمل بياناتك");
             const { error } = await _supabase.from('students').insert([d]);
-            if(error) alert("خطأ: " + error.message);
-            else { alert("تم الاشتراك بنجاح!"); showAuth('login'); }
+            if(error) alert("حدث خطأ في التسجيل");
+            else { alert("تم الاشتراك بنجاح! سجل دخولك الآن."); showAuth('login'); }
         }
 
         async function doLogin() {
             const p = document.getElementById('lp').value, w = document.getElementById('lw').value;
             const { data, error } = await _supabase.from('students').select('*').eq('student_phone', p).eq('password', w).maybeSingle();
-            if(error || !data) alert("الرقم أو الباسورد خطأ");
+            if(error || !data) alert("الرقم أو كلمة المرور غير صحيحة");
             else {
                 localStorage.setItem('physics_user', JSON.stringify({ full_name: data.full_name }));
                 launch(data.full_name);
@@ -146,10 +162,9 @@
 
         function logout() { localStorage.removeItem('physics_user'); location.reload(); }
 
-        // استعادة الباسورد عبر واتساب
         function goWA() {
-            const m = encodeURIComponent(" نسيت الباسورد الخاص بي في المنصة وأحتاج استعادته.");
-            window.open(`https://wa.me/201000000000?text=${m}`, '_blank'); // استبدل الرقم برقمك الحقيقي
+            const m = encodeURIComponent("أحتاج مساعدة في استعادة بيانات الدخول الخاصة بي للمنصة.");
+            window.open(`https://wa.me/201021422744?text=${m}`, '_blank');
         }
     </script>
 </body>
