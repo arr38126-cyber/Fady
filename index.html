@@ -3,161 +3,154 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dr: Fady  | Physics Platform</title>
+    <title>Dr: Fady Adel | Physics Platform</title>
     <link rel="icon" href="https://i.ibb.co/nMB0QD7k/fady-logo.png" type="image/png" />
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --navy: #0d1b2a; 
-            --navy-mid: #1b2e42; 
-            --gold: #c9972b; /* اللون الذهبي الأساسي */
-            --gold-lt: #e8b84b; /* ذهبي فاتح للإضاءة */
-            --gold-dk: #a87820; /* ذهبي غامق للظل */
-            --bg: #0a1520; 
-            --card-bg: #111e2d; 
-            --card-brd: #1e3248; 
-            --white: #f0f4f8;
-            --gray: #6a7f96; 
-            --shadow: 0 24px 70px rgba(0,0,0,.55); 
-            --radius: 20px;
+            --navy: #0d1b2a; --gold: #c9972b; --gold-lt: #e8b84b; --gold-dk: #a87820; 
+            --bg: #0a1520; --card-bg: #111e2d; --card-brd: #1e3248; --white: #f0f4f8; --gray: #6a7f96; 
         }
-        body {
-            font-family: 'Cairo', sans-serif; background: var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            min-height: 100vh; padding: 24px 16px; overflow-x: hidden; position: relative;
-        }
-        body::before {
-            content: ''; position: fixed; inset: 0;
-            background: radial-gradient(ellipse 70% 55% at 15% 15%, rgba(201,151,43,.07) 0%, transparent 65%),
-                        radial-gradient(ellipse 100% 80% at 50% 0%, rgba(27,46,66,.5) 0%, transparent 60%);
-            z-index: 0;
-        }
-        .wrapper { position: relative; z-index: 1; width: 100%; max-width: 450px; animation: fadeUp .75s ease both; }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); min-height: 100vh; padding: 20px; color: var(--white); overflow-x: hidden; }
+        body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 70% 55% at 15% 15%, rgba(201,151,43,.05) 0%, transparent 65%); z-index: -1; }
 
-        .header { text-align: center; margin-bottom: 25px; }
-        .logo-img-wrap {
-            width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 15px;
-            border: 3px solid var(--gold); background: var(--navy);
-            display: flex; align-items: center; justify-content: center; overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,.6);
-        }
-        .logo-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .site-title { font-size: 1.8rem; color: var(--white); font-weight: 900; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo-wrap { width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 10px; border: 2px solid var(--gold); background: var(--navy); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
+        .logo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .site-title { font-size: 1.6rem; font-weight: 900; }
         .site-title span { color: var(--gold); }
-        .tagline { font-family: 'Amiri', serif; color: var(--gold-lt); font-style: italic; font-size: 1.1rem; margin-top: 10px; display: block; }
 
-        .card { background: var(--card-bg); border: 1px solid var(--card-brd); border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow); position: relative; }
-        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gold); border-radius: 20px 20px 0 0; }
-        
-        .tabs { display: flex; background: rgba(255,255,255,.05); border-radius: 12px; padding: 5px; margin-bottom: 25px; gap: 5px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--gray); cursor: pointer; font-weight: 600; border-radius: 8px; transition: .3s; }
-        
-        /* زر التبديل النشط باللون الذهبي */
+        /* Auth Card */
+        .auth-card { background: var(--card-bg); border: 1px solid var(--card-brd); border-radius: 20px; padding: 30px; max-width: 400px; margin: 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; overflow: hidden; }
+        .auth-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gold); }
+        .tabs { display: flex; background: rgba(255,255,255,.05); border-radius: 12px; padding: 5px; margin-bottom: 20px; gap: 5px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: transparent; color: var(--gray); cursor: pointer; font-weight: 700; border-radius: 8px; transition: .3s; font-family: 'Cairo'; }
         .tab-btn.active { background: var(--gold); color: var(--navy); }
-
-        .form-group { margin-bottom: 15px; }
-        input {
-            width: 100%; padding: 14px; background: #162333; border: 1px solid var(--card-brd);
-            border-radius: 10px; color: var(--white); text-align: right; font-family: 'Cairo';
-        }
-        input:focus { outline: none; border-color: var(--gold); background: #1c2d42; }
-
-        /* تعديل ألوان الأزرار للذهبي الفخم */
-        button.main-btn {
-            width: 100%; padding: 15px; 
-            background: linear-gradient(135deg, var(--gold-dk) 0%, var(--gold) 50%, var(--gold-lt) 100%);
-            color: var(--navy); border: none; border-radius: 10px; font-weight: 800; font-size: 1.1rem;
-            cursor: pointer; transition: .4s; margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(201, 151, 43, 0.2);
-        }
-        button.main-btn:hover { 
-            transform: translateY(-3px); 
-            box-shadow: 0 8px 25px rgba(201, 151, 43, 0.4);
-            filter: brightness(1.1);
-        }
+        input { width: 100%; padding: 14px; background: #162333; border: 1px solid var(--card-brd); border-radius: 10px; color: var(--white); text-align: right; font-family: 'Cairo'; margin-bottom: 12px; }
+        input:focus { outline: none; border-color: var(--gold); }
+        .gold-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--gold-dk), var(--gold), var(--gold-lt)); color: var(--navy); border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: .3s; font-family: 'Cairo'; font-size: 1rem; }
+        .gold-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(201, 151, 43, 0.4); }
         
-        .forgot-link { color: #ff6b6b; display: block; margin-top: 15px; font-size: 0.9rem; text-decoration: none; font-weight: 600; text-align: center; }
+        /* استرجاع الباسورد */
+        .forgot-link { display: block; text-align: center; margin-top: 15px; color: #ff6b6b; text-decoration: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+
+        /* Dashboard & Glassmorphism */
+        .dashboard { max-width: 1000px; margin: 0 auto; display: none; }
+        .course-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
+        .course-card { background: var(--card-bg); border: 1px solid var(--card-brd); border-radius: 18px; padding: 20px; position: relative; overflow: hidden; transition: .3s; }
+        .course-card img { width: 100%; height: 160px; border-radius: 12px; object-fit: cover; margin-bottom: 15px; }
+        .course-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 10px; display: block; color: var(--gold-lt); }
+        
+        .locked-overlay { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 18px; }
+        .lock-icon { font-size: 45px; color: var(--gold); margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+        .lock-text { font-weight: 700; color: var(--white); background: rgba(0,0,0,0.6); padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; }
+
         .hidden { display: none; }
+        .logout-btn { background: #ff4d4d; margin-top: 30px; max-width: 200px; color: white; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
     <div class="header">
-        <div class="logo-img-wrap"><img src="https://i.ibb.co/nMB0QD7k/fady-logo.png" alt="Logo"></div>
+        <div class="logo-wrap"><img src="https://i.ibb.co/nMB0QD7k/fady-logo.png" alt="Logo"></div>
         <h1 class="site-title">Dr: <span>Fady Adel</span></h1>
-        <span class="tagline">"وَمَن لا يُحِبّ صُعُودَ الجِبَالِ يَعِش أَبَدَ الدَّهرِ بَينَ الحُفَرِ"</span>
     </div>
 
-    <div class="card">
+    <div id="authSection" class="auth-card">
         <div class="tabs">
-            <button class="tab-btn active" id="loginTab" onclick="switchTab('login')">تسجيل الدخول</button>
-            <button class="tab-btn" id="regTab" onclick="switchTab('reg')">حساب جديد</button>
+            <button class="tab-btn active" id="t-login" onclick="showAuth('login')">تسجيل الدخول</button>
+            <button class="tab-btn" id="t-reg" onclick="showAuth('reg')">حساب جديد</button>
         </div>
-
-        <div id="loginForm">
-            <div class="form-group"><input type="tel" id="lPhone" placeholder="رقم الموبايل"></div>
-            <div class="form-group"><input type="password" id="lPass" placeholder="كلمة المرور"></div>
-            <button class="main-btn" onclick="handleLogin()">دخول المنصة</button>
-            <a href="#" onclick="forgotPW()" class="forgot-link">نسيت كلمة المرور؟ تواصل معنا</a>
+        <div id="loginArea">
+            <input type="tel" id="lp" placeholder="رقم الموبايل">
+            <input type="password" id="lw" placeholder="كلمة المرور">
+            <button class="gold-btn" onclick="doLogin()">دخول المنصة</button>
+            <a onclick="goWA()" class="forgot-link">نسيت كلمة المرور؟ تواصل مع مارك</a>
         </div>
-
-        <div id="regForm" class="hidden">
-            <div class="form-group"><input type="text" id="rName" placeholder="الاسم الثلاثي"></div>
-            <div class="form-group"><input type="tel" id="rPhone" placeholder="رقم الموبايل"></div>
-            <div class="form-group"><input type="tel" id="rParent" placeholder="رقم ولي الأمر"></div>
-            <div class="form-group"><input type="password" id="rPass" placeholder="كلمة المرور"></div>
-            <button class="main-btn" onclick="handleRegister()">تأكيد الاشتراك</button>
+        <div id="regArea" class="hidden">
+            <input type="text" id="rn" placeholder="الاسم الثلاثي">
+            <input type="tel" id="rp" placeholder="رقم الموبايل">
+            <input type="tel" id="rj" placeholder="رقم ولي الأمر">
+            <input type="password" id="rw" placeholder="كلمة المرور">
+            <button class="gold-btn" onclick="doReg()">إنشاء حساب</button>
         </div>
     </div>
-</div>
 
-<script>
-    const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
+    <div id="dashboardSection" class="dashboard">
+        <h2 style="text-align: center;">مرحباً بك يا <span id="userNameDisplay" style="color:var(--gold);"></span> 📚</h2>
+        <div class="course-grid">
+            <div class="course-card">
+                <img src="https://images.unsplash.com/photo-1636466483764-2e04717ce08b?w=500" alt="Physics">
+                <span class="course-title">فيزياء الصف الثالث الثانوي</span>
+                <button class="gold-btn">فتح المحتوى</button>
+            </div>
+            <div class="course-card">
+                <div class="locked-overlay">
+                    <div class="lock-icon">🔒</div>
+                    <div class="lock-text">اشترك لفتح الكورس</div>
+                </div>
+                <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=500" alt="Revision">
+                <span class="course-title">ليالي الامتحان</span>
+                <button class="gold-btn" disabled>مغلق</button>
+            </div>
+        </div>
+        <center><button class="gold-btn logout-btn" onclick="logout()">تسجيل الخروج</button></center>
+    </div>
 
-    function switchTab(type) {
-        const isLogin = type === 'login';
-        document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
-        document.getElementById('regForm').classList.toggle('hidden', isLogin);
-        document.getElementById('loginTab').classList.toggle('active', isLogin);
-        document.getElementById('regTab').classList.toggle('active', !isLogin);
-    }
+    <script>
+        const _supabase = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    async function handleRegister() {
-        const data = {
-            full_name: document.getElementById('rName').value,
-            student_phone: document.getElementById('rPhone').value,
-            parent_phone: document.getElementById('rParent').value,
-            password: document.getElementById('rPass').value,
-            is_logged_in: false
+        // ميكانزم "افتكرني"
+        window.onload = function() {
+            const saved = localStorage.getItem('physics_user');
+            if (saved) {
+                const user = JSON.parse(saved);
+                launch(user.full_name);
+            }
         };
-        if(!data.full_name || !data.student_phone || !data.password) return alert("أكمل البيانات");
-        const { error } = await _supabase.from('students').insert([data]);
-        if(error) alert("خطأ: " + error.message);
-        else { alert("تم الاشتراك بنجاح!"); switchTab('login'); }
-    }
 
-    async function handleLogin() {
-        const p = document.getElementById('lPhone').value, pw = document.getElementById('lPass').value;
-        const { data, error } = await _supabase.from('students').select('*').eq('student_phone', p).eq('password', pw).maybeSingle();
-        if(error || !data) alert("البيانات غير صحيحة");
-        else {
-            if(data.is_logged_in) alert("الحساب مفتوح من جهاز آخر");
+        function showAuth(v) {
+            const isL = v === 'login';
+            document.getElementById('loginArea').classList.toggle('hidden', !isL);
+            document.getElementById('regArea').classList.toggle('hidden', isL);
+            document.getElementById('t-login').classList.toggle('active', isL);
+            document.getElementById('t-reg').classList.toggle('active', !isL);
+        }
+
+        async function doReg() {
+            const d = { full_name: document.getElementById('rn').value, student_phone: document.getElementById('rp').value, parent_phone: document.getElementById('rj').value, password: document.getElementById('rw').value, is_logged_in: false };
+            if(!d.full_name || !d.student_phone || !d.password) return alert("أكمل بياناتك");
+            const { error } = await _supabase.from('students').insert([d]);
+            if(error) alert("خطأ: " + error.message);
+            else { alert("تم الاشتراك بنجاح!"); showAuth('login'); }
+        }
+
+        async function doLogin() {
+            const p = document.getElementById('lp').value, w = document.getElementById('lw').value;
+            const { data, error } = await _supabase.from('students').select('*').eq('student_phone', p).eq('password', w).maybeSingle();
+            if(error || !data) alert("الرقم أو الباسورد خطأ");
             else {
-                await _supabase.from('students').update({ is_logged_in: true }).eq('student_phone', p);
-                alert("أهلاً بك يا " + data.full_name);
+                localStorage.setItem('physics_user', JSON.stringify({ full_name: data.full_name }));
+                launch(data.full_name);
             }
         }
-    }
 
-    function forgotPW() {
-        const msg = encodeURIComponent("دكتور فادي، أحتاج مساعدة في استعادة باسوورد المنصة الخاص بي.");
-        window.open(`https://wa.me/201000000000?text=${msg}`, '_blank');
-    }
-</script>
+        function launch(name) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('dashboardSection').style.display = 'block';
+            document.getElementById('userNameDisplay').innerText = name;
+        }
+
+        function logout() { localStorage.removeItem('physics_user'); location.reload(); }
+
+        // استعادة الباسورد عبر واتساب
+        function goWA() {
+            const m = encodeURIComponent(" نسيت الباسورد الخاص بي في المنصة وأحتاج استعادته.");
+            window.open(`https://wa.me/201000000000?text=${m}`, '_blank'); // استبدل الرقم برقمك الحقيقي
+        }
+    </script>
 </body>
 </html>
