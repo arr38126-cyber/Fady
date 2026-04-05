@@ -39,7 +39,7 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
 
 .form-group { text-align: right; margin-bottom: 15px; }
 .form-group label { display: block; font-weight: 700; margin-bottom: 5px; color: var(--navy); }
-.form-group input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; outline: none; font-family: 'Cairo'; transition: 0.3s; }
+.form-group input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; outline: none; font-family: 'Cairo'; transition: 0.3s; box-sizing: border-box; }
 .form-group input:focus { border-color: var(--orange); }
 
 .btn-primary { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; font-size: 1rem; }
@@ -64,7 +64,7 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
             <div id="nav-student-name" style="color:var(--orange); font-size:0.8rem;">...</div>
         </div>
     </div>
-    <button onclick="logout()" style="background:var(--orange); color:#fff; border:none; padding:6px 15px; border-radius:8px; cursor:pointer; font-weight:700;">خروج</button>
+    <button onclick="handleLogout()" style="background:var(--orange); color:#fff; border:none; padding:6px 15px; border-radius:8px; cursor:pointer; font-weight:700;">خروج</button>
 </nav>
 
 <div id="app">
@@ -123,7 +123,7 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
 const { createClient } = supabase;
 const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-// بصمة الجهاز
+// بصمة الجهاز الفريدة
 function getDeviceId() {
     let id = localStorage.getItem('fady_device_id');
     if (!id) {
@@ -133,7 +133,12 @@ function getDeviceId() {
     return id;
 }
 
-function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display='block'; setTimeout(()=>t.style.display='none', 5000); }
+function showToast(m) { 
+    const t = document.getElementById('toast'); 
+    t.innerText = m; 
+    t.style.display='block'; 
+    setTimeout(()=>t.style.display='none', 5000); 
+}
 
 function showPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -141,7 +146,6 @@ function showPage(id) {
     document.getElementById('navbar').classList.toggle('visible', id === 'home-page');
 }
 
-// استرجاع الباسورد
 function forgotPassword() {
     const phone = document.getElementById('l-phone').value;
     const msg = phone ? `أهلاً دكتور فادي، أنا الطالب صاحب الرقم ${phone} ونسيت كلمة المرور.` : `أهلاً دكتور فادي، نسيت كلمة المرور الخاصة بي.`;
@@ -149,7 +153,7 @@ function forgotPassword() {
 }
 
 // ══════════════════════════════════════════
-// العمليات المنطقية (Logic)
+// العمليات المنطقية (Login / Signup / Logout)
 // ══════════════════════════════════════════
 
 async function handleLogin() {
@@ -159,19 +163,19 @@ async function handleLogin() {
 
     if(!phone || !pass) return showToast('برجاء إدخال البيانات');
 
-    // ملاحظة: استخدمت student_phone بدلاً من phone كما في صورتك
+    // جلب بيانات الطالب بناءً على رقم الموبايل والباسورد
     const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
 
     if (error || !data) return showToast('عفواً، البيانات غير صحيحة');
 
-    if (data.role === 'admin') { window.location.href = 'admin.html'; return; }
-
-    // قفل الجهاز
+    // نظام قفل الجهاز المرن:
+    // إذا كان هناك جهاز مسجل (ليس null) وهذا الجهاز ليس هو الجهاز الحالي
     if (data.last_device_id && data.last_device_id !== devId) {
-        alert('🚫 الحساب مسجل على جهاز آخر! تواصل مع المشرف.');
+        alert('🚫 الحساب مفتوح حالياً على جهاز آخر. يرجى تسجيل الخروج من الجهاز الأول أولاً لتتمكن من الدخول هنا.');
         return;
     }
 
+    // إذا كان الحساب متاحاً (null) أو نفس الجهاز، سجل الدخول وحدث بصمة الجهاز
     await sb.from('students').update({ last_device_id: devId }).eq('id', data.id);
     sessionStorage.setItem('fady_student_id', data.id);
     startSession(data);
@@ -184,13 +188,12 @@ async function handleSignup() {
     const pass = document.getElementById('s-pass').value.trim();
     const devId = getDeviceId();
 
-    if (!name || phone.length < 11 || pass.length < 6) return showToast('بيانات ناقصة أو الباسورد ضعيفة');
+    if (!name || phone.length < 11 || pass.length < 6) return showToast('بيانات ناقصة أو الباسورد ضعيفة (6 رموز على الأقل)');
 
-    // التعديل الجوهري: ربط الحقول بأسماء الأعمدة في صورتك
     const { data, error } = await sb.from('students').insert([{
-        full_name: name,         // العمود في صورتك
-        student_phone: phone,   // العمود في صورتك
-        parent_phone: pPhone,   // العمود في صورتك
+        full_name: name,
+        student_phone: phone,
+        parent_phone: pPhone,
         password: pass,
         role: 'student',
         last_device_id: devId
@@ -198,7 +201,6 @@ async function handleSignup() {
 
     if (error) {
         showToast("فشل التسجيل: " + error.message);
-        console.error(error);
         return;
     }
 
@@ -206,8 +208,19 @@ async function handleSignup() {
     startSession(data);
 }
 
+async function handleLogout() {
+    const id = sessionStorage.getItem('fady_student_id');
+    if (id) {
+        // أهم تعديل: مسح بصمة الجهاز من السيرفر عند الخروج الإرادي
+        await sb.from('students').update({ last_device_id: null }).eq('id', id);
+    }
+    sessionStorage.clear();
+    location.reload();
+}
+
 function startSession(user) {
     document.getElementById('nav-student-name').innerText = user.full_name;
+    // تحديث العلامة المائية باسم الطالب ورقمه
     const wmText = `${user.full_name} - ${user.student_phone} `;
     document.getElementById('wm-text').innerText = Array(200).fill(wmText).join('   ');
     document.getElementById('watermark').classList.add('active');
@@ -222,7 +235,7 @@ async function loadCourses() {
     if(data && data.length > 0) {
         data.forEach(c => {
             container.innerHTML += `
-                <div style="background:#fff; border-radius:15px; overflow:hidden; box-shadow:var(--shadow);">
+                <div style="background:#fff; border-radius:15px; overflow:hidden; box-shadow:var(--shadow); transition:0.3s; cursor:pointer;" onclick="showToast('سيتم فتح المحاضرات قريباً')">
                     <img src="${c.image_url || 'https://i.ibb.co/zT82jk68/image.png'}" style="width:100%; height:180px; object-fit:cover;">
                     <div style="padding:15px;">
                         <h3 style="margin:0; font-size:1rem; color:var(--navy);">${c.title}</h3>
@@ -230,22 +243,28 @@ async function loadCourses() {
                     </div>
                 </div>`;
         });
+    } else {
+        container.innerHTML = `<p style="grid-column: 1/-1; color:gray;">لا يوجد كورسات متاحة حالياً.</p>`;
     }
 }
 
-function logout() { sessionStorage.clear(); location.reload(); }
+// ══════════════════════════════════════════
+// أنظمة الحماية التلقائية
+// ══════════════════════════════════════════
 
-// الحماية
+// منع القائمة اليمنى
 document.addEventListener('contextmenu', e => e.preventDefault());
+
+// منع اختصارات التصوير Inspect و PrintScreen
 document.addEventListener('keydown', e => {
-    if(e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+    if(e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
         document.getElementById('capture-overlay').classList.add('active');
         setTimeout(()=>document.getElementById('capture-overlay').classList.remove('active'), 3000);
         e.preventDefault();
     }
 });
 
-// التحقق التلقائي
+// التحقق من الجلسة عند فتح الصفحة
 window.onload = async () => {
     const id = sessionStorage.getItem('fady_student_id');
     if(id) {
