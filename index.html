@@ -11,8 +11,8 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
-        /* نظام الحماية */
-        #capture-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 100000; align-items: center; justify-content: center; color: #fff; text-align: center; font-size: 1.2rem; }
+        /* حماية المحتوى */
+        #capture-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 100000; align-items: center; justify-content: center; color: #fff; text-align: center; }
         #capture-overlay.active { display: flex; }
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06; overflow: hidden; }
         #watermark.active { display: block; }
@@ -23,22 +23,25 @@
         .nav-logo { display: flex; align-items: center; gap: 10px; }
         .nav-logo img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--orange); }
 
-        /* تصميم الكورسات */
+        /* الكورسات */
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .course-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: var(--card-shadow); transition: 0.3s; }
+        .course-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: var(--card-shadow); position: relative; transition: 0.3s; }
         .course-img { width: 100%; height: 170px; object-fit: cover; }
         .course-content { padding: 18px; text-align: right; }
         
-        /* الدخول والتسجيل */
+        /* شارات السعر */
+        .price-badge { position: absolute; top: 12px; left: 12px; padding: 5px 12px; border-radius: 10px; font-weight: bold; font-size: 0.75rem; z-index: 10; color: #fff; }
+        .badge-free { background: #2ecc71; box-shadow: 0 2px 8px rgba(46,204,113,0.4); }
+        .badge-paid { background: var(--navy); }
+
+        /* تسجيل الدخول */
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); padding: 20px; }
         .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 35px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .auth-quote { font-family: 'Amiri', serif; color: var(--orange); background: rgba(232,88,26,0.06); padding: 15px; border-radius: 15px; margin-bottom: 25px; font-size: 1.1rem; border-right: 4px solid var(--orange); line-height: 1.6; }
 
         .input-group { text-align: right; margin-bottom: 15px; }
-        .input-group input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; outline: none; transition: 0.3s; }
-        .input-group input:focus { border-color: var(--orange); }
-
+        .input-group input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; outline: none; }
         .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1.1rem; }
         
         .page { display: none; }
@@ -47,7 +50,7 @@
 </head>
 <body>
 
-<div id="capture-overlay">🚫 تصوير الشاشة غير مسموح به لحماية المحتوى</div>
+<div id="capture-overlay">🚫 تصوير الشاشة غير مسموح به</div>
 <div id="watermark"><div id="wm-text" style="transform: rotate(-30deg); white-space: nowrap; font-size: 16px; line-height: 7;"></div></div>
 
 <nav id="navbar">
@@ -55,7 +58,7 @@
         <img src="https://i.ibb.co/zT82jk68/image.png" alt="Dr. Fady">
         <div>
             <div style="font-weight: 800; font-size: 0.9rem;">Dr. Fady Adel</div>
-            <div id="nav-user-name" style="color: var(--orange); font-size: 0.8rem;">محمل...</div>
+            <div id="nav-user-name" style="color: var(--orange); font-size: 0.8rem;">تحميل...</div>
         </div>
     </div>
     <button style="background:none; border:1px solid #fff; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="handleLogout()">خروج</button>
@@ -67,8 +70,7 @@
             <div class="auth-card">
                 <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="margin-bottom: 10px;">
                 <div class="auth-quote">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ<br>يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</div>
-                <h3 style="margin-bottom:20px; color:var(--navy)">دخول الطالب</h3>
-                <div class="input-group"><input type="tel" id="l-phone" placeholder="رقم الموبايل (11 رقم)" maxlength="11"></div>
+                <div class="input-group"><input type="tel" id="l-phone" placeholder="رقم الموبايل" maxlength="11"></div>
                 <div class="input-group"><input type="password" id="l-pass" placeholder="كلمة المرور"></div>
                 <button id="login-btn" class="btn-main" onclick="handleLogin()">دخول المنصة</button>
             </div>
@@ -84,144 +86,131 @@
 </div>
 
 <script>
-    // تهيئة Supabase (تأكد من صحة الروابط)
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    // 1. توليد بصمة ثابتة للجهاز لمنع الطرد العشوائي
+    // 1. توليد بصمة جهاز ثابتة (أكثر استقراراً)
     function getDeviceId() {
         let id = localStorage.getItem('fady_device_id');
         if (!id) {
-            // بصمة تعتمد على نوع الجهاز والمعالج ودقة الشاشة (أكثر ثباتاً)
-            const platform = navigator.platform || 'unknown';
-            const screenRes = `${screen.width}x${screen.height}`;
-            const vendor = navigator.vendor || 'web';
-            id = `DEVICE-${platform}-${vendor}-${screenRes}-${Math.random().toString(36).substr(2, 5)}`;
+            const platform = navigator.platform || 'web';
+            const screenInfo = `${screen.width}x${screen.height}`;
+            id = `FADY-${platform}-${screenInfo}-${Math.random().toString(36).substr(2, 5)}`;
             localStorage.setItem('fady_device_id', id);
         }
         return id;
     }
 
-    // 2. حارس الأمان (يفحص إذا كان الإدمن صفر الجهاز أو طالب آخر دخل)
+    // 2. التحقق من صلاحية الجهاز (والتصفير اليدوي)
     async function checkDeviceValidity() {
         const userId = localStorage.getItem('fady_session');
-        if (!userId) return;
+        if (!userId) return false;
 
+        const { data } = await sb.from('students').select('last_device_id').eq('id', userId).single();
         const currentDevId = getDeviceId();
-        const { data, error } = await sb.from('students').select('last_device_id').eq('id', userId).single();
 
-        if (error || !data) return;
-
-        // الحالة الأولى: الإدمن عمل تصفير (القيمة null)
-        // الحالة الثانية: البصمة في السيرفر مختلفة عن بصمة المتصفح الحالي
-        if (data.last_device_id === null || data.last_device_id !== currentDevId) {
-            let reason = (data.last_device_id === null) ? "تصفير من الإدارة" : "دخول من جهاز آخر";
-            alert(`⚠️ تنبيه أمني: ${reason}. سيتم تسجيل الخروج.`);
+        // لو الإدمن صفر الجهاز (null) أو البصمة تغيرت
+        if (data && (data.last_device_id === null || data.last_device_id !== currentDevId)) {
+            alert("⚠️ تم تصفير حسابك أو الدخول من جهاز آخر. يرجى تسجيل الدخول.");
             handleLogout();
+            return false;
+        }
+        return true;
+    }
+
+    // 3. تسجيل الدخول
+    async function handleLogin() {
+        const phone = document.getElementById('l-phone').value.trim();
+        const pass = document.getElementById('l-pass').value.trim();
+        const devId = getDeviceId();
+
+        const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+
+        if (user) {
+            await sb.from('students').update({ last_device_id: devId }).eq('id', user.id);
+            localStorage.setItem('fady_session', user.id);
+            localStorage.setItem('fady_phone', user.student_phone);
+            startSession(user);
+        } else {
+            alert("بيانات الدخول غير صحيحة");
         }
     }
 
-    // 3. التحكم في الصفحات
+    function startSession(user) {
+        document.getElementById('nav-user-name').innerText = user.full_name;
+        const wmText = `${user.full_name} - ${user.student_phone} `;
+        document.getElementById('wm-text').innerText = Array(200).fill(wmText).join('   ');
+        document.getElementById('watermark').classList.add('active');
+        showPage('home-page');
+        loadCourses();
+        setInterval(checkDeviceValidity, 30000); // فحص كل 30 ثانية
+    }
+
+    // 4. تحميل وعرض الكورسات (مع منطق المجاني والمدفوع)
+    async function loadCourses() {
+        const { data: courses } = await sb.from('courses').select('*');
+        const container = document.getElementById('courses-container');
+        container.innerHTML = '';
+
+        if (courses) {
+            courses.forEach(c => {
+                const isFree = parseFloat(c.price) === 0;
+                container.innerHTML += `
+                    <div class="course-card">
+                        <span class="price-badge ${isFree ? 'badge-free' : 'badge-paid'}">${isFree ? 'مجاني 🎁' : 'مدفوع 🔒'}</span>
+                        <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" class="course-img">
+                        <div class="course-content">
+                            <h3 style="margin:0 0 15px 0; font-size:1rem;">${c.title}</h3>
+                            <button class="btn-main" onclick="tryOpenCourse('${c.id}', ${isFree})">مشاهدة المحتوى</button>
+                        </div>
+                    </div>`;
+            });
+        }
+    }
+
+    // 5. محاولة فتح الكورس بناءً على السعر
+    async function tryOpenCourse(courseId, isFree) {
+        const isValid = await checkDeviceValidity();
+        if (!isValid) return;
+
+        if (isFree) {
+            // الكورس مجاني: افتح فوراً
+            alert("✅ كورس مجاني متاح لك.");
+            // هنا تضع كود فتح صفحة الفيديوهات
+        } else {
+            // الكورس مدفوع: ابحث عن تفعيل في جدول student_access
+            const phone = localStorage.getItem('fady_phone');
+            const { data: access } = await sb.from('student_access').select('*').eq('student_phone', phone).eq('course_id', courseId).single();
+
+            if (access) {
+                alert("🎉 تم التحقق من اشتراكك. مشاهدة ممتعة!");
+                // هنا تضع كود فتح صفحة الفيديوهات
+            } else {
+                alert("🚫 أنت غير مشترك في هذا الكورس. يرجى التواصل مع د. فادي لتفعيله.");
+            }
+        }
+    }
+
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', id === 'home-page');
     }
 
-    // 4. تسجيل الدخول
-    async function handleLogin() {
-        const phone = document.getElementById('l-phone').value.trim();
-        const pass = document.getElementById('l-pass').value.trim();
-        const btn = document.getElementById('login-btn');
-        const devId = getDeviceId();
-
-        if (phone.length < 11) return alert("يرجى إدخال رقم هاتف صحيح");
-        btn.innerText = "جاري التحقق..."; btn.disabled = true;
-
-        const { data: user, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-
-        if (user) {
-            // تحديث السيرفر بالبصمة الحالية (تطرد أي جهاز قديم)
-            await sb.from('students').update({ last_device_id: devId }).eq('id', user.id);
-            localStorage.setItem('fady_session', user.id);
-            startSession(user);
-        } else {
-            alert("بيانات الدخول غير صحيحة");
-            btn.innerText = "دخول المنصة"; btn.disabled = false;
-        }
-    }
-
-    // 5. بدء الجلسة وتحميل البيانات
-    function startSession(user) {
-        document.getElementById('nav-user-name').innerText = user.full_name;
-        
-        // الواتر مارك لحماية الفيديوهات
-        const wmText = `${user.full_name} - ${user.student_phone} `;
-        document.getElementById('wm-text').innerText = Array(200).fill(wmText).join('   ');
-        document.getElementById('watermark').classList.add('active');
-        
-        showPage('home-page');
-        loadCourses();
-        
-        // فحص دوري كل 30 ثانية للتأكد من عدم التصفير أو الدخول المزدوج
-        setInterval(checkDeviceValidity, 30000);
-    }
-
-    // 6. جلب الكورسات
-    async function loadCourses() {
-        const { data } = await sb.from('courses').select('*');
-        const container = document.getElementById('courses-container');
-        container.innerHTML = data ? data.map(c => `
-            <div class="course-card">
-                <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" class="course-img">
-                <div class="course-content">
-                    <h3 style="margin:0 0 15px 0; color:var(--navy); font-size:1.1rem;">${c.title}</h3>
-                    <button class="btn-main" onclick="openCourse('${c.id}')">مشاهدة المحتوى</button>
-                </div>
-            </div>`).join('') : '<p>لا توجد كورسات متاحة حالياً.</p>';
-    }
-
-    function openCourse(id) {
-        // فحص أمان سريع قبل الدخول للكورس
-        checkDeviceValidity().then(() => {
-            console.log("جارٍ فتح الكورس: " + id);
-            // هنا يتم توجيه الطالب لصفحة المحاضرات الخاصة بالكورس
-        });
-    }
-
     function handleLogout() {
         localStorage.removeItem('fady_session');
+        localStorage.removeItem('fady_phone');
         location.reload();
     }
 
-    // 7. منع تصوير الشاشة (محاكاة برمجية)
+    // حماية إضافية ضد تصوير الشاشة
     document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', e => {
-        if (e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C' || e.key === 'K'))) {
-            e.preventDefault();
-            const ov = document.getElementById('capture-overlay');
-            ov.classList.add('active');
-            setTimeout(() => ov.classList.remove('active'), 2500);
-        }
-    });
-
-    // 8. فحص الجلسة عند فتح الموقع
     window.onload = async () => {
         const id = localStorage.getItem('fady_session');
         if (id) {
             const { data: user } = await sb.from('students').select('*').eq('id', id).single();
-            if (user) {
-                const currentDevId = getDeviceId();
-                // إذا كانت البصمة في السيرفر مختلفة عن الجهاز الحالي، لا تفتح الجلسة
-                if (user.last_device_id !== currentDevId) {
-                    localStorage.removeItem('fady_session');
-                    showPage('login-page');
-                } else {
-                    startSession(user);
-                }
-            } else {
-                localStorage.removeItem('fady_session');
-            }
+            if (user && user.last_device_id === getDeviceId()) startSession(user);
+            else handleLogout();
         }
     };
 </script>
