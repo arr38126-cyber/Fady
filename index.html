@@ -71,18 +71,10 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
                 <img src="https://i.ibb.co/zT82jk68/image.png" class="auth-logo">
                 <div class="auth-quote">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ<br>يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</div>
                 <h2 style="color:var(--navy); margin-bottom:20px;">تسجيل الدخول</h2>
-                <div class="form-group">
-                    <label>رقم الموبايل</label>
-                    <input type="tel" id="l-phone" placeholder="01XXXXXXXXX" maxlength="11">
-                </div>
-                <div class="form-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="l-pass" placeholder="••••••••">
-                </div>
+                <div class="form-group"><label>رقم الموبايل</label><input type="tel" id="l-phone" placeholder="01XXXXXXXXX" maxlength="11"></div>
+                <div class="form-group"><label>كلمة المرور</label><input type="password" id="l-pass" placeholder="••••••••"></div>
                 <button id="login-btn-main" class="btn-primary" onclick="handleLogin()">دخول المنصة</button>
-                <div style="margin-top:20px; font-size:0.9rem;">
-                    <span onclick="forgotPassword()" style="color:var(--orange); cursor:pointer; font-weight:600;">نسيت كلمة المرور؟</span>
-                </div>
+                <div style="margin-top:20px; font-size:0.9rem;"><span onclick="forgotPassword()" style="color:var(--orange); cursor:pointer; font-weight:600;">نسيت كلمة المرور؟</span></div>
                 <p style="margin-top:15px;">ليس لديك حساب؟ <span onclick="showPage('signup-page')" style="color:var(--navy); cursor:pointer; font-weight:800;">سجل الآن</span></p>
             </div>
         </div>
@@ -116,11 +108,11 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
 const { createClient } = supabase;
 const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-// بصمة الجهاز
+// استخدام Fingerprint ثابت يعتمد على المتصفح لتقليل أخطاء التصفير
 function getDeviceId() {
     let id = localStorage.getItem('fady_device_id');
     if (!id) {
-        id = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now();
+        id = 'ID_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('fady_device_id', id);
     }
     return id;
@@ -129,7 +121,7 @@ function getDeviceId() {
 function showToast(m) { 
     const t = document.getElementById('toast'); 
     t.innerText = m; t.style.display='block'; 
-    setTimeout(()=>t.style.display='none', 4000); 
+    setTimeout(()=>t.style.display='none', 3000); 
 }
 
 function showPage(id) {
@@ -145,13 +137,13 @@ function forgotPassword() {
 }
 
 // ══════════════════════════════════════════
-// المنطق الجديد والمحسن (الدخول والخروج)
+// تعديل منطق الدخول (الإصلاح الشامل)
 // ══════════════════════════════════════════
 
 async function handleLogin() {
     const phone = document.getElementById('l-phone').value.trim();
     const pass = document.getElementById('l-pass').value.trim();
-    const devId = getDeviceId();
+    const currentDevId = getDeviceId();
     const btn = document.getElementById('login-btn-main');
 
     if(!phone || !pass) { showToast('برجاء إدخال البيانات'); return; }
@@ -160,26 +152,27 @@ async function handleLogin() {
     btn.disabled = true;
 
     try {
-        const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+        const { data: user, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
 
-        if (error || !data) { 
-            showToast('عفواً، البيانات غير صحيحة'); 
+        if (error || !user) { 
+            showToast('البيانات غير صحيحة'); 
             btn.innerText = "دخول المنصة"; btn.disabled = false; return; 
         }
 
-        // المنطق الصارم: لو فيه ID "مختلف" عن جهازي الحالي، ارفض.
-        // بنستخدم (!!) لتحويل القيم لـ Boolean والتأكد إنها مش null فعلاً
-        if (data.last_device_id && data.last_device_id !== devId && data.last_device_id !== "null") {
-            alert('🚫 الحساب مفتوح على جهاز آخر. يرجى تسجيل الخروج منه أولاً.');
+        // الفحص الجديد: يسمح بالدخول إذا كانت الخانة فارغة، أو مطابقة للجهاز الحالي، أو "null" نصية
+        const isDeviceEmpty = !user.last_device_id || user.last_device_id === "null" || user.last_device_id === "";
+        const isSameDevice = user.last_device_id === currentDevId;
+
+        if (!isDeviceEmpty && !isSameDevice) {
+            alert('🚫 الحساب مفتوح على جهاز آخر. إذا قمت بعمل خروج من الجهاز الآخر، انتظر دقيقة وحاول مجدداً.');
             btn.innerText = "دخول المنصة"; btn.disabled = false; return;
         }
 
-        // تحديث الجهاز والانتظار للتأكد
-        const { error: updError } = await sb.from('students').update({ last_device_id: devId }).eq('id', data.id);
-        if(updError) throw updError;
-
-        sessionStorage.setItem('fady_student_id', data.id);
-        startSession(data);
+        // تحديث البصمة للتأكيد
+        await sb.from('students').update({ last_device_id: currentDevId }).eq('id', user.id);
+        
+        sessionStorage.setItem('fady_student_id', user.id);
+        startSession(user);
     } catch (e) {
         showToast("خطأ في الاتصال");
         btn.innerText = "دخول المنصة"; btn.disabled = false;
@@ -194,23 +187,19 @@ async function handleLogout() {
         btn.innerText = "جاري التحرير...";
         btn.disabled = true;
         
-        // أهم سطر: بنرسل null الحقيقي وبننتظر السيرفر تماماً
-        const { error } = await sb.from('students')
-            .update({ last_device_id: null }) 
-            .eq('id', id);
+        // نحدث الخانة لتصبح فارغة تماماً
+        const { error } = await sb.from('students').update({ last_device_id: null }).eq('id', id);
         
         if (error) {
-            alert("فشل تحرير الجهاز. تأكد من الإنترنت.");
+            console.error("Logout Error:", error);
+            showToast("فشل في تحرير الجهاز");
             btn.innerText = "خروج"; btn.disabled = false;
             return;
         }
-        
-        // مسح محلي بعد تأكيد السيرفر
-        sessionStorage.removeItem('fady_student_id');
-        window.location.reload();
-    } else {
-        window.location.reload();
     }
+    
+    sessionStorage.clear();
+    window.location.href = window.location.pathname; // إعادة تحميل نظيفة
 }
 
 async function handleSignup() {
@@ -227,7 +216,7 @@ async function handleSignup() {
         password: pass, role: 'student', last_device_id: devId
     }]).select().single();
 
-    if (error) { showToast("رقم الهاتف مسجل مسبقاً"); return; }
+    if (error) { showToast("رقم الهاتف مسجل بالفعل"); return; }
 
     sessionStorage.setItem('fady_student_id', data.id);
     startSession(data);
@@ -260,14 +249,14 @@ async function loadCourses() {
     }
 }
 
-// حماية إضافية
+// حماية
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('keydown', e => {
-    if(e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C'))) {
+    if(e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
         e.preventDefault();
         const ov = document.getElementById('capture-overlay');
         ov.classList.add('active');
-        setTimeout(()=> ov.classList.remove('active'), 2500);
+        setTimeout(()=> ov.classList.remove('active'), 2000);
     }
 });
 
