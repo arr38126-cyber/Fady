@@ -14,7 +14,6 @@
 
 body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0; user-select: none; overflow-x: hidden; }
 
-/* إصلاح طبقة الحماية - جعلناها لا تمنع اللمس إلا لو نشطة */
 #capture-overlay { 
     display: none; 
     position: fixed; 
@@ -26,7 +25,7 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
     color: #fff; 
     text-align: center; 
     font-size: 1.2rem; 
-    pointer-events: none; /* مهم جداً */
+    pointer-events: none;
 }
 #capture-overlay.active { display: flex; pointer-events: all; }
 
@@ -70,7 +69,7 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
             <div id="nav-student-name" style="color:var(--orange); font-size:0.8rem;">...</div>
         </div>
     </div>
-    <button onclick="handleLogout()" style="background:var(--orange); color:#fff; border:none; padding:6px 15px; border-radius:8px; cursor:pointer; font-weight:700;">خروج</button>
+    <button id="logout-btn" onclick="handleLogout()" style="background:var(--orange); color:#fff; border:none; padding:6px 15px; border-radius:8px; cursor:pointer; font-weight:700;">خروج</button>
 </nav>
 
 <div id="app">
@@ -88,7 +87,7 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
                     <label>كلمة المرور</label>
                     <input type="password" id="l-pass" placeholder="••••••••">
                 </div>
-                <button class="btn-primary" onclick="handleLogin()">دخول المنصة</button>
+                <button id="login-btn-main" class="btn-primary" onclick="handleLogin()">دخول المنصة</button>
                 <div style="margin-top:20px; font-size:0.9rem;">
                     <span onclick="forgotPassword()" style="color:var(--orange); cursor:pointer; font-weight:600;">نسيت كلمة المرور؟</span>
                 </div>
@@ -150,23 +149,36 @@ function showPage(id) {
 function forgotPassword() {
     const phone = document.getElementById('l-phone').value;
     const msg = phone ? `أهلاً دكتور فادي، أنا الطالب صاحب الرقم ${phone} ونسيت كلمة المرور.` : `أهلاً دكتور فادي، نسيت كلمة المرور الخاصة بي.`;
-    window.open(`https://wa.me/201022744?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://wa.me/201044?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
+// تعديل الدخول: التأكد من المسح الفعلي
 async function handleLogin() {
     const phone = document.getElementById('l-phone').value.trim();
     const pass = document.getElementById('l-pass').value.trim();
     const devId = getDeviceId();
+    const btn = document.getElementById('login-btn-main');
 
     if(!phone || !pass) { showToast('برجاء إدخال البيانات'); return; }
+
+    btn.innerText = "جاري التحقق...";
+    btn.disabled = true;
 
     try {
         const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
 
-        if (error || !data) { showToast('عفواً، البيانات غير صحيحة'); return; }
+        if (error || !data) { 
+            showToast('عفواً، البيانات غير صحيحة'); 
+            btn.innerText = "دخول المنصة";
+            btn.disabled = false;
+            return; 
+        }
 
-        if (data.last_device_id && data.last_device_id !== "" && data.last_device_id !== devId) {
-            alert('🚫 الحساب مفتوح حالياً على جهاز آخر.');
+        // فحص صارم للجهاز
+        if (data.last_device_id && data.last_device_id !== "" && data.last_device_id !== "null" && data.last_device_id !== devId) {
+            alert('🚫 الحساب مفتوح حالياً على جهاز آخر. يرجى التأكد من تسجيل الخروج من الجهاز الآخر أولاً.');
+            btn.innerText = "دخول المنصة";
+            btn.disabled = false;
             return;
         }
 
@@ -174,7 +186,9 @@ async function handleLogin() {
         sessionStorage.setItem('fady_student_id', data.id);
         startSession(data);
     } catch (e) {
-        showToast("خطأ في الاتصال بالسيرفر");
+        showToast("خطأ في الشبكة");
+        btn.innerText = "دخول المنصة";
+        btn.disabled = false;
     }
 }
 
@@ -198,14 +212,31 @@ async function handleSignup() {
     startSession(data);
 }
 
+// تعديل الخروج: الانتظار الإجباري للسيرفر
 async function handleLogout() {
     const id = sessionStorage.getItem('fady_student_id');
+    const btn = document.getElementById('logout-btn');
+    
     if (id) {
-        showToast("جاري تحرير الجهاز...");
-        await sb.from('students').update({ last_device_id: null }).eq('id', id);
+        btn.innerText = "جاري الحذف...";
+        btn.disabled = true;
+        
+        // محاولة التحديث حتى التأكد
+        const { error } = await sb.from('students').update({ last_device_id: null }).eq('id', id);
+        
+        if (error) {
+            alert("عفواً، فشل تحرير الجهاز. تأكد من وجود إنترنت وحاول مرة أخرى.");
+            btn.innerText = "خروج";
+            btn.disabled = false;
+            return;
+        }
+        
+        // فقط عند النجاح نمسح البيانات ونعمل ريفريش
+        sessionStorage.clear();
+        location.reload();
+    } else {
+        location.reload();
     }
-    sessionStorage.clear();
-    location.reload();
 }
 
 function startSession(user) {
@@ -235,7 +266,6 @@ async function loadCourses() {
     }
 }
 
-// تعديل نظام الحماية لضمان عدم تجميد الشاشة
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('keydown', e => {
     if(e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J'))) {
