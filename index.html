@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>منصة Dr. Fady Adel | فيزياء</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -12,10 +12,8 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; -webkit-user-select: none; overflow-x: hidden; color: #333; }
 
-        /* حماية الشاشة */
+        /* حماية الشاشة (Blur) */
         body.security-blur { filter: blur(35px) brightness(0.2) !important; pointer-events: none !important; }
-        #security-overlay-msg { display: none; position: fixed; inset: 0; z-index: 100000; background: rgba(0,0,0,0.95); color: #fff; align-items: center; justify-content: center; text-align: center; font-size: 1.5rem; font-weight: bold; padding: 20px; }
-        body.security-blur #security-overlay-msg { display: flex; }
 
         /* الواتر مارك */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.08; overflow: hidden; }
@@ -28,14 +26,14 @@
         .nav-logo { display: flex; align-items: center; gap: 10px; }
         .nav-logo img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--orange); }
 
-        /* نظام الفيديو المحمي بالكامل (الدرع) */
+        /* نظام الفيديو المحمي بالدرع الصامت */
         .video-wrap { background: #000; border-radius: 20px; overflow: hidden; margin-bottom: 25px; position: relative; padding-bottom: 56.25%; height: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 2px solid var(--navy); }
-        .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; } /* منع التفاعل مع اليوتيوب */
+        .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; } 
         
-        /* الدرع الشفاف لمنع الضغط نهائياً */
-        .yt-full-shield { position: absolute; inset: 0; z-index: 100; cursor: default; }
+        /* الدرع الشفاف الكامل لمنع الخروج لليوتيوب */
+        .yt-full-shield { position: absolute; inset: 0; z-index: 100; cursor: default; background: rgba(0,0,0,0); }
 
-        /* الأقسام والكروت (التصميم الأصلي) */
+        /* التصميم الأصلي للأقسام */
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .page { display: none; }
         .page.active { display: block; }
@@ -63,7 +61,6 @@
 </head>
 <body oncontextmenu="return false;">
 
-<div id="security-overlay-msg">🚫 تصوير الشاشة غير مسموح به</div>
 <div id="watermark"><div id="wm-text"></div></div>
 
 <a href="https://wa.me/201021422744" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
@@ -137,39 +134,29 @@
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
     function enableSecurity() {
-        window.addEventListener('keydown', (e) => {
-            if (e.key === "PrintScreen") { document.body.classList.add('security-blur'); e.preventDefault(); }
-        });
+        window.addEventListener('keydown', (e) => { if (e.key === "PrintScreen") document.body.classList.add('security-blur'); });
         window.addEventListener('blur', () => document.body.classList.add('security-blur'));
         window.addEventListener('focus', () => document.body.classList.remove('security-blur'));
-    }
-
-    function getDeviceId() {
-        let id = localStorage.getItem('fady_device_id') || `FADY-${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('fady_device_id', id);
-        return id;
     }
 
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value.trim();
         const pass = document.getElementById('l-pass').value.trim();
         const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+        
         if (user) {
-            const devId = getDeviceId();
-            if (user.last_device_id && user.last_device_id !== devId) return alert("⚠️ الحساب مفتوح على جهاز آخر!");
-            await sb.from('students').update({ last_device_id: devId }).eq('id', user.id);
             localStorage.setItem('fady_session', user.id);
             localStorage.setItem('fady_phone', user.student_phone);
             startSession(user);
-        } else alert("بيانات خاطئة");
+        } else alert("بيانات الدخول غير صحيحة");
     }
 
     async function handleRegister() {
-        const name = document.getElementById('r-name').value.trim();
-        const phone = document.getElementById('r-phone').value.trim();
-        const parentPhone = document.getElementById('r-parent').value.trim();
-        const pass = document.getElementById('r-pass').value.trim();
-        const { data } = await sb.from('students').insert([{ full_name: name, student_phone: phone, parent_phone: parentPhone, password: pass, last_device_id: getDeviceId() }]).select().single();
+        const name = document.getElementById('r-name').value;
+        const phone = document.getElementById('r-phone').value;
+        const pPhone = document.getElementById('r-parent').value;
+        const pass = document.getElementById('r-pass').value;
+        const { data } = await sb.from('students').insert([{ full_name: name, student_phone: phone, parent_phone: pPhone, password: pass }]).select().single();
         if (data) startSession(data); else alert("خطأ في التسجيل");
     }
 
@@ -191,7 +178,7 @@
                 <img src="${c.image_url || 'https://via.placeholder.com/300x170/1B2347/fff?text=Physics'}" class="course-img">
                 <div class="course-content">
                     <h3>${c.title}</h3>
-                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول المحتوى</button>
+                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول</button>
                 </div>
             </div>`).join('');
     }
@@ -199,10 +186,9 @@
     async function openCourse(courseId, title, isFree) {
         if (!isFree) {
             const { data: access } = await sb.from('student_access').select('*').eq('student_phone', localStorage.getItem('fady_phone')).eq('course_id', courseId).single();
-            if (!access) return alert("🚫 يرجى تفعيل الكورس أولاً.");
+            if (!access) return alert("يرجى تفعيل الكورس أولاً");
         }
         document.getElementById('current-course-title').innerText = title;
-        document.getElementById('video-section').style.display = 'none';
         showPage('content-page');
         const { data: lessons } = await sb.from('lessons').select('*').eq('course_id', courseId).order('id');
         document.getElementById('lessons-list').innerHTML = lessons.map((l, i) => `
@@ -216,7 +202,7 @@
         let vId = idOrUrl.includes('v=') ? idOrUrl.split('v=')[1].split('&')[0] : (idOrUrl.includes('be/') ? idOrUrl.split('be/')[1] : idOrUrl);
         document.getElementById('video-section').style.display = 'block';
         document.getElementById('player-container').innerHTML = `
-            <iframe src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&modestbranding=1&controls=1&disablekb=1&iv_load_policy=3" allow="autoplay; encrypted-media"></iframe>
+            <iframe src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&modestbranding=1&controls=1&iv_load_policy=3" allow="autoplay; encrypted-media"></iframe>
         `;
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
