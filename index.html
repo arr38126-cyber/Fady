@@ -108,14 +108,14 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
 const { createClient } = supabase;
 const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-// استخدام Fingerprint ثابت يعتمد على المتصفح لتقليل أخطاء التصفير
+// بصمة جهاز ثابتة جداً
 function getDeviceId() {
     let id = localStorage.getItem('fady_device_id');
-    if (!id) {
-        id = 'ID_' + Math.random().toString(36).substr(2, 9);
+    if (!id || id === "null") {
+        id = 'FADY_' + Math.random().toString(36).substr(2, 9) + Date.now();
         localStorage.setItem('fady_device_id', id);
     }
-    return id;
+    return String(id);
 }
 
 function showToast(m) { 
@@ -132,12 +132,11 @@ function showPage(id) {
 
 function forgotPassword() {
     const phone = document.getElementById('l-phone').value;
-    const msg = phone ? `أهلاً دكتور فادي، أنا الطالب صاحب الرقم ${phone} ونسيت كلمة المرور.` : `أهلاً دكتور فادي، نسيت كلمة المرور الخاصة بي.`;
-    window.open(`https://wa.me/201021422744?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://wa.me/201021422744?text=أهلاً دكتور فادي، أنا الطالب صاحب الرقم ${phone || ''} ونسيت كلمة المرور.`, '_blank');
 }
 
 // ══════════════════════════════════════════
-// تعديل منطق الدخول (الإصلاح الشامل)
+// دالة الدخول الذكية
 // ══════════════════════════════════════════
 
 async function handleLogin() {
@@ -146,7 +145,7 @@ async function handleLogin() {
     const currentDevId = getDeviceId();
     const btn = document.getElementById('login-btn-main');
 
-    if(!phone || !pass) { showToast('برجاء إدخال البيانات'); return; }
+    if(!phone || !pass) return showToast('برجاء إدخال البيانات');
 
     btn.innerText = "جاري التحقق...";
     btn.disabled = true;
@@ -159,16 +158,16 @@ async function handleLogin() {
             btn.innerText = "دخول المنصة"; btn.disabled = false; return; 
         }
 
-        // الفحص الجديد: يسمح بالدخول إذا كانت الخانة فارغة، أو مطابقة للجهاز الحالي، أو "null" نصية
-        const isDeviceEmpty = !user.last_device_id || user.last_device_id === "null" || user.last_device_id === "";
-        const isSameDevice = user.last_device_id === currentDevId;
-
-        if (!isDeviceEmpty && !isSameDevice) {
-            alert('🚫 الحساب مفتوح على جهاز آخر. إذا قمت بعمل خروج من الجهاز الآخر، انتظر دقيقة وحاول مجدداً.');
+        // تحويل القيم لنصوص لضمان دقة المقارنة
+        const dbDevId = user.last_device_id ? String(user.last_device_id) : "";
+        
+        // لو الخانة مش فاضية + مش نفس الجهاز الحالي = ارفض
+        if (dbDevId !== "" && dbDevId !== "null" && dbDevId !== currentDevId) {
+            alert('🚫 الحساب مفتوح على جهاز آخر. إذا قمت بالخروج، انتظر دقيقة وجرب مرة أخرى.');
             btn.innerText = "دخول المنصة"; btn.disabled = false; return;
         }
 
-        // تحديث البصمة للتأكيد
+        // تحديث البصمة في السيرفر
         await sb.from('students').update({ last_device_id: currentDevId }).eq('id', user.id);
         
         sessionStorage.setItem('fady_student_id', user.id);
@@ -187,19 +186,17 @@ async function handleLogout() {
         btn.innerText = "جاري التحرير...";
         btn.disabled = true;
         
-        // نحدث الخانة لتصبح فارغة تماماً
+        // تصفير حقيقي والانتظار
         const { error } = await sb.from('students').update({ last_device_id: null }).eq('id', id);
         
         if (error) {
-            console.error("Logout Error:", error);
-            showToast("فشل في تحرير الجهاز");
-            btn.innerText = "خروج"; btn.disabled = false;
-            return;
+            alert("فشل التحرير، تأكد من الإنترنت.");
+            btn.innerText = "خروج"; btn.disabled = false; return;
         }
     }
     
-    sessionStorage.clear();
-    window.location.href = window.location.pathname; // إعادة تحميل نظيفة
+    sessionStorage.removeItem('fady_student_id');
+    location.reload();
 }
 
 async function handleSignup() {
@@ -209,14 +206,14 @@ async function handleSignup() {
     const pass = document.getElementById('s-pass').value.trim();
     const devId = getDeviceId();
 
-    if (!name || phone.length < 11 || pass.length < 6) { showToast('بيانات ناقصة'); return; }
+    if (!name || phone.length < 11 || pass.length < 6) return showToast('بيانات ناقصة');
 
     const { data, error } = await sb.from('students').insert([{
         full_name: name, student_phone: phone, parent_phone: pPhone,
         password: pass, role: 'student', last_device_id: devId
     }]).select().single();
 
-    if (error) { showToast("رقم الهاتف مسجل بالفعل"); return; }
+    if (error) return showToast("الرقم مسجل مسبقاً");
 
     sessionStorage.setItem('fady_student_id', data.id);
     startSession(data);
@@ -249,14 +246,13 @@ async function loadCourses() {
     }
 }
 
-// حماية
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('keydown', e => {
     if(e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
         e.preventDefault();
         const ov = document.getElementById('capture-overlay');
         ov.classList.add('active');
-        setTimeout(()=> ov.classList.remove('active'), 2000);
+        setTimeout(()=> ov.classList.remove('active'), 2500);
     }
 });
 
