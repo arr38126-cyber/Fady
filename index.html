@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>منصة Dr. Fady Adel | فيزياء</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -12,15 +12,15 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; -webkit-user-select: none; overflow-x: hidden; color: #333; }
 
-        /* حماية متطورة: تعتيم عند محاولة تسجيل الشاشة أو فقدان التركيز */
-        body.screen-capture-detected { filter: blur(40px) brightness(0.2) !important; pointer-events: none !important; }
-        #security-msg { display: none; position: fixed; inset: 0; z-index: 100001; background: rgba(0,0,0,0.9); color: #fff; align-items: center; justify-content: center; text-align: center; font-size: 1.5rem; font-weight: bold; padding: 20px; }
-        body.screen-capture-detected #security-msg { display: flex; }
+        /* حماية ضد تسجيل الشاشة ولقطات الشاشة */
+        body.security-blur { filter: blur(30px) brightness(0.2) !important; pointer-events: none !important; }
+        #security-overlay { display: none; position: fixed; inset: 0; z-index: 100000; background: rgba(0,0,0,0.95); color: #fff; align-items: center; justify-content: center; text-align: center; font-size: 1.5rem; font-weight: bold; padding: 20px; direction: rtl; }
+        body.security-blur #security-overlay { display: flex; }
 
-        /* العلامة المائية */
-        #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.1; overflow: hidden; }
+        /* الحماية والواتر مارك */
+        #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.08; overflow: hidden; }
         #watermark.active { display: block; }
-        #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.1rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
+        #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.2rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
 
         /* الهيدر */
         nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
@@ -28,27 +28,44 @@
         .nav-logo { display: flex; align-items: center; gap: 10px; }
         .nav-logo img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--orange); }
 
-        /* الفيديو */
-        .video-wrap { background: #000; border-radius: 20px; overflow: hidden; margin-bottom: 25px; position: relative; padding-bottom: 56.25%; height: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 2px solid var(--navy); }
-        .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-
-        /* كروت وتصميم */
+        /* الأقسام والشاشات */
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .page { display: none; }
         .page.active { display: block; }
+
+        /* نظام الفيديو المحمي */
+        .video-wrap { background: #000; border-radius: 20px; overflow: hidden; margin-bottom: 25px; position: relative; padding-bottom: 56.25%; height: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 2px solid var(--navy); }
+        .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+        /* كروت الكورسات */
         .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .course-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: var(--card-shadow); transition: 0.3s; }
-        .content-item { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-right: 5px solid var(--orange); cursor: pointer; }
-        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; }
+        .course-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: var(--card-shadow); position: relative; transition: 0.3s; }
+        .course-card:hover { transform: translateY(-5px); }
+        .course-img { width: 100%; height: 170px; object-fit: cover; }
+        .course-content { padding: 18px; text-align: right; }
+        .price-badge { position: absolute; top: 12px; left: 12px; padding: 5px 12px; border-radius: 10px; font-weight: bold; font-size: 0.75rem; z-index: 10; color: #fff; }
+
+        /* قائمة الدروس */
+        .content-item { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-right: 5px solid var(--orange); cursor: pointer; transition: 0.2s; }
+        .content-item:hover { background: #fdf2ed; transform: scale(1.01); }
+        .content-info { display: flex; align-items: center; gap: 15px; }
+        .content-icon { width: 45px; height: 45px; background: rgba(232,88,26,0.1); color: var(--orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        
+        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25d366; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); z-index: 9999; text-decoration: none; }
+        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1rem; }
+        
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); padding: 20px; }
         .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 30px; text-align: center; }
-        .input-group input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; outline: none; text-align: center; margin-bottom: 12px; }
+        .input-group { text-align: right; margin-bottom: 12px; }
+        .input-group input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; outline: none; text-align: center; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<div id="security-msg">⚠️ عذراً، تصوير الشاشة أو تسجيلها ممنوع تماماً لحماية حقوق المنصة.</div>
+<div id="security-overlay">🚫 تصوير الشاشة غير مسموح به لحماية الحقوق</div>
 <div id="watermark"><div id="wm-text"></div></div>
+
+<a href="https://wa.me/201021422744" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
 
 <nav id="navbar">
     <div class="nav-logo">
@@ -68,12 +85,12 @@
     <div id="login-page" class="page active">
         <div class="auth-screen">
             <div class="auth-card">
-                <img src="https://i.ibb.co/zT82jk68/image.png" width="70" style="border-radius: 50%; margin-bottom: 10px;">
-                <h3>تسجيل الدخول</h3>
-                <input type="tel" id="l-phone" class="input-group" placeholder="رقم الموبايل" style="width:100%">
-                <input type="password" id="l-pass" class="input-group" placeholder="كلمة المرور" style="width:100%">
-                <button class="btn-main" onclick="handleLogin()">دخول</button>
-                <p onclick="showPage('register-page')" style="margin-top:15px; cursor:pointer;">إنشاء حساب جديد</p>
+                <img src="https://i.ibb.co/zT82jk68/image.png" width="70" style="margin-bottom: 10px; border-radius: 50%;">
+                <h3 style="margin-bottom: 20px;">تسجيل الدخول</h3>
+                <div class="input-group"><input type="tel" id="l-phone" placeholder="رقم الموبايل"></div>
+                <div class="input-group"><input type="password" id="l-pass" placeholder="كلمة المرور"></div>
+                <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
+                <button style="background:none; border:none; color:var(--navy); margin-top:15px; cursor:pointer; font-weight:700;" onclick="showPage('register-page')">ليس لديك حساب؟ سجل الآن</button>
             </div>
         </div>
     </div>
@@ -81,31 +98,34 @@
     <div id="register-page" class="page">
         <div class="auth-screen">
             <div class="auth-card">
-                <h3>حساب جديد</h3>
-                <input type="text" id="r-name" class="input-group" placeholder="الاسم ثلاثي" style="width:100%">
-                <input type="tel" id="r-phone" class="input-group" placeholder="رقم الطالب" style="width:100%">
-                <input type="tel" id="r-parent" class="input-group" placeholder="رقم ولي الأمر" style="width:100%">
-                <input type="password" id="r-pass" class="input-group" placeholder="كلمة المرور" style="width:100%">
-                <button class="btn-main" onclick="handleRegister()">تأكيد</button>
-                <p onclick="showPage('login-page')" style="margin-top:10px; cursor:pointer;">رجوع</p>
+                <h3>فتح حساب جديد</h3><br>
+                <div class="input-group"><input type="text" id="r-name" placeholder="الاسم ثلاثي"></div>
+                <div class="input-group"><input type="tel" id="r-phone" placeholder="رقم موبايل الطالب"></div>
+                <div class="input-group"><input type="tel" id="r-parent" placeholder="رقم موبايل ولي الأمر"></div>
+                <div class="input-group"><input type="password" id="r-pass" placeholder="كلمة المرور"></div>
+                <button class="btn-main" onclick="handleRegister()">تأكيد التسجيل</button>
+                <button style="background:none; border:none; margin-top:10px;" onclick="showPage('login-page')">رجوع للدخول</button>
             </div>
         </div>
     </div>
 
     <div id="home-page" class="page">
         <div class="container">
-            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom: 25px;">محاضراتي</h2>
+            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom: 25px;">محاضراتي المتاحة</h2>
             <div id="courses-container" class="course-grid"></div>
         </div>
     </div>
 
     <div id="content-page" class="page">
         <div class="container">
-            <h2 id="current-course-title" style="text-align: right; color: var(--navy);"></h2>
+            <h2 id="current-course-title" style="text-align: right; color: var(--navy); margin-bottom: 20px;"></h2>
             <div id="video-section" class="video-wrap" style="display:none;">
-                <div id="player-container"></div>
+                <div id="player-container" style="width:100%; height:100%;"></div>
             </div>
-            <div id="lessons-list" style="margin-top:20px;"></div>
+            <div style="margin-top:20px;">
+                <h4 style="text-align: right; color: #666; margin-bottom: 15px;"><i class="fas fa-video"></i> المحاضرات المرئية</h4>
+                <div id="lessons-list"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -114,34 +134,32 @@
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    /* --- نظام الحماية المتقدم --- */
+    let currentStudent = null;
+
+    /* نظام الحماية المتقدمة */
     function enableSecurity() {
-        // منع اختصارات لوحة المفاتيح للتصوير
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'PrintScreen' || e.keyCode === 44) { 
-                activateSecurity(); 
-                e.preventDefault(); 
-            }
-            if (e.ctrlKey && (e.key === 'p' || e.key === 'u' || (e.shiftKey && (e.key === 'I' || e.key === 'S' || e.key === 'C')))) {
+        // منع اختصارات لوحة المفاتيح
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "PrintScreen" || e.keyCode === 44) {
+                alert("تنبيه: محاولة لقطة الشاشة مرصودة!");
+                document.body.classList.add('security-blur');
                 e.preventDefault();
             }
+            if (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u')) e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'j' || e.key === 'c')) e.preventDefault();
         });
 
-        // كشف محاولة تصوير الشاشة (عند الخروج من النافذة)
-        window.addEventListener('blur', activateSecurity);
-        window.addEventListener('focus', deactivateSecurity);
-        
-        // منع سحب الصور أو العناصر
-        document.addEventListener('dragstart', (e) => e.preventDefault());
+        // منع التسجيل عند الخروج من النافذة
+        window.addEventListener('blur', () => document.body.classList.add('security-blur'));
+        window.addEventListener('focus', () => document.body.classList.remove('security-blur'));
     }
 
-    function activateSecurity() { document.body.classList.add('screen-capture-detected'); }
-    function deactivateSecurity() { document.body.classList.remove('screen-capture-detected'); }
-
-    /* --- إدارة الجلسة والدخول --- */
     function getDeviceId() {
-        let id = localStorage.getItem('fady_device_id') || `FADY-${btoa(navigator.userAgent).substr(0,15)}`;
-        localStorage.setItem('fady_device_id', id);
+        let id = localStorage.getItem('fady_device_id');
+        if (!id) {
+            id = `FADY-${navigator.platform}-${Math.random().toString(36).substr(2, 5)}`;
+            localStorage.setItem('fady_device_id', id);
+        }
         return id;
     }
 
@@ -152,26 +170,31 @@
 
         if (user) {
             const devId = getDeviceId();
-            if (user.last_device_id && user.last_device_id !== devId) return alert("الحساب مفتوح على جهاز آخر!");
+            if (user.last_device_id && user.last_device_id !== devId) {
+                return alert("⚠️ الحساب مفتوح على جهاز آخر. سجل خروجك من هناك أولاً.");
+            }
             await sb.from('students').update({ last_device_id: devId }).eq('id', user.id);
             localStorage.setItem('fady_session', user.id);
+            localStorage.setItem('fady_phone', user.student_phone);
             startSession(user);
-        } else alert("بيانات خاطئة");
+        } else alert("بيانات الدخول غير صحيحة");
     }
 
     async function handleRegister() {
-        const name = document.getElementById('r-name').value;
-        const phone = document.getElementById('r-phone').value;
-        const pPhone = document.getElementById('r-parent').value;
-        const pass = document.getElementById('r-pass').value;
-        const { data } = await sb.from('students').insert([{ full_name: name, student_phone: phone, parent_phone: pPhone, password: pass, last_device_id: getDeviceId() }]).select().single();
-        if (data) startSession(data); else alert("خطأ في التسجيل");
+        const name = document.getElementById('r-name').value.trim();
+        const phone = document.getElementById('r-phone').value.trim();
+        const parentPhone = document.getElementById('r-parent').value.trim();
+        const pass = document.getElementById('r-pass').value.trim();
+        if(!name || !phone || !parentPhone || !pass) return alert("يرجى ملء كافة البيانات");
+        const { data } = await sb.from('students').insert([{ full_name: name, student_phone: phone, parent_phone: parentPhone, password: pass, last_device_id: getDeviceId() }]).select().single();
+        if (data) startSession(data); else alert("خطأ في التسجيل أو الرقم مكرر");
     }
 
     function startSession(user) {
+        currentStudent = user;
         document.getElementById('nav-user-name').innerText = user.full_name;
         const wmText = `${user.full_name} | ${user.student_phone} `;
-        document.getElementById('wm-text').innerText = Array(60).fill(wmText).join('    ');
+        document.getElementById('wm-text').innerText = Array(50).fill(wmText).join('    ');
         document.getElementById('watermark').classList.add('active');
         showPage('home-page');
         loadCourses();
@@ -180,40 +203,49 @@
 
     async function loadCourses() {
         const { data: courses } = await sb.from('courses').select('*');
-        document.getElementById('courses-container').innerHTML = courses.map(c => `
-            <div class="course-card" style="padding:15px">
-                <h3>${c.title}</h3>
-                <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول</button>
+        const container = document.getElementById('courses-container');
+        container.innerHTML = courses.map(c => `
+            <div class="course-card">
+                <span class="price-badge" style="background:${parseFloat(c.price) === 0 ? '#2ecc71' : '#1B2347'}">${parseFloat(c.price) === 0 ? 'مجاني' : 'مدفوع'}</span>
+                <img src="${c.image_url || 'https://via.placeholder.com/300x170/1B2347/fff?text=Physics'}" class="course-img">
+                <div class="course-content">
+                    <h3 style="margin-bottom:15px;">${c.title}</h3>
+                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول المحتوى</button>
+                </div>
             </div>`).join('');
     }
 
-    async function openCourse(id, title, isFree) {
+    async function openCourse(courseId, title, isFree) {
         if (!isFree) {
-            const { data: access } = await sb.from('student_access').select('*').eq('student_phone', localStorage.getItem('fady_phone')).eq('course_id', id).single();
-            if (!access) return alert("يرجى التفعيل أولاً");
+            const phone = localStorage.getItem('fady_phone');
+            const { data: access } = await sb.from('student_access').select('*').eq('student_phone', phone).eq('course_id', courseId).single();
+            if (!access) return alert("🚫 يرجى تفعيل الكورس أولاً من السكرتارية.");
         }
         document.getElementById('current-course-title').innerText = title;
+        document.getElementById('video-section').style.display = 'none';
         showPage('content-page');
-        const { data: lessons } = await sb.from('lessons').select('*').eq('course_id', id).order('id');
-        document.getElementById('lessons-list').innerHTML = lessons.map(l => `
+        document.getElementById('back-btn').style.display = 'block';
+        const { data: lessons } = await sb.from('lessons').select('*').eq('course_id', courseId).order('id');
+        document.getElementById('lessons-list').innerHTML = lessons?.length ? lessons.map((l, i) => `
             <div class="content-item" onclick="playVideo('${l.video_id || l.youtube_url}')">
-                <b>${l.title}</b> <span>▶ تشغيل</span>
-            </div>`).join('');
+                <div class="content-info">
+                    <div class="content-icon"><i class="fas fa-play"></i></div>
+                    <div><b>${i+1}. ${l.title}</b><br><small>فيديو شرح</small></div>
+                </div>
+                <span style="color:var(--orange); font-size:0.8rem; font-weight:bold;">مشاهدة الآن</span>
+            </div>`).join('') : '<p style="text-align:center">قريباً...</p>';
     }
 
-    /* --- نظام الفيديو المحمي: إخفاء المعلومات --- */
+    /* تشغيل الفيديو مع إخفاء المعلومات */
     function playVideo(idOrUrl) {
         let vId = idOrUrl.includes('v=') ? idOrUrl.split('v=')[1].split('&')[0] : (idOrUrl.includes('be/') ? idOrUrl.split('be/')[1] : idOrUrl);
         const section = document.getElementById('video-section');
         section.style.display = 'block';
         
-        // استخدام پارامترات تمنع إظهار العنوان والشعار قدر الإمكان
-        // modestbranding=1 (إخفاء شعار يوتيوب)
-        // showinfo=0 (إخفاء العنوان - لم يعد مدعوماً رسمياً لكنه يساعد في بعض المتصفحات)
-        // controls=1 (إبقاء التحكم لكن بدون روابط خارجية)
+        // استخدام بارامترات يوتيوب لإخفاء الشعار والعناوين قدر الإمكان
+        // modestbranding=1 (إخفاء الشعار)، rel=0 (منع الفيديوهات المقترحة)، controls=1 (تحكم بسيط)
         document.getElementById('player-container').innerHTML = `
-            <iframe src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3&disablekb=1" 
-                    allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         `;
         section.scrollIntoView({ behavior: 'smooth' });
     }
@@ -222,20 +254,22 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
-        if (id === 'home-page') document.getElementById('back-btn').style.display = 'none'; else document.getElementById('back-btn').style.display = 'block';
+        if (id === 'home-page') document.getElementById('back-btn').style.display = 'none';
+        window.scrollTo(0,0);
     }
 
     async function handleLogout() {
         const id = localStorage.getItem('fady_session');
         if (id) await sb.from('students').update({ last_device_id: null }).eq('id', id);
-        localStorage.clear(); location.reload();
+        localStorage.clear(); location.reload(); 
     }
 
     window.onload = async () => {
         const id = localStorage.getItem('fady_session');
         if (id) {
             const { data: user } = await sb.from('students').select('*').eq('id', id).single();
-            if (user && user.last_device_id === getDeviceId()) startSession(user); else handleLogout();
+            if (user && user.last_device_id === getDeviceId()) startSession(user);
+            else handleLogout();
         }
     };
 </script>
