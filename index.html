@@ -4,96 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>منصة Dr. Fady Adel للفيزياء</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&family=Amiri:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-/* ══════════════════════════════════════════
-   VARIABLES & BRANDING
-══════════════════════════════════════════ */
-:root {
-  --navy: #1B2347; --orange: #E8581A; --orange-lt: #F97316;
-  --white: #FFFFFF; --off-white: #FFF8F3; --navy-80: rgba(27,35,71,0.8);
-  --shadow: 0 4px 24px rgba(27,35,71,0.15); --radius: 16px;
-}
-
-/* ══════════════════════════════════════════
-   GLOBAL STYLES
-══════════════════════════════════════════ */
+:root { --navy: #1B2347; --orange: #E8581A; --orange-lt: #F97316; --white: #FFFFFF; --off-white: #FFF8F3; --shadow: 0 4px 24px rgba(27,35,71,0.15); }
 body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0; user-select: none; overflow-x: hidden; }
-img { pointer-events: none; }
-
-/* PROTECTION OVERLAYS */
-#capture-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 99999; align-items: center; justify-content: center; color: #fff; text-align: center; font-size: 1.5rem; }
+#capture-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 99999; align-items: center; justify-content: center; color: #fff; text-align: center; }
 #capture-overlay.active { display: flex; }
 #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.12; overflow: hidden; }
 #watermark.active { display: block; }
-
-/* ══════════════════════════════════════════
-   AUTH UI (Login & Signup)
-══════════════════════════════════════════ */
-.auth-bg { min-height: 100vh; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; }
-.auth-card { background: #fff; border-radius: 24px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); text-align: center; z-index: 2; }
-.auth-logo { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--orange); margin-bottom: 15px; object-fit: cover; }
-.auth-quote { font-family: 'Amiri', serif; color: var(--orange); background: rgba(232,88,26,0.1); padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; }
+.auth-bg { min-height: 100vh; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.auth-card { background: #fff; border-radius: 24px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); text-align: center; }
+.auth-logo { width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--orange); margin-bottom: 15px; }
 .form-group { text-align: right; margin-bottom: 15px; }
-.form-group label { display: block; font-weight: 700; margin-bottom: 5px; color: var(--navy); }
-.form-group input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; outline: none; font-family: 'Cairo'; transition: 0.3s; }
-.form-group input:focus { border-color: var(--orange); }
-.btn-primary { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; font-size: 1rem; transition: 0.3s; }
-.btn-primary:hover { background: var(--orange-lt); transform: translateY(-2px); }
-
-/* ══════════════════════════════════════════
-   NAVBAR & CONTENT
-══════════════════════════════════════════ */
-#navbar { display: none; background: var(--navy); padding: 12px 25px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
-#navbar.visible { display: flex; }
-.nav-logo { height: 45px; width: 45px; border-radius: 50%; border: 2px solid var(--orange); }
-
-.page { display: none; animation: fadeUp 0.4s ease; }
+.form-group label { display: block; font-weight: 700; margin-bottom: 5px; }
+.form-group input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; outline: none; font-family: 'Cairo'; }
+.btn-primary { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; }
+.toast { position: fixed; top: 20px; right: 20px; background: var(--navy); color: #fff; padding: 15px; border-radius: 10px; display: none; z-index: 10000; border-right: 5px solid var(--orange); }
+.page { display: none; animation: fadeIn 0.4s; }
 .page.active { display: block; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
-
-.courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; padding: 30px; }
-.course-card { background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; transition: 0.3s; position: relative; }
-.course-card:hover { transform: translateY(-5px); }
-.course-thumb { width: 100%; height: 180px; object-fit: cover; }
-.course-body { padding: 15px; }
-
-/* TOAST */
-.toast { position: fixed; top: 20px; right: 20px; background: var(--navy); color: #fff; padding: 15px 25px; border-radius: 10px; display: none; z-index: 10000; border-right: 5px solid var(--orange); }
-
-/* ══════════════════════════════════════════
-   DEVICE LOCK STYLE
-══════════════════════════════════════════ */
-.lock-screen { text-align: center; color: #fff; }
-.lock-screen h1 { font-size: 4rem; margin: 0; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+#navbar { display: none; background: var(--navy); padding: 12px 25px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); color: #fff; }
+#navbar.visible { display: flex; }
 </style>
 </head>
 <body>
 
-<div id="capture-overlay">🚫<br>تصوير الشاشة محظور لحماية المحتوى</div>
-<div id="watermark"><div id="wm-text" style="transform: rotate(-30deg); white-space: nowrap; font-size: 22px; line-height: 6; font-weight: bold; color: rgba(27,35,71,0.1);"></div></div>
+<div id="capture-overlay">🚫<br>التصوير محظور</div>
+<div id="watermark"><div id="wm-text" style="transform: rotate(-30deg); white-space: nowrap; font-size: 20px; line-height: 6; color: rgba(27,35,71,0.1);"></div></div>
 <div id="toast" class="toast"></div>
 
 <nav id="navbar">
-    <div style="display:flex; align-items:center; gap:12px;">
-        <img src="https://i.ibb.co/zT82jk68/image.png" class="nav-logo">
-        <div>
-            <div style="color:#fff; font-weight:700; font-size:0.9rem;">Dr. Fady Adel</div>
-            <div id="nav-student-name" style="color:var(--orange); font-size:0.8rem; font-weight:600;">...</div>
-        </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+        <img src="https://i.ibb.co/zT82jk68/image.png" width="40" style="border-radius:50%">
+        <span id="nav-student-name">...</span>
     </div>
-    <button onclick="logout()" style="background:var(--orange); color:#fff; border:none; padding:7px 15px; border-radius:8px; cursor:pointer; font-weight:700;">خروج</button>
+    <button onclick="logout()" style="background:var(--orange); color:#fff; border:none; padding:5px 15px; border-radius:5px; cursor:pointer;">خروج</button>
 </nav>
 
 <div id="app">
-
     <div id="login-page" class="page active">
         <div class="auth-bg">
             <div class="auth-card">
                 <img src="https://i.ibb.co/zT82jk68/image.png" class="auth-logo">
-                <div class="auth-quote">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</div>
-                <h2 style="margin-bottom:20px; color:var(--navy);">تسجيل الدخول</h2>
+                <h2 style="color:var(--navy);">تسجيل الدخول</h2>
                 <div class="form-group">
                     <label>رقم الموبايل</label>
                     <input type="tel" id="l-phone" placeholder="01XXXXXXXXX" maxlength="11">
@@ -102,8 +56,9 @@ img { pointer-events: none; }
                     <label>كلمة المرور</label>
                     <input type="password" id="l-pass" placeholder="••••••••">
                 </div>
-                <button class="btn-primary" onclick="handleLogin()">دخول المنصة</button>
-                <p style="margin-top:20px; font-size:0.9rem;">ليس لديك حساب؟ <span onclick="showPage('signup-page')" style="color:var(--orange); cursor:pointer; font-weight:700;">اضغط هنا للتسجيل</span></p>
+                <button class="btn-primary" onclick="handleLogin()">دخول</button>
+                <p style="margin-top:15px;"><span onclick="forgotPassword()" style="color:var(--orange); cursor:pointer; font-size:0.85rem;">نسيت كلمة المرور؟</span></p>
+                <p style="margin-top:10px; font-size:0.9rem;">ليس لديك حساب؟ <span onclick="showPage('signup-page')" style="color:var(--navy); cursor:pointer; font-weight:700;">سجل الآن</span></p>
             </div>
         </div>
     </div>
@@ -112,6 +67,129 @@ img { pointer-events: none; }
         <div class="auth-bg">
             <div class="auth-card">
                 <img src="https://i.ibb.co/zT82jk68/image.png" class="auth-logo">
-                <h2 style="margin-bottom:20px; color:var(--navy);">إنشاء حساب جديد</h2>
-                <div class="form-group"><label>الاسم بالكامل</label><input type="text" id="s-name" placeholder="أدخل اسمك ثلاثي"></div>
-                <div class="form-group">
+                <h2 style="color:var(--navy);">حساب جديد</h2>
+                <div class="form-group"><label>الاسم بالكامل</label><input type="text" id="s-name" placeholder="أدخل اسمك"></div>
+                <div class="form-group"><label>رقم موبايل الطالب</label><input type="tel" id="s-phone" maxlength="11"></div>
+                <div class="form-group"><label>رقم ولي الأمر</label><input type="tel" id="s-p-phone" maxlength="11"></div>
+                <div class="form-group"><label>كلمة المرور</label><input type="password" id="s-pass" placeholder="6 أحرف فأكثر"></div>
+                <button class="btn-primary" onclick="handleSignup()">إنشاء الحساب</button>
+                <p onclick="showPage('login-page')" style="margin-top:15px; cursor:pointer; font-size:0.85rem;">العودة للدخول</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="home-page" class="page">
+        <div style="padding:40px; text-align:center;">
+            <h1>مرحباً بك في محاضراتنا</h1>
+            <div id="courses-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:20px; padding:20px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
+
+function getDeviceId() {
+    let id = localStorage.getItem('fady_device_id');
+    if (!id) {
+        id = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now();
+        localStorage.setItem('fady_device_id', id);
+    }
+    return id;
+}
+
+function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display='block'; setTimeout(()=>t.style.display='none', 3000); }
+
+function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('navbar').classList.toggle('visible', id === 'home-page');
+}
+
+// استرجاع الباسورد عبر الواتساب
+function forgotPassword() {
+    const phone = document.getElementById('l-phone').value;
+    const msg = phone ? `أهلاً دكتور فادي، أنا الطالب صاحب الرقم ${phone} ونسيت كلمة المرور الخاصة بي.` : `أهلاً دكتور فادي، نسيت كلمة المرور الخاصة بي على المنصة.`;
+    window.open(`https://wa.me/201021422744?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+async function handleLogin() {
+    const phone = document.getElementById('l-phone').value.trim();
+    const pass = document.getElementById('l-pass').value.trim();
+    const devId = getDeviceId();
+
+    if(!phone || !pass) return showToast('برجاء إدخال البيانات');
+
+    const { data, error } = await sb.from('students').select('*').eq('phone', phone).eq('password', pass).single();
+
+    if (error || !data) return showToast('رقم الموبايل أو الباسورد خطأ');
+
+    if (data.role === 'admin') { window.location.href = 'admin.html'; return; }
+
+    if (data.last_device_id && data.last_device_id !== devId) {
+        alert('هذا الحساب مسجل على جهاز آخر! تواصل مع المشرف لفك القفل.');
+        return;
+    }
+
+    await sb.from('students').update({ last_device_id: devId }).eq('id', data.id);
+    sessionStorage.setItem('fady_student_id', data.id);
+    startSession(data);
+}
+
+async function handleSignup() {
+    const name = document.getElementById('s-name').value.trim();
+    const phone = document.getElementById('s-phone').value.trim();
+    const pPhone = document.getElementById('s-p-phone').value.trim();
+    const pass = document.getElementById('s-pass').value.trim();
+    const devId = getDeviceId();
+
+    if (!name || phone.length < 11 || pass.length < 6) return showToast('بيانات ناقصة أو غير صحيحة');
+
+    const { data, error } = await sb.from('students').insert([{
+        name, phone, parent_phone: pPhone, password: pass, role: 'student', last_device_id: devId
+    }]).select().single();
+
+    if (error) {
+        console.error(error);
+        return showToast('الرقم مسجل بالفعل أو حدث خطأ');
+    }
+
+    sessionStorage.setItem('fady_student_id', data.id);
+    startSession(data);
+}
+
+function startSession(user) {
+    document.getElementById('nav-student-name').innerText = user.name;
+    const wmText = `${user.name} - ${user.phone} `;
+    document.getElementById('wm-text').innerText = Array(200).fill(wmText).join('   ');
+    document.getElementById('watermark').classList.add('active');
+    showPage('home-page');
+    loadCourses();
+}
+
+async function loadCourses() {
+    const { data } = await sb.from('courses').select('*');
+    const container = document.getElementById('courses-container');
+    container.innerHTML = '';
+    if(data) data.forEach(c => {
+        container.innerHTML += `<div style="background:#fff; border-radius:10px; padding:15px; box-shadow:var(--shadow)">
+            <img src="${c.image_url || 'https://i.ibb.co/zT82jk68/image.png'}" width="100%" style="border-radius:10px;">
+            <h3>${c.title}</h3>
+            <p style="color:var(--orange); font-weight:700;">${c.price} ج.م</p>
+        </div>`;
+    });
+}
+
+function logout() { sessionStorage.clear(); location.reload(); }
+
+window.onload = async () => {
+    const id = sessionStorage.getItem('fady_student_id');
+    if(id) {
+        const { data } = await sb.from('students').select('*').eq('id', id).single();
+        if(data) startSession(data);
+    }
+};
+</script>
+</body>
+</html>
