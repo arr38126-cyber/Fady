@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --card-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
-        /* الواتر مارك العامة الخلفية */
+        /* الواتر مارك العامة */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.05; overflow: hidden; }
         #watermark.active { display: block; }
 
@@ -23,36 +23,38 @@
         .nav-logo img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--orange); }
 
         /* بيت الشعر */
-        .auth-quote { font-family: 'Amiri', serif; color: var(--orange); background: rgba(232,88,26,0.06); padding: 15px; border-radius: 15px; margin-bottom: 25px; font-size: 1.1rem; border-right: 4px solid var(--orange); line-height: 1.6; text-align: center; font-style: italic; }
+        .auth-quote { font-family: 'Amiri', serif; color: var(--orange); background: rgba(232,88,26,0.06); padding: 15px; border-radius: 15px; margin-bottom: 25px; font-size: 1.1rem; border-right: 4px solid var(--orange); line-height: 1.6; text-align: center; }
 
-        /* مشغل الفيديو المحمي */
+        /* نافذة الفيديو المحمي */
         #video-modal { display: none; position: fixed; inset: 0; background: #000; z-index: 200000; flex-direction: column; align-items: center; justify-content: center; }
         #video-modal.active { display: flex; }
-        .video-box { position: relative; width: 100%; max-width: 900px; aspect-ratio: 16/9; background: #000; }
+        .video-wrapper { position: relative; width: 100%; max-width: 900px; aspect-ratio: 16/9; background: #000; overflow: hidden; }
         
-        /* الواتر مارك المتحركة فوق الفيديو */
-        #video-wm-float { position: absolute; color: rgba(255,255,255,0.3); font-size: clamp(10px, 2vw, 14px); pointer-events: none; z-index: 20; white-space: nowrap; font-weight: bold; transition: all 1.2s linear; text-shadow: 1px 1px 2px #000; }
+        /* الطبقات الحامية (تمنع الضغط على شعار يوتيوب والعنوان) */
+        .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 100; cursor: default; }
+        .shield-bottom { position: absolute; bottom: 0; right: 0; width: 100px; height: 50px; z-index: 100; cursor: default; }
+        
+        #video-wm-float { position: absolute; color: rgba(255,255,255,0.3); font-size: clamp(10px, 2vw, 14px); pointer-events: none; z-index: 110; white-space: nowrap; font-weight: bold; transition: all 1s linear; text-shadow: 1px 1px 2px #000; }
+        iframe { border: none; width: 100%; height: 100%; }
         .close-video { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
 
-        /* نظام الصفحات */
+        /* نظام الصفحات والكروت */
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .page { display: none; min-height: 90vh; }
         .page.active { display: block; }
-
-        /* الكورسات والمحتوى */
         .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .course-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: var(--card-shadow); position: relative; }
+        .course-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
         .course-img { width: 100%; height: 170px; object-fit: cover; }
         .course-content { padding: 18px; text-align: right; }
         .price-badge { position: absolute; top: 12px; left: 12px; padding: 5px 12px; border-radius: 10px; font-weight: bold; font-size: 0.75rem; color: #fff; z-index: 5; }
 
-        .content-item { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-right: 5px solid var(--orange); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        
-        /* الدخول والتسجيل */
+        .content-item { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-right: 5px solid var(--orange); }
+
+        /* الدخول */
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); padding: 20px; }
         .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 30px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
         .input-group { text-align: right; margin-bottom: 15px; }
-        .input-group input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; font-size: 1rem; }
+        .input-group input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; }
         .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1.1rem; }
 
         .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25d366; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); z-index: 9999; text-decoration: none; }
@@ -65,25 +67,29 @@
 <a href="https://wa.me/201012345678" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
 
 <div id="video-modal">
-    <div class="video-box">
+    <div class="video-wrapper">
         <span class="close-video" onclick="closeVideo()">&times;</span>
-        <div id="video-wm-float">محمل...</div>
-        <div id="player"></div>
+        <div id="video-wm-float"></div>
+        
+        <div class="shield-top"></div>
+        <div class="shield-bottom"></div>
+        
+        <div id="iframe-container" style="width:100%; height:100%;"></div>
     </div>
-    <p style="color: #fff; margin-top: 25px; font-size: 0.8rem; opacity: 0.7;">🚫 يمنع تصوير الشاشة نهائياً</p>
+    <p style="color: #fff; margin-top: 20px; font-size: 0.8rem; opacity: 0.6;">⚠️ حماية المحتوى نشطة - د. فادي عادل</p>
 </div>
 
 <nav id="navbar">
     <div class="nav-logo">
-        <img src="https://i.ibb.co/zT82jk68/image.png" alt="Logo">
+        <img src="https://i.ibb.co/zT82jk68/image.png">
         <div>
             <div id="nav-user-name" style="font-weight: 800;">تحميل...</div>
             <div style="color: var(--orange); font-size: 0.8rem;">Physics - Dr. Fady</div>
         </div>
     </div>
     <div style="display:flex; gap:8px;">
-        <button id="back-btn" style="display:none; background:rgba(255,255,255,0.1); border:1px solid #fff; color:#fff; padding:5px 12px; border-radius:8px; cursor:pointer;" onclick="showPage('home-page')">الرئيسية</button>
-        <button style="background:none; border:1px solid #fff; color:#fff; padding:5px 12px; border-radius:8px; cursor:pointer;" onclick="handleLogout()">خروج</button>
+        <button id="back-btn" style="display:none; background:rgba(255,255,255,0.1); border:1px solid #fff; color:#fff; padding:5px 12px; border-radius:8px;" onclick="showPage('home-page')">الرئيسية</button>
+        <button style="background:none; border:1px solid #fff; color:#fff; padding:5px 12px; border-radius:8px;" onclick="handleLogout()">خروج</button>
     </div>
 </nav>
 
@@ -116,24 +122,23 @@
 
     <div id="home-page" class="page">
         <div class="container">
-            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; color: var(--navy);">محاضراتي</h2>
+            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; color: var(--navy);">محاضراتي المتاحة</h2>
             <div id="courses-container" class="course-grid"></div>
         </div>
     </div>
 
     <div id="content-page" class="page">
         <div class="container">
-            <h2 id="cur-course-title" style="text-align: right; color: var(--navy); border-right: 5px solid var(--orange); padding-right:15px;"></h2>
-            <div style="margin-top:25px;" id="content-list"></div>
+            <h2 id="cur-course-title" style="text-align: right; border-right: 5px solid var(--orange); padding-right:15px;"></h2>
+            <div id="content-list" style="margin-top:25px;"></div>
         </div>
     </div>
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
-    let ytPlayer, wmInterval;
+    let wmInterval;
 
     function getDeviceId() {
         let id = localStorage.getItem('fady_device_id');
@@ -144,14 +149,14 @@
         return id;
     }
 
+    // الدخول والتسجيل
     async function handleRegister() {
         const name = document.getElementById('r-name').value.trim();
         const phone = document.getElementById('r-phone').value.trim();
         const pass = document.getElementById('r-pass').value.trim();
-        if(name.length < 5 || phone.length < 11) return alert("برجاء إكمال البيانات");
+        if(name.length < 5 || phone.length < 11) return alert("البيانات ناقصة");
         const { error } = await sb.from('students').insert([{ full_name: name, student_phone: phone, password: pass, role: 'student' }]);
-        if(!error) { alert("تم التسجيل! سجل دخول الآن."); showPage('login-page'); }
-        else alert("الرقم مسجل بالفعل.");
+        if(!error) { alert("تم التسجيل!"); showPage('login-page'); } else alert("الرقم مسجل بالفعل");
     }
 
     async function handleLogin() {
@@ -163,29 +168,25 @@
             localStorage.setItem('fady_session', user.id);
             localStorage.setItem('fady_phone', user.student_phone);
             startSession(user);
-        } else alert("بيانات الدخول خاطئة");
+        } else alert("خطأ في البيانات");
     }
 
     function startSession(user) {
         document.getElementById('nav-user-name').innerText = user.full_name;
-        document.getElementById('wm-text').innerText = Array(150).fill(`${user.full_name} - ${user.student_phone} `).join('   ');
+        document.getElementById('wm-text').innerText = Array(120).fill(`${user.full_name} - ${user.student_phone} `).join('   ');
         document.getElementById('watermark').classList.add('active');
         showPage('home-page');
         loadCourses();
-        setInterval(checkDevice, 30000);
+        setInterval(async () => {
+            const { data } = await sb.from('students').select('last_device_id').eq('id', user.id).single();
+            if(data && data.last_device_id !== getDeviceId()) handleLogout();
+        }, 30000);
     }
 
-    async function checkDevice() {
-        const id = localStorage.getItem('fady_session');
-        if(!id) return;
-        const { data } = await sb.from('students').select('last_device_id').eq('id', id).single();
-        if(data && data.last_device_id !== getDeviceId()) handleLogout();
-    }
-
+    // الكورسات والمحتوى
     async function loadCourses() {
         const { data: courses } = await sb.from('courses').select('*');
-        const container = document.getElementById('courses-container');
-        container.innerHTML = courses.map(c => {
+        document.getElementById('courses-container').innerHTML = courses.map(c => {
             const isFree = parseFloat(c.price) === 0;
             return `
                 <div class="course-card">
@@ -193,7 +194,7 @@
                     <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" class="course-img">
                     <div class="course-content">
                         <h3>${c.title}</h3>
-                        <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}', ${isFree})">فتح المحتوى</button>
+                        <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}', ${isFree})">دخول</button>
                     </div>
                 </div>`;
         }).join('');
@@ -201,60 +202,45 @@
 
     async function openCourse(courseId, title, isFree) {
         if (!isFree) {
-            const phone = localStorage.getItem('fady_phone');
-            const { data: access } = await sb.from('student_access').select('*').eq('student_phone', phone).eq('course_id', courseId).single();
-            if (!access) return alert("🚫 يرجى التواصل مع السكرتارية لتفعيل الكورس.");
+            const { data: access } = await sb.from('student_access').select('*').eq('student_phone', localStorage.getItem('fady_phone')).eq('course_id', courseId).single();
+            if (!access) return alert("🚫 يرجى تفعيل الكورس أولاً.");
         }
         document.getElementById('cur-course-title').innerText = title;
         showPage('content-page');
         document.getElementById('back-btn').style.display = 'block';
         const { data: lessons } = await sb.from('lessons').select('*').eq('course_id', courseId);
         document.getElementById('content-list').innerHTML = lessons?.map(l => `
-            <div class="content-item" onclick="viewVideo('${l.video_id}', '${l.title}')">
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <div style="color:var(--orange); font-size:1.5rem;"><i class="fas fa-play-circle"></i></div>
-                    <div><b>${l.title}</b><br><small>فيديو شرح</small></div>
+            <div class="content-item" onclick="viewVideo('${l.video_id}')">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <i class="fas fa-play-circle" style="color:var(--orange); font-size:1.4rem;"></i>
+                    <b>${l.title}</b>
                 </div>
                 <i class="fas fa-chevron-left"></i>
             </div>`).join('') || "قريباً...";
     }
 
-    // --- مشغل الفيديو المعدل لمنع الشاشة السوداء ---
-    function viewVideo(vId, title) {
+    // --- مشغل الفيديو الجديد والأكثر استقراراً ---
+    function viewVideo(vId) {
         const modal = document.getElementById('video-modal');
         const wmFloat = document.getElementById('video-wm-float');
         modal.classList.add('active');
         wmFloat.innerText = document.getElementById('nav-user-name').innerText + " | " + localStorage.getItem('fady_phone');
 
+        // تنظيف وتحميل التضمين المباشر
+        const container = document.getElementById('iframe-container');
+        container.innerHTML = `<iframe src="https://www.youtube.com/embed/${vId}?rel=0&modestbranding=1&autoplay=1&controls=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+
         if (wmInterval) clearInterval(wmInterval);
         wmInterval = setInterval(() => {
-            wmFloat.style.top = Math.floor(Math.random() * 80) + 5 + "%";
-            wmFloat.style.left = Math.floor(Math.random() * 60) + 5 + "%";
+            wmFloat.style.top = Math.floor(Math.random() * 70) + 10 + "%";
+            wmFloat.style.left = Math.floor(Math.random() * 60) + 10 + "%";
         }, 2000);
-
-        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-            ytPlayer.loadVideoById(vId);
-        } else {
-            ytPlayer = new YT.Player('player', {
-                height: '100%', width: '100%', videoId: vId,
-                playerVars: { 
-                    'autoplay': 1, 'controls': 1, 'modestbranding': 1, 
-                    'rel': 0, 'origin': window.location.origin, 'fs': 1 
-                },
-                events: { 'onReady': (e) => e.target.playVideo() }
-            });
-        }
-        saveLog(title);
     }
 
     function closeVideo() {
-        if(ytPlayer) ytPlayer.stopVideo();
+        document.getElementById('iframe-container').innerHTML = ''; // إيقاف الفيديو تماماً
         document.getElementById('video-modal').classList.remove('active');
         clearInterval(wmInterval);
-    }
-
-    async function saveLog(t) {
-        await sb.from('lesson_views').insert([{ student_phone: localStorage.getItem('fady_phone'), lesson_title: t }]);
     }
 
     function showPage(id) {
@@ -270,10 +256,15 @@
         const id = localStorage.getItem('fady_session');
         if (id) {
             const { data: user } = await sb.from('students').select('*').eq('id', id).single();
-            if (user && user.last_device_id === getDeviceId()) startSession(user);
-            else handleLogout();
+            if (user && user.last_device_id === getDeviceId()) startSession(user); else handleLogout();
         }
     };
+    
+    // منع الاختصارات
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey && (e.key === 'u' || e.key === 'c' || e.key === 's')) e.preventDefault();
+        if (e.key === 'F12') e.preventDefault();
+    });
 </script>
 </body>
 </html>
