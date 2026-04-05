@@ -15,7 +15,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; }
 
-        /* واترمارك */
+        /* واترمارك الحماية */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.08; overflow: hidden; }
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; color: var(--navy); line-height: 5; text-align: center; width: 300%; font-size: 1.2rem; }
@@ -26,19 +26,21 @@
         .nav-logo { display: flex; align-items: center; gap: 10px; }
         .nav-logo img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--orange); }
 
-        /* الفيديو والدروع */
+        /* منطقة الفيديو والدروع الثلاثة */
         .video-master-container { position: relative; width: 100%; max-width: 900px; margin: 0 auto; background: #000; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .video-wrap { position: relative; padding-bottom: 56.25%; height: 0; z-index: 1; }
         .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; }
 
         .shields-container { position: absolute; inset: 0; z-index: 100; display: flex; }
-        .shield-part { height: 100%; background: transparent; flex: 1; }
+        .shield-part { height: 100%; background: transparent; flex: 1; cursor: default; }
 
         /* أزرار التحكم */
         .player-controls { position: relative; z-index: 200; background: var(--navy); padding: 15px; display: flex; align-items: center; justify-content: center; gap: 20px; border-top: 3px solid var(--orange); flex-wrap: wrap; }
-        .p-btn { background: none; border: none; color: #fff; cursor: pointer; font-size: 1.5rem; }
+        .p-btn { background: none; border: none; color: #fff; cursor: pointer; font-size: 1.5rem; transition: 0.2s; }
+        .p-btn:hover { color: var(--orange); }
         .p-select { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #fff; border-radius: 8px; padding: 5px; font-family: 'Cairo'; }
 
+        /* تنسيقات الصفحات */
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .page { display: none; }
         .page.active { display: block; }
@@ -69,7 +71,7 @@
                 <input type="tel" id="lp" placeholder="رقم الموبايل" style="width:100%; padding:13px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd; text-align:center; font-family:'Cairo'; outline:none;">
                 <input type="password" id="lw" placeholder="كلمة المرور" style="width:100%; padding:13px; margin-bottom:20px; border-radius:12px; border:1px solid #ddd; text-align:center; font-family:'Cairo'; outline:none;">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
-                <p onclick="showPage('register-page')" style="cursor:pointer; font-weight:700; margin-top:15px; color:var(--navy);">إنشاء حساب جديد</p>
+                <p onclick="showPage('register-page')" style="cursor:pointer; font-weight:700; margin-top:15px; color:var(--navy);">ليس لديك حساب؟ سجل الآن</p>
             </div>
         </div>
     </div>
@@ -77,20 +79,20 @@
     <div id="register-page" class="page">
         <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy);">
             <div style="background:#fff; padding:35px; border-radius:25px; width:90%; max-width:400px; text-align:center;">
-                <h3>فتح حساب طالب</h3>
+                <h3>فتح حساب طالب جديد</h3>
                 <input type="text" id="rn" placeholder="الاسم ثلاثي" style="width:100%; padding:12px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd; text-align:center;">
                 <input type="tel" id="rp" placeholder="رقم موبايلك" style="width:100%; padding:12px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd; text-align:center;">
                 <input type="tel" id="rpp" placeholder="رقم ولي الأمر" style="width:100%; padding:12px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd; text-align:center;">
                 <input type="password" id="rw" placeholder="كلمة المرور" style="width:100%; padding:12px; margin-bottom:15px; border-radius:12px; border:1px solid #ddd; text-align:center;">
                 <button class="btn-main" onclick="handleRegister()">تأكيد التسجيل</button>
-                <p onclick="showPage('login-page')" style="cursor:pointer; margin-top:10px;">رجوع</p>
+                <p onclick="showPage('login-page')" style="cursor:pointer; margin-top:10px;">لديك حساب بالفعل؟ دخول</p>
             </div>
         </div>
     </div>
 
     <div id="home-page" class="page">
         <div class="container">
-            <h2 style="text-align:right;">محاضراتي</h2>
+            <h2 style="text-align:right;">محاضراتي المتاحة</h2>
             <div id="courses-container" class="course-grid"></div>
         </div>
     </div>
@@ -125,23 +127,38 @@
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
     let player;
 
+    // تم إلغاء نظام الـ Device ID تماماً
     async function handleLogin() {
         const p = document.getElementById('lp').value.trim();
         const w = document.getElementById('lw').value.trim();
-        const { data: u } = await sb.from('students').select('*').eq('student_phone', p).eq('password', w).single();
-        if (u) { localStorage.setItem('f_id', u.id); localStorage.setItem('f_p', u.student_phone); start(u); } 
-        else alert("بيانات خاطئة");
+        
+        const { data: u, error } = await sb.from('students').select('*').eq('student_phone', p).eq('password', w).single();
+        
+        if (u) {
+            localStorage.setItem('f_id', u.id); 
+            localStorage.setItem('f_p', u.student_phone);
+            start(u);
+        } else {
+            alert("رقم الموبايل أو كلمة المرور غير صحيحة");
+        }
     }
 
     async function handleRegister() {
-        const { data: u } = await sb.from('students').insert([{ 
+        const { data: u, error } = await sb.from('students').insert([{ 
             full_name: document.getElementById('rn').value, 
             student_phone: document.getElementById('rp').value, 
             parent_phone: document.getElementById('rpp').value,
             password: document.getElementById('rw').value
+            // تم حذف last_device_id من هنا
         }]).select().single();
-        if(u) { localStorage.setItem('f_id', u.id); localStorage.setItem('f_p', u.student_phone); start(u); } 
-        else alert("خطأ في التسجيل");
+        
+        if(u) {
+            localStorage.setItem('f_id', u.id); 
+            localStorage.setItem('f_p', u.student_phone);
+            start(u);
+        } else {
+            alert("خطأ في التسجيل، ربما الرقم مسجل مسبقاً");
+        }
     }
 
     function start(u) {
@@ -172,7 +189,7 @@
         const { data: ls } = await sb.from('lessons').select('*').eq('course_id', id).order('id');
         document.getElementById('lessons-list').innerHTML = ls.map((l,i) => `
             <div class="content-item" onclick="playV('${l.video_id}')">
-                <span><b>${i+1}.</b> ${l.title}</span> <i class="fas fa-play-circle" style="color:var(--orange)"></i>
+                <span><b>${i+1}.</b> ${l.title}</span> <i class="fas fa-play-circle" style="color:var(--orange); font-size:1.4rem;"></i>
             </div>`).join('');
     }
 
@@ -182,7 +199,12 @@
         player = new YT.Player('yt-player', {
             height: '100%', width: '100%', videoId: vid,
             playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1, 'rel': 0, 'disablekb': 1 },
-            events: { 'onReady': (e) => e.target.playVideo(), 'onStateChange': (e) => { document.getElementById('p-play').innerHTML = (e.data == 1) ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>'; } }
+            events: { 
+                'onReady': (e) => e.target.playVideo(), 
+                'onStateChange': (e) => { 
+                    document.getElementById('p-play').innerHTML = (e.data == 1) ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>'; 
+                } 
+            }
         });
     }
 
@@ -190,12 +212,21 @@
     function seek(s) { if(player) player.seekTo(player.getCurrentTime()+s, true); }
     function setS(v) { if(player) player.setPlaybackRate(parseFloat(v)); }
     function toggleFS() { let e = document.getElementById('fs-target'); if(!document.fullscreenElement) e.requestFullscreen(); else document.exitFullscreen(); }
-    function showPage(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById('navbar').classList.toggle('visible', id!=='login-page' && id!=='register-page'); }
+    
+    function showPage(id) { 
+        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); 
+        document.getElementById('navbar').classList.toggle('visible', id!=='login-page' && id!=='register-page'); 
+    }
+
     function handleLogout() { localStorage.clear(); location.reload(); }
 
     window.onload = async () => {
         const id = localStorage.getItem('f_id');
-        if(id) { const { data: u } = await sb.from('students').select('*').eq('id', id).single(); if(u) start(u); }
+        if(id) { 
+            const { data: u } = await sb.from('students').select('*').eq('id', id).single(); 
+            if(u) start(u); 
+        }
     };
 </script>
 </body>
