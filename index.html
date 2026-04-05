@@ -1,210 +1,339 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>منصة Dr. Fady Adel | فيزياء</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة Dr. Fady Adel للفيزياء</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ══════════════════════════════════════════
+   VARIABLES  —  Dr. Fady Adel Brand Colors
+══════════════════════════════════════════ */
+:root {
+  --navy:        #1B2347;
+  --orange:      #E8581A;
+  --orange-lt:   #F97316;
+  --white:       #FFFFFF;
+  --off-white:   #FFF8F3;
+  --navy-80:     rgba(27,35,71,0.80);
+  --navy-60:     rgba(27,35,71,0.60);
+  --orange-10:   rgba(232,88,26,0.10);
+  --shadow:      0 4px 24px rgba(27,35,71,0.15);
+  --shadow-lg:   0 8px 40px rgba(27,35,71,0.22);
+  --radius:      16px;
+  --radius-sm:   10px;
+  --tr:          0.3s cubic-bezier(.4,0,.2,1);
+}
 
-        /* نافذة الفيديو - تم التأكد من إغلاقها افتراضياً */
-        #video-modal { 
-            display: none !important; /* ضمان الاختفاء */
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200000; 
-            flex-direction: column; align-items: center; justify-content: center; 
-        }
-        #video-modal.active { display: flex !important; }
-        
-        .video-wrapper { position: relative; width: 95%; max-width: 850px; aspect-ratio: 16/9; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        #video-wm-float { position: absolute; color: rgba(255,255,255,0.3); font-size: 14px; pointer-events: none; z-index: 100; white-space: nowrap; transition: all 1s linear; }
-        iframe { border: none; width: 100%; height: 100%; }
-        .close-video { position: absolute; top: -45px; right: 0; color: #fff; font-size: 35px; cursor: pointer; }
+/* ══════════════════════════════════════════
+   GLOBAL
+══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Cairo',sans-serif;
+  background:var(--off-white);
+  color:var(--navy);
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-user-select:none;
+  user-select:none;
+}
+img{pointer-events:none;}
 
-        /* بقية التنسيقات */
-        #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.05; overflow: hidden; }
-        #watermark.active { display: block; }
-        nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; }
-        nav.visible { display: flex; }
-        .auth-quote { font-family: 'Amiri', serif; color: var(--orange); background: rgba(232,88,26,0.06); padding: 15px; border-radius: 15px; margin-bottom: 25px; border-right: 4px solid var(--orange); text-align: center; }
-        .page { display: none; min-height: 90vh; }
-        .page.active { display: block; }
-        .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
-        .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 30px; text-align: center; }
-        .input-group input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 15px; font-family: 'Cairo'; }
-        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1.1rem; }
-        .course-card { background: #fff; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .content-item { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 12px; display: flex; justify-content: space-between; cursor: pointer; border-right: 5px solid var(--orange); }
-    </style>
+/* ══════════════════════════════════════════
+   SCREEN-CAPTURE OVERLAY
+══════════════════════════════════════════ */
+#capture-overlay{
+  display:none;position:fixed;inset:0;background:#000;z-index:99999;
+  align-items:center;justify-content:center;flex-direction:column;gap:16px;
+  color:#fff;font-size:1.5rem;font-family:'Cairo',sans-serif;
+}
+#capture-overlay.active{display:flex;}
+
+/* ══════════════════════════════════════════
+   WATERMARK
+══════════════════════════════════════════ */
+#watermark{display:none;position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden;}
+#watermark.active{display:block;}
+#watermark-text{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-30deg);
+  font-size:clamp(0.8rem,3vw,1.5rem);font-weight:700;
+  color:rgba(27,35,71,0.08);white-space:nowrap;text-align:center;
+  line-height:2.5;width:300%;
+  animation:wm-drift 25s linear infinite alternate;
+}
+@keyframes wm-drift{
+  from{transform:translate(-55%,-55%) rotate(-30deg);}
+  to  {transform:translate(-45%,-45%) rotate(-30deg);}
+}
+
+/* ══════════════════════════════════════════
+   NAVBAR
+══════════════════════════════════════════ */
+#navbar{
+  display:none;background:var(--navy);padding:12px 24px;
+  align-items:center;justify-content:space-between;
+  box-shadow:var(--shadow);position:sticky;top:0;z-index:100;
+}
+#navbar.visible{display:flex;}
+.nav-logo{height:46px;width:46px;border-radius:50%;object-fit:cover;border:2.5px solid var(--orange);flex-shrink:0;}
+.nav-title{font-size:1rem;font-weight:700;color:#fff;}
+#nav-student-name{font-size:0.82rem;color:var(--orange);font-weight:600;}
+#logout-btn{
+  background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);
+  padding:8px 18px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.88rem;
+}
+
+/* ══════════════════════════════════════════
+   PAGES
+══════════════════════════════════════════ */
+.page{display:none;animation:fadeUp .4s ease;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
+
+/* ══════════════════════════════════════════
+   AUTH STYLES
+══════════════════════════════════════════ */
+.auth-bg{
+  min-height:100vh;
+  background:linear-gradient(135deg,var(--navy) 0%,#2a3460 60%,#1B2347 100%);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;position:relative;overflow:hidden;
+}
+.auth-card{
+  background:#fff;border-radius:24px;
+  padding:40px; width:100%;max-width:440px;
+  box-shadow:var(--shadow-lg);position:relative;z-index:2;
+}
+.auth-logo{
+  width:110px;height:110px;border-radius:50%;object-fit:cover;
+  border:4px solid var(--orange);display:block;margin:0 auto 15px;
+}
+.auth-quote{
+  font-family:'Amiri',serif;font-size:1rem;color:var(--orange);text-align:center;
+  margin:15px 0 25px;padding:12px;border-right:4px solid var(--orange);
+  background:var(--orange-10);border-radius:var(--radius-sm);
+}
+.auth-title{font-size:1.5rem;font-weight:800;color:var(--navy);text-align:center;margin-bottom:24px;}
+
+.form-group{margin-bottom:16px;}
+.form-group input{
+  width:100%;padding:13px 16px;border:2px solid #e5e7eb;border-radius:var(--radius-sm);
+  font-family:'Cairo',sans-serif;outline:none;text-align:right;
+}
+.form-group input:focus{border-color:var(--orange);}
+
+.btn-primary{
+  width:100%;padding:14px;background:var(--orange);color:#fff;
+  border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;
+}
+
+/* ══════════════════════════════════════════
+   VIDEO SECTION
+══════════════════════════════════════════ */
+.video-wrap{
+  background:#000;border-radius:var(--radius);overflow:hidden;
+  margin-bottom:24px;position:relative;padding-bottom:56.25%;height:0;
+  box-shadow: var(--shadow-lg);
+}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
+
+/* ══════════════════════════════════════════
+   LESSONS LIST
+══════════════════════════════════════════ */
+.lesson-item{
+  background:#fff;border-radius:var(--radius-sm);padding:16px 20px;
+  display:flex;align-items:center;gap:16px;margin-bottom:12px;
+  box-shadow:var(--shadow);cursor:pointer;transition:all var(--tr);
+  border-right:5px solid transparent;
+}
+.lesson-item:hover{border-right-color:var(--orange);transform:translateX(-5px);}
+.lesson-item.active{border-right-color:var(--orange);background:var(--orange-10);}
+
+</style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-<div id="watermark"><div id="wm-text" style="transform: rotate(-30deg); white-space: nowrap;"></div></div>
-
-<div id="video-modal">
-    <div class="video-wrapper">
-        <span class="close-video" onclick="closeVideo()">&times;</span>
-        <div id="video-wm-float"></div>
-        <div id="video-container" style="width:100%; height:100%;"></div>
-    </div>
-</div>
+<div id="capture-overlay">🚫<p>تصوير الشاشة غير مسموح به</p></div>
+<div id="watermark"><div id="watermark-text"></div></div>
+<div class="toast" id="toast"></div>
 
 <nav id="navbar">
-    <div style="display:flex; align-items:center; gap:10px;">
-        <img src="https://i.ibb.co/zT82jk68/image.png" width="40" style="border-radius:50%">
-        <div id="nav-user-name" style="font-weight:bold"></div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <img class="nav-logo" src="https://i.ibb.co/zT82jk68/image.png" alt="Logo">
+    <div>
+      <div class="nav-title">Dr. Fady Adel — فيزياء</div>
+      <div id="nav-student-name">تحميل...</div>
     </div>
-    <button style="background:none; border:1px solid #fff; color:#fff; padding:5px 10px; border-radius:8px;" onclick="handleLogout()">خروج</button>
+  </div>
+  <button id="logout-btn" onclick="logout()">خروج</button>
 </nav>
 
 <div id="app">
-    <div id="login-page" class="page active">
-        <div class="auth-screen">
-            <div class="auth-card">
-                <img src="https://i.ibb.co/zT82jk68/image.png" width="80">
-                <div class="auth-quote">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ<br>يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</div>
-                <input type="tel" id="l-phone" placeholder="رقم الموبايل" class="input-group">
-                <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
-                <button class="btn-main" onclick="handleLogin()">دخول المنصة</button>
-                <p onclick="showPage('register-page')" style="cursor:pointer; margin-top:15px; font-size:0.9rem;">إنشاء حساب جديد</p>
-            </div>
-        </div>
-    </div>
 
-    <div id="register-page" class="page">
-        <div class="auth-screen">
-            <div class="auth-card">
-                <h3>تسجيل طالب جديد</h3>
-                <input type="text" id="r-name" placeholder="الاسم" class="input-group">
-                <input type="tel" id="r-phone" placeholder="الموبايل" class="input-group">
-                <input type="password" id="r-pass" placeholder="كلمة المرور" class="input-group">
-                <button class="btn-main" onclick="handleRegister()">تأكيد</button>
-                <p onclick="showPage('login-page')" style="cursor:pointer; margin-top:10px;">رجوع</p>
-            </div>
-        </div>
+  <div id="login-page" class="page active">
+    <div class="auth-bg">
+      <div class="auth-card">
+        <img class="auth-logo" src="https://i.ibb.co/zT82jk68/image.png">
+        <div class="auth-quote">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ<br>يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</div>
+        <h1 class="auth-title">تسجيل الدخول</h1>
+        <div class="form-group"><input type="tel" id="login-phone" placeholder="رقم الموبايل"></div>
+        <div class="form-group"><input type="password" id="login-pass" placeholder="كلمة المرور"></div>
+        <button class="btn-primary" onclick="login()">دخول المنصة</button>
+        <p style="text-align:center; margin-top:15px; cursor:pointer;" onclick="showPage('signup-page')">إنشاء حساب جديد</p>
+      </div>
     </div>
+  </div>
 
-    <div id="home-page" class="page">
-        <div style="padding:20px;">
-            <h2 style="text-align:right">كورساتي</h2>
-            <div id="courses-container"></div>
-        </div>
+  <div id="signup-page" class="page">
+    <div class="auth-bg">
+      <div class="auth-card">
+        <h1 class="auth-title">حساب جديد</h1>
+        <div class="form-group"><input type="text" id="signup-name" placeholder="الاسم ثلاثي"></div>
+        <div class="form-group"><input type="tel" id="signup-phone" placeholder="رقم الموبايل"></div>
+        <div class="form-group"><input type="tel" id="signup-parent-phone" placeholder="رقم موبايل ولي الأمر"></div>
+        <div class="form-group"><input type="password" id="signup-pass" placeholder="كلمة المرور"></div>
+        <button class="btn-primary" onclick="signup()">تأكيد التسجيل</button>
+        <p style="text-align:center; margin-top:15px; cursor:pointer;" onclick="showPage('login-page')">العودة للدخول</p>
+      </div>
     </div>
+  </div>
 
-    <div id="content-page" class="page">
-        <div style="padding:20px;">
-            <button onclick="showPage('home-page')" style="margin-bottom:15px;">⬅ رجوع</button>
-            <div id="content-list"></div>
-        </div>
+  <div id="home-page" class="page">
+    <div style="background:var(--navy);padding:30px 24px; color:#fff; text-align:center;">
+        <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="border-radius:50%; border:3px solid var(--orange)">
+        <h2>كورسات الفيزياء - د. فادي عادل</h2>
     </div>
+    <div style="padding:28px 24px;max-width:1100px;margin:0 auto;">
+      <div id="courses-grid" class="courses-grid">
+         </div>
+    </div>
+  </div>
+
+  <div id="content-page" class="page">
+    <div style="padding:24px;">
+      <button class="back-btn" onclick="showHome()">⬅ العودة للرئيسية</button>
+      <h2 id="content-title" style="margin-top:10px;">—</h2>
+      <div class="video-wrap" id="video-wrap" style="display:none;">
+        <div id="yt-player-container" style="width:100%; height:100%;"></div>
+      </div>
+      <div id="lessons-list" class="lessons-list"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-    const { createClient } = supabase;
-    const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
-    let wmInterval, checkInterval;
+const { createClient } = supabase;
+const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    function getDeviceId() {
-        let id = localStorage.getItem('fady_device_id') || `D-${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('fady_device_id', id);
-        return id;
-    }
+let currentStudent = null;
+let deviceId = null;
 
-    async function handleLogin() {
-        const phone = document.getElementById('l-phone').value.trim();
-        const pass = document.getElementById('l-pass').value.trim();
-        const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        
-        if (user) {
-            await sb.from('students').update({ last_device_id: getDeviceId() }).eq('id', user.id);
-            localStorage.setItem('fady_session', user.id);
-            localStorage.setItem('fady_phone', user.student_phone);
-            startSession(user);
-        } else alert("بيانات خاطئة");
-    }
+function getDeviceId() {
+  let id = localStorage.getItem('fady_device_id') || ('fady_' + Math.random().toString(36).substr(2, 9));
+  localStorage.setItem('fady_device_id', id);
+  return id;
+}
 
-    function startSession(user) {
-        document.getElementById('nav-user-name').innerText = user.full_name;
-        document.getElementById('wm-text').innerText = Array(50).fill(`${user.full_name} ${user.student_phone}`).join('   ');
-        document.getElementById('watermark').classList.add('active');
-        showPage('home-page');
-        loadCourses();
-        
-        // يبدأ الفحص فقط بعد تسجيل الدخول بنجاح
-        if (checkInterval) clearInterval(checkInterval);
-        checkInterval = setInterval(async () => {
-            const { data } = await sb.from('students').select('last_device_id').eq('id', user.id).single();
-            if(data && data.last_device_id !== getDeviceId()) handleLogout();
-        }, 20000);
-    }
+// ─── LOGIN ───
+async function login() {
+  const phone = document.getElementById('login-phone').value.trim();
+  const pass = document.getElementById('login-pass').value.trim();
+  if (!phone || !pass) return alert("أدخل البيانات");
 
-    async function loadCourses() {
-        const { data } = await sb.from('courses').select('*');
-        document.getElementById('courses-container').innerHTML = data.map(c => `
-            <div class="course-card">
-                <div style="padding:15px; text-align:right;">
-                    <h3>${c.title}</h3>
-                    <button class="btn-main" onclick="openCourse('${c.id}')">فتح الكورس</button>
-                </div>
-            </div>`).join('');
-    }
+  const { data, error } = await sb.from('students').select('*').eq('phone', phone).eq('password', pass).single();
+  if (error || !data) return alert("خطأ في الموبايل أو كلمة المرور");
 
-    async function openCourse(id) {
-        const { data } = await sb.from('lessons').select('*').eq('course_id', id);
-        showPage('content-page');
-        document.getElementById('content-list').innerHTML = data.map(l => `
-            <div class="content-item" onclick="viewVideo('${l.video_id}')">
-                <span>${l.title}</span>
-                <i class="fas fa-play-circle"></i>
-            </div>`).join('');
-    }
+  deviceId = getDeviceId();
+  await sb.from('students').update({ last_device_id: deviceId }).eq('id', data.id);
+  
+  currentStudent = data;
+  sessionStorage.setItem('fady_student_id', data.id);
+  afterLogin();
+}
 
-    function viewVideo(vId) {
-        const modal = document.getElementById('video-modal');
-        const wmFloat = document.getElementById('video-wm-float');
-        modal.classList.add('active');
-        wmFloat.innerText = localStorage.getItem('fady_phone');
+function afterLogin() {
+  document.getElementById('nav-student-name').textContent = currentStudent.name;
+  // تفعيل الواتر مارك باسم الطالب ورقم موبايله للحماية
+  const wmText = `${currentStudent.name} - ${currentStudent.phone}`;
+  document.getElementById('watermark-text').textContent = Array(15).fill(wmText).join('      ');
+  document.getElementById('watermark').classList.add('active');
+  showPage('home-page');
+  loadCourses();
+}
 
-        document.getElementById('video-container').innerHTML = `
-            <iframe src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0" allow="autoplay" allowfullscreen></iframe>`;
+// ─── LOAD COURSES ───
+async function loadCourses() {
+  const grid = document.getElementById('courses-grid');
+  grid.innerHTML = '<p>جاري تحميل الكورسات...</p>';
+  const { data: courses } = await sb.from('courses').select('*');
+  
+  grid.innerHTML = data.map(c => `
+    <div class="course-card" onclick="openCourse('${c.id}', '${c.title}')" style="background:#fff; padding:20px; border-radius:15px; margin-bottom:15px; border-right:6px solid var(--orange); box-shadow:var(--shadow);">
+      <h3>${c.title}</h3>
+      <p style="color:var(--orange); font-weight:bold;">${c.is_free ? 'مجاني' : 'كورس مدفوع'}</p>
+    </div>
+  `).join('');
+}
 
-        if (wmInterval) clearInterval(wmInterval);
-        wmInterval = setInterval(() => {
-            wmFloat.style.top = Math.random() * 80 + "%";
-            wmFloat.style.left = Math.random() * 80 + "%";
-        }, 3000);
-    }
+async function openCourse(id, title) {
+  document.getElementById('content-title').textContent = title;
+  showPage('content-page');
+  const { data: lessons } = await sb.from('lessons').select('*').eq('course_id', id).order('order');
+  
+  document.getElementById('lessons-list').innerHTML = lessons.map((l, i) => `
+    <div class="lesson-item" onclick="watchVideo('${l.youtube_url}', ${l.id})">
+      <div class="lesson-num">${i+1}</div>
+      <div class="lesson-info"><b>${l.title}</b></div>
+      <button class="btn-lesson btn-watch">▶ مشاهدة</button>
+    </div>
+  `).join('');
+}
 
-    function closeVideo() {
-        document.getElementById('video-container').innerHTML = '';
-        document.getElementById('video-modal').classList.remove('active');
-        clearInterval(wmInterval);
-    }
+// ─── WATCH VIDEO (FIXED) ───
+function watchVideo(url, id) {
+  const videoId = extractId(url);
+  if(!videoId) return alert("رابط فيديو غير مدعوم");
+  
+  const wrap = document.getElementById('video-wrap');
+  wrap.style.display = 'block';
+  // استخدام iframe نظيف ومباشر لضمان عدم حدوث أخطاء "حدث خطأ"
+  document.getElementById('yt-player-container').innerHTML = `
+    <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1" 
+    allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  `;
+  
+  wrap.scrollIntoView({ behavior: 'smooth' });
+}
 
-    function showPage(id) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
-    }
+function extractId(url) {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length == 11) ? match[2] : null;
+}
 
-    function handleLogout() {
-        clearInterval(checkInterval);
-        localStorage.clear();
-        location.reload();
-    }
+function showHome() {
+  document.getElementById('yt-player-container').innerHTML = '';
+  document.getElementById('video-wrap').style.display = 'none';
+  showPage('home-page');
+}
 
-    window.onload = async () => {
-        const id = localStorage.getItem('fady_session');
-        if (id) {
-            const { data: user } = await sb.from('students').select('*').eq('id', id).single();
-            if (user && user.last_device_id === getDeviceId()) startSession(user);
-            else handleLogout();
-        }
-    };
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'signup-page');
+}
+
+function logout() { sessionStorage.clear(); location.reload(); }
+
+// ─── PROTECTION ───
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if(e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'c')) e.preventDefault();
+});
 </script>
 </body>
 </html>
