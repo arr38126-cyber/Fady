@@ -15,17 +15,9 @@
 body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0; user-select: none; overflow-x: hidden; }
 
 #capture-overlay { 
-    display: none; 
-    position: fixed; 
-    inset: 0; 
-    background: #000; 
-    z-index: 99999; 
-    align-items: center; 
-    justify-content: center; 
-    color: #fff; 
-    text-align: center; 
-    font-size: 1.2rem; 
-    pointer-events: none;
+    display: none; position: fixed; inset: 0; background: #000; z-index: 99999; 
+    align-items: center; justify-content: center; color: #fff; text-align: center; 
+    font-size: 1.2rem; pointer-events: none;
 }
 #capture-overlay.active { display: flex; pointer-events: all; }
 
@@ -124,6 +116,7 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
 const { createClient } = supabase;
 const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
+// بصمة الجهاز
 function getDeviceId() {
     let id = localStorage.getItem('fady_device_id');
     if (!id) {
@@ -135,8 +128,7 @@ function getDeviceId() {
 
 function showToast(m) { 
     const t = document.getElementById('toast'); 
-    t.innerText = m; 
-    t.style.display='block'; 
+    t.innerText = m; t.style.display='block'; 
     setTimeout(()=>t.style.display='none', 4000); 
 }
 
@@ -149,10 +141,13 @@ function showPage(id) {
 function forgotPassword() {
     const phone = document.getElementById('l-phone').value;
     const msg = phone ? `أهلاً دكتور فادي، أنا الطالب صاحب الرقم ${phone} ونسيت كلمة المرور.` : `أهلاً دكتور فادي، نسيت كلمة المرور الخاصة بي.`;
-    window.open(`https://wa.me/201044?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://wa.me/201021422744?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// تعديل الدخول: التأكد من المسح الفعلي
+// ══════════════════════════════════════════
+// المنطق الجديد والمحسن (الدخول والخروج)
+// ══════════════════════════════════════════
+
 async function handleLogin() {
     const phone = document.getElementById('l-phone').value.trim();
     const pass = document.getElementById('l-pass').value.trim();
@@ -169,26 +164,52 @@ async function handleLogin() {
 
         if (error || !data) { 
             showToast('عفواً، البيانات غير صحيحة'); 
-            btn.innerText = "دخول المنصة";
-            btn.disabled = false;
-            return; 
+            btn.innerText = "دخول المنصة"; btn.disabled = false; return; 
         }
 
-        // فحص صارم للجهاز
-        if (data.last_device_id && data.last_device_id !== "" && data.last_device_id !== "null" && data.last_device_id !== devId) {
-            alert('🚫 الحساب مفتوح حالياً على جهاز آخر. يرجى التأكد من تسجيل الخروج من الجهاز الآخر أولاً.');
-            btn.innerText = "دخول المنصة";
-            btn.disabled = false;
-            return;
+        // المنطق الصارم: لو فيه ID "مختلف" عن جهازي الحالي، ارفض.
+        // بنستخدم (!!) لتحويل القيم لـ Boolean والتأكد إنها مش null فعلاً
+        if (data.last_device_id && data.last_device_id !== devId && data.last_device_id !== "null") {
+            alert('🚫 الحساب مفتوح على جهاز آخر. يرجى تسجيل الخروج منه أولاً.');
+            btn.innerText = "دخول المنصة"; btn.disabled = false; return;
         }
 
-        await sb.from('students').update({ last_device_id: devId }).eq('id', data.id);
+        // تحديث الجهاز والانتظار للتأكد
+        const { error: updError } = await sb.from('students').update({ last_device_id: devId }).eq('id', data.id);
+        if(updError) throw updError;
+
         sessionStorage.setItem('fady_student_id', data.id);
         startSession(data);
     } catch (e) {
-        showToast("خطأ في الشبكة");
-        btn.innerText = "دخول المنصة";
-        btn.disabled = false;
+        showToast("خطأ في الاتصال");
+        btn.innerText = "دخول المنصة"; btn.disabled = false;
+    }
+}
+
+async function handleLogout() {
+    const id = sessionStorage.getItem('fady_student_id');
+    const btn = document.getElementById('logout-btn');
+    
+    if (id) {
+        btn.innerText = "جاري التحرير...";
+        btn.disabled = true;
+        
+        // أهم سطر: بنرسل null الحقيقي وبننتظر السيرفر تماماً
+        const { error } = await sb.from('students')
+            .update({ last_device_id: null }) 
+            .eq('id', id);
+        
+        if (error) {
+            alert("فشل تحرير الجهاز. تأكد من الإنترنت.");
+            btn.innerText = "خروج"; btn.disabled = false;
+            return;
+        }
+        
+        // مسح محلي بعد تأكيد السيرفر
+        sessionStorage.removeItem('fady_student_id');
+        window.location.reload();
+    } else {
+        window.location.reload();
     }
 }
 
@@ -206,43 +227,16 @@ async function handleSignup() {
         password: pass, role: 'student', last_device_id: devId
     }]).select().single();
 
-    if (error) { showToast("فشل التسجيل: " + error.message); return; }
+    if (error) { showToast("رقم الهاتف مسجل مسبقاً"); return; }
 
     sessionStorage.setItem('fady_student_id', data.id);
     startSession(data);
 }
 
-// تعديل الخروج: الانتظار الإجباري للسيرفر
-async function handleLogout() {
-    const id = sessionStorage.getItem('fady_student_id');
-    const btn = document.getElementById('logout-btn');
-    
-    if (id) {
-        btn.innerText = "جاري الحذف...";
-        btn.disabled = true;
-        
-        // محاولة التحديث حتى التأكد
-        const { error } = await sb.from('students').update({ last_device_id: null }).eq('id', id);
-        
-        if (error) {
-            alert("عفواً، فشل تحرير الجهاز. تأكد من وجود إنترنت وحاول مرة أخرى.");
-            btn.innerText = "خروج";
-            btn.disabled = false;
-            return;
-        }
-        
-        // فقط عند النجاح نمسح البيانات ونعمل ريفريش
-        sessionStorage.clear();
-        location.reload();
-    } else {
-        location.reload();
-    }
-}
-
 function startSession(user) {
     document.getElementById('nav-student-name').innerText = user.full_name;
     const wmText = `${user.full_name} - ${user.student_phone} `;
-    document.getElementById('wm-text').innerText = Array(200).fill(wmText).join('   ');
+    document.getElementById('wm-text').innerText = Array(150).fill(wmText).join('   ');
     document.getElementById('watermark').classList.add('active');
     showPage('home-page');
     loadCourses();
@@ -266,13 +260,14 @@ async function loadCourses() {
     }
 }
 
+// حماية إضافية
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('keydown', e => {
-    if(e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J'))) {
+    if(e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C'))) {
         e.preventDefault();
         const ov = document.getElementById('capture-overlay');
         ov.classList.add('active');
-        setTimeout(()=> ov.classList.remove('active'), 3000);
+        setTimeout(()=> ov.classList.remove('active'), 2500);
     }
 });
 
@@ -281,6 +276,7 @@ window.onload = async () => {
     if(id) {
         const { data } = await sb.from('students').select('*').eq('id', id).single();
         if(data) startSession(data);
+        else sessionStorage.removeItem('fady_student_id');
     }
 };
 </script>
