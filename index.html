@@ -111,19 +111,14 @@ body { font-family: 'Cairo', sans-serif; background: var(--off-white); margin: 0
             <h2>مرحباً بك في طريق التفوق</h2>
             <p style="color:var(--orange);">كل التوفيق يا بطل!</p>
         </div>
-        <div id="courses-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:25px; padding:30px;">
-            </div>
+        <div id="courses-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:25px; padding:30px;"></div>
     </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════
-// الإعدادات والربط (Supabase)
-// ══════════════════════════════════════════
 const { createClient } = supabase;
 const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-// بصمة الجهاز الفريدة
 function getDeviceId() {
     let id = localStorage.getItem('fady_device_id');
     if (!id) {
@@ -153,7 +148,7 @@ function forgotPassword() {
 }
 
 // ══════════════════════════════════════════
-// العمليات المنطقية (Login / Signup / Logout)
+// المنطق المُعدل (تسجيل الدخول والخروج)
 // ══════════════════════════════════════════
 
 async function handleLogin() {
@@ -163,19 +158,16 @@ async function handleLogin() {
 
     if(!phone || !pass) return showToast('برجاء إدخال البيانات');
 
-    // جلب بيانات الطالب بناءً على رقم الموبايل والباسورد
     const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
 
     if (error || !data) return showToast('عفواً، البيانات غير صحيحة');
 
-    // نظام قفل الجهاز المرن:
-    // إذا كان هناك جهاز مسجل (ليس null) وهذا الجهاز ليس هو الجهاز الحالي
-    if (data.last_device_id && data.last_device_id !== devId) {
-        alert('🚫 الحساب مفتوح حالياً على جهاز آخر. يرجى تسجيل الخروج من الجهاز الأول أولاً لتتمكن من الدخول هنا.');
+    // فحص دقيق جداً: إذا كانت الخانة ليست فارغة وليست مطابقة للجهاز الحالي
+    if (data.last_device_id && data.last_device_id !== "" && data.last_device_id !== devId) {
+        alert('🚫 الحساب مفتوح حالياً على جهاز آخر. يرجى تسجيل الخروج من الجهاز الأول أولاً.');
         return;
     }
 
-    // إذا كان الحساب متاحاً (null) أو نفس الجهاز، سجل الدخول وحدث بصمة الجهاز
     await sb.from('students').update({ last_device_id: devId }).eq('id', data.id);
     sessionStorage.setItem('fady_student_id', data.id);
     startSession(data);
@@ -188,7 +180,7 @@ async function handleSignup() {
     const pass = document.getElementById('s-pass').value.trim();
     const devId = getDeviceId();
 
-    if (!name || phone.length < 11 || pass.length < 6) return showToast('بيانات ناقصة أو الباسورد ضعيفة (6 رموز على الأقل)');
+    if (!name || phone.length < 11 || pass.length < 6) return showToast('بيانات ناقصة');
 
     const { data, error } = await sb.from('students').insert([{
         full_name: name,
@@ -199,79 +191,19 @@ async function handleSignup() {
         last_device_id: devId
     }]).select().single();
 
-    if (error) {
-        showToast("فشل التسجيل: " + error.message);
-        return;
-    }
+    if (error) return showToast("فشل التسجيل: " + error.message);
 
     sessionStorage.setItem('fady_student_id', data.id);
     startSession(data);
 }
 
+// الدالة الأهم: تم تحسينها لضمان وصول الأمر للسيرفر
 async function handleLogout() {
     const id = sessionStorage.getItem('fady_student_id');
     if (id) {
-        // أهم تعديل: مسح بصمة الجهاز من السيرفر عند الخروج الإرادي
-        await sb.from('students').update({ last_device_id: null }).eq('id', id);
-    }
-    sessionStorage.clear();
-    location.reload();
-}
-
-function startSession(user) {
-    document.getElementById('nav-student-name').innerText = user.full_name;
-    // تحديث العلامة المائية باسم الطالب ورقمه
-    const wmText = `${user.full_name} - ${user.student_phone} `;
-    document.getElementById('wm-text').innerText = Array(200).fill(wmText).join('   ');
-    document.getElementById('watermark').classList.add('active');
-    showPage('home-page');
-    loadCourses();
-}
-
-async function loadCourses() {
-    const { data } = await sb.from('courses').select('*');
-    const container = document.getElementById('courses-container');
-    container.innerHTML = '';
-    if(data && data.length > 0) {
-        data.forEach(c => {
-            container.innerHTML += `
-                <div style="background:#fff; border-radius:15px; overflow:hidden; box-shadow:var(--shadow); transition:0.3s; cursor:pointer;" onclick="showToast('سيتم فتح المحاضرات قريباً')">
-                    <img src="${c.image_url || 'https://i.ibb.co/zT82jk68/image.png'}" style="width:100%; height:180px; object-fit:cover;">
-                    <div style="padding:15px;">
-                        <h3 style="margin:0; font-size:1rem; color:var(--navy);">${c.title}</h3>
-                        <p style="color:var(--orange); font-weight:800; margin-top:8px;">${c.price} ج.م</p>
-                    </div>
-                </div>`;
-        });
-    } else {
-        container.innerHTML = `<p style="grid-column: 1/-1; color:gray;">لا يوجد كورسات متاحة حالياً.</p>`;
-    }
-}
-
-// ══════════════════════════════════════════
-// أنظمة الحماية التلقائية
-// ══════════════════════════════════════════
-
-// منع القائمة اليمنى
-document.addEventListener('contextmenu', e => e.preventDefault());
-
-// منع اختصارات التصوير Inspect و PrintScreen
-document.addEventListener('keydown', e => {
-    if(e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
-        document.getElementById('capture-overlay').classList.add('active');
-        setTimeout(()=>document.getElementById('capture-overlay').classList.remove('active'), 3000);
-        e.preventDefault();
-    }
-});
-
-// التحقق من الجلسة عند فتح الصفحة
-window.onload = async () => {
-    const id = sessionStorage.getItem('fady_student_id');
-    if(id) {
-        const { data } = await sb.from('students').select('*').eq('id', id).single();
-        if(data) startSession(data);
-    }
-};
-</script>
-</body>
-</html>
+        showToast("جاري تحرير الجهاز... انتظر لحظة");
+        // ننتظر السيرفر يخلص التعديل قبل أي خطوة تانية
+        const { error } = await sb.from('students').update({ last_device_id: null }).eq('id', id);
+        
+        if (error) {
+            console.error(
