@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
         /* الواتر مارك العامة */
@@ -25,20 +25,18 @@
         /* بيت الشعر */
         .auth-quote { font-family: 'Amiri', serif; color: var(--orange); background: rgba(232,88,26,0.06); padding: 15px; border-radius: 15px; margin-bottom: 25px; font-size: 1.1rem; border-right: 4px solid var(--orange); line-height: 1.6; text-align: center; }
 
-        /* نافذة الفيديو المحمي */
+        /* نافذة الفيديو (التعديل لضمان التشغيل) */
         #video-modal { display: none; position: fixed; inset: 0; background: #000; z-index: 200000; flex-direction: column; align-items: center; justify-content: center; }
         #video-modal.active { display: flex; }
-        .video-wrapper { position: relative; width: 100%; max-width: 900px; aspect-ratio: 16/9; background: #000; overflow: hidden; }
+        .video-wrapper { position: relative; width: 100%; max-width: 900px; aspect-ratio: 16/9; background: #000; }
         
-        /* الطبقات الحامية (تمنع الضغط على شعار يوتيوب والعنوان) */
-        .shield-top { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 100; cursor: default; }
-        .shield-bottom { position: absolute; bottom: 0; right: 0; width: 100px; height: 50px; z-index: 100; cursor: default; }
+        /* الواتر مارك المتحركة (فوق الفيديو مباشرة) */
+        #video-wm-float { position: absolute; color: rgba(255,255,255,0.4); font-size: clamp(10px, 2vw, 15px); pointer-events: none; z-index: 100; white-space: nowrap; font-weight: bold; transition: all 1.2s linear; text-shadow: 1px 1px 3px #000; }
         
-        #video-wm-float { position: absolute; color: rgba(255,255,255,0.3); font-size: clamp(10px, 2vw, 14px); pointer-events: none; z-index: 110; white-space: nowrap; font-weight: bold; transition: all 1s linear; text-shadow: 1px 1px 2px #000; }
-        iframe { border: none; width: 100%; height: 100%; }
-        .close-video { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; }
+        iframe { border: none; width: 100%; height: 100%; position: relative; z-index: 1; }
+        .close-video { position: absolute; top: -45px; right: 10px; color: #fff; font-size: 35px; cursor: pointer; z-index: 101; }
 
-        /* نظام الصفحات والكروت */
+        /* التنسيقات العامة */
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .page { display: none; min-height: 90vh; }
         .page.active { display: block; }
@@ -46,35 +44,26 @@
         .course-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
         .course-img { width: 100%; height: 170px; object-fit: cover; }
         .course-content { padding: 18px; text-align: right; }
-        .price-badge { position: absolute; top: 12px; left: 12px; padding: 5px 12px; border-radius: 10px; font-weight: bold; font-size: 0.75rem; color: #fff; z-index: 5; }
-
-        .content-item { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-right: 5px solid var(--orange); }
-
-        /* الدخول */
-        .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); padding: 20px; }
-        .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 30px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
-        .input-group { text-align: right; margin-bottom: 15px; }
-        .input-group input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; }
         .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1.1rem; }
 
-        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25d366; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); z-index: 9999; text-decoration: none; }
+        .content-item { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-right: 5px solid var(--orange); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+        /* شاشة الدخول */
+        .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); padding: 20px; }
+        .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 30px; text-align: center; }
+        .input-group { text-align: right; margin-bottom: 15px; }
+        .input-group input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; font-size: 1rem; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div id="watermark"><div id="wm-text" style="transform: rotate(-30deg); white-space: nowrap; font-size: 16px; line-height: 7;"></div></div>
 
-<a href="https://wa.me/201012345678" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
-
 <div id="video-modal">
     <div class="video-wrapper">
         <span class="close-video" onclick="closeVideo()">&times;</span>
         <div id="video-wm-float"></div>
-        
-        <div class="shield-top"></div>
-        <div class="shield-bottom"></div>
-        
-        <div id="iframe-container" style="width:100%; height:100%;"></div>
+        <div id="video-container" style="width:100%; height:100%;"></div>
     </div>
     <p style="color: #fff; margin-top: 20px; font-size: 0.8rem; opacity: 0.6;">⚠️ حماية المحتوى نشطة - د. فادي عادل</p>
 </div>
@@ -115,14 +104,14 @@
                 <div class="input-group"><input type="tel" id="r-phone" placeholder="رقم الموبايل"></div>
                 <div class="input-group"><input type="password" id="r-pass" placeholder="كلمة المرور"></div>
                 <button class="btn-main" onclick="handleRegister()">تأكيد التسجيل</button>
-                <button style="background:none; border:none; margin-top:15px; cursor:pointer;" onclick="showPage('login-page')">رجوع للدخول</button>
+                <button style="background:none; border:none; margin-top:15px; cursor:pointer;" onclick="showPage('login-page')">رجوع</button>
             </div>
         </div>
     </div>
 
     <div id="home-page" class="page">
         <div class="container">
-            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; color: var(--navy);">محاضراتي المتاحة</h2>
+            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px;">محاضراتي المتاحة</h2>
             <div id="courses-container" class="course-grid"></div>
         </div>
     </div>
@@ -149,16 +138,6 @@
         return id;
     }
 
-    // الدخول والتسجيل
-    async function handleRegister() {
-        const name = document.getElementById('r-name').value.trim();
-        const phone = document.getElementById('r-phone').value.trim();
-        const pass = document.getElementById('r-pass').value.trim();
-        if(name.length < 5 || phone.length < 11) return alert("البيانات ناقصة");
-        const { error } = await sb.from('students').insert([{ full_name: name, student_phone: phone, password: pass, role: 'student' }]);
-        if(!error) { alert("تم التسجيل!"); showPage('login-page'); } else alert("الرقم مسجل بالفعل");
-    }
-
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value.trim();
         const pass = document.getElementById('l-pass').value.trim();
@@ -183,27 +162,22 @@
         }, 30000);
     }
 
-    // الكورسات والمحتوى
     async function loadCourses() {
         const { data: courses } = await sb.from('courses').select('*');
-        document.getElementById('courses-container').innerHTML = courses.map(c => {
-            const isFree = parseFloat(c.price) === 0;
-            return `
-                <div class="course-card">
-                    <span class="price-badge" style="background:${isFree ? '#2ecc71' : '#1B2347'}">${isFree ? 'مجاني' : 'مدفوع'}</span>
-                    <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" class="course-img">
-                    <div class="course-content">
-                        <h3>${c.title}</h3>
-                        <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}', ${isFree})">دخول</button>
-                    </div>
-                </div>`;
-        }).join('');
+        document.getElementById('courses-container').innerHTML = courses.map(c => `
+            <div class="course-card">
+                <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" class="course-img">
+                <div class="course-content">
+                    <h3>${c.title}</h3>
+                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">فتح</button>
+                </div>
+            </div>`).join('');
     }
 
     async function openCourse(courseId, title, isFree) {
         if (!isFree) {
             const { data: access } = await sb.from('student_access').select('*').eq('student_phone', localStorage.getItem('fady_phone')).eq('course_id', courseId).single();
-            if (!access) return alert("🚫 يرجى تفعيل الكورس أولاً.");
+            if (!access) return alert("يرجى تفعيل الكورس أولاً.");
         }
         document.getElementById('cur-course-title').innerText = title;
         showPage('content-page');
@@ -211,24 +185,22 @@
         const { data: lessons } = await sb.from('lessons').select('*').eq('course_id', courseId);
         document.getElementById('content-list').innerHTML = lessons?.map(l => `
             <div class="content-item" onclick="viewVideo('${l.video_id}')">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <i class="fas fa-play-circle" style="color:var(--orange); font-size:1.4rem;"></i>
-                    <b>${l.title}</b>
-                </div>
-                <i class="fas fa-chevron-left"></i>
+                <b>${l.title}</b>
+                <i class="fas fa-play-circle" style="color:var(--orange)"></i>
             </div>`).join('') || "قريباً...";
     }
 
-    // --- مشغل الفيديو الجديد والأكثر استقراراً ---
+    // --- مشغل الفيديو (النسخة المستقرة) ---
     function viewVideo(vId) {
         const modal = document.getElementById('video-modal');
         const wmFloat = document.getElementById('video-wm-float');
         modal.classList.add('active');
         wmFloat.innerText = document.getElementById('nav-user-name').innerText + " | " + localStorage.getItem('fady_phone');
 
-        // تنظيف وتحميل التضمين المباشر
-        const container = document.getElementById('iframe-container');
-        container.innerHTML = `<iframe src="https://www.youtube.com/embed/${vId}?rel=0&modestbranding=1&autoplay=1&controls=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        // تحميل الفيديو مباشرة في Iframe لضمان الاستقرار
+        document.getElementById('video-container').innerHTML = `
+            <iframe src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&modestbranding=1" 
+                    allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
 
         if (wmInterval) clearInterval(wmInterval);
         wmInterval = setInterval(() => {
@@ -238,7 +210,7 @@
     }
 
     function closeVideo() {
-        document.getElementById('iframe-container').innerHTML = ''; // إيقاف الفيديو تماماً
+        document.getElementById('video-container').innerHTML = ''; 
         document.getElementById('video-modal').classList.remove('active');
         clearInterval(wmInterval);
     }
@@ -247,7 +219,6 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
-        if (id === 'home-page') document.getElementById('back-btn').style.display = 'none';
     }
 
     function handleLogout() { localStorage.clear(); location.reload(); }
@@ -259,11 +230,10 @@
             if (user && user.last_device_id === getDeviceId()) startSession(user); else handleLogout();
         }
     };
-    
-    // منع الاختصارات
+
+    // حماية إضافية
     document.addEventListener('keydown', e => {
-        if (e.ctrlKey && (e.key === 'u' || e.key === 'c' || e.key === 's')) e.preventDefault();
-        if (e.key === 'F12') e.preventDefault();
+        if (e.ctrlKey && (e.key === 'u' || e.key === 'c')) e.preventDefault();
     });
 </script>
 </body>
