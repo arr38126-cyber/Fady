@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>منصة Dr. Fady Adel | فيزياء</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --card-shadow: 0 10px 25px rgba(0,0,0,0.1); }
@@ -41,14 +41,17 @@
 
         /* شاشات الدخول */
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); padding: 20px; }
-        .auth-card { background: #fff; width: 100%; max-width: 420px; border-radius: 25px; padding: 40px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .auth-card { background: #fff; width: 100%; max-width: 420px; border-radius: 25px; padding: 35px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        
+        /* تصميم بيت الشعر */
+        .auth-quote { font-family: 'Amiri', serif; color: var(--orange); background: rgba(232,88,26,0.08); padding: 15px; border-radius: 15px; margin-bottom: 25px; font-size: 1.15rem; line-height: 1.6; border-right: 4px solid var(--orange); font-style: italic; }
+
         .input-group { text-align: right; margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy); }
-        .input-group input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; outline: none; transition: 0.3s; }
+        .input-group input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; outline: none; transition: 0.3s; box-sizing: border-box; }
         .input-group input:focus { border-color: var(--orange); }
 
         .whatsapp-float { position: fixed; bottom: 25px; left: 25px; background: #25D366; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 5000; transition: 0.3s; }
-        .whatsapp-float:hover { transform: scale(1.1); }
         
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.4s ease; }
@@ -60,7 +63,7 @@
 <div id="capture-overlay">🚫 تصوير الشاشة غير مسموح به</div>
 <div id="watermark"><div id="wm-text" style="transform: rotate(-30deg); white-space: nowrap; font-size: 18px; line-height: 6;"></div></div>
 
-<a href="https://wa.me/201021422744" class="whatsapp-float" target="_blank">
+<a href="https://wa.me/2010744" class="whatsapp-float" target="_blank">
     <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="35">
 </a>
 
@@ -79,8 +82,9 @@
     <div id="login-page" class="page active">
         <div class="auth-screen">
             <div class="auth-card">
-                <img src="https://i.ibb.co/zT82jk68/image.png" width="100" style="margin-bottom: 20px;">
-                <h2 style="color: var(--navy);">تسجيل دخول الطالب</h2>
+                <img src="https://i.ibb.co/zT82jk68/image.png" width="90" style="margin-bottom: 15px;">
+                <div class="auth-quote">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ<br>يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</div>
+                <h2 style="color: var(--navy); margin-bottom: 20px;">دخول الطالب</h2>
                 <div class="input-group">
                     <label>رقم الموبايل</label>
                     <input type="tel" id="l-phone" placeholder="01xxxxxxxxx" maxlength="11">
@@ -101,10 +105,9 @@
                 <h2 style="color: var(--navy);">تسجيل حساب جديد</h2>
                 <div class="input-group"><label>الاسم بالكامل</label><input type="text" id="s-name" placeholder="أدخل اسمك ثلاثي"></div>
                 <div class="input-group"><label>رقم الموبايل</label><input type="tel" id="s-phone" maxlength="11"></div>
-                <div class="input-group"><label>رقم ولي الأمر</label><input type="tel" id="s-parent" maxlength="11"></div>
                 <div class="input-group"><label>كلمة المرور</label><input type="password" id="s-pass"></div>
                 <button class="btn-main" onclick="handleSignup()">تأكيد البيانات</button>
-                <p style="margin-top: 15px;" onclick="showPage('login-page')">العودة لتسجيل الدخول</p>
+                <p style="margin-top: 15px; cursor:pointer;" onclick="showPage('login-page')">العودة لتسجيل الدخول</p>
             </div>
         </div>
     </div>
@@ -112,8 +115,7 @@
     <div id="home-page" class="page">
         <div class="container">
             <h2 style="text-align: right; color: var(--navy); border-right: 5px solid var(--orange); padding-right: 15px;">محاضراتي المتاحة</h2>
-            <div id="courses-container" class="course-grid">
-                </div>
+            <div id="courses-container" class="course-grid"></div>
         </div>
     </div>
 </div>
@@ -143,7 +145,7 @@
         const btn = document.getElementById('login-btn');
         const devId = getDeviceId();
 
-        if (!phone || !pass) return alert("برجاء إدخال البيانات كاملة");
+        if (!phone || !pass) return alert("برجاء إدخال البيانات");
         btn.innerText = "جاري التحقق..."; btn.disabled = true;
 
         try {
@@ -154,10 +156,10 @@
                 btn.innerText = "دخول المنصة"; btn.disabled = false; return;
             }
 
-            // طرد الجهاز القديم تلقائياً بالتحديث
+            // تحديث البصمة يطرد أي جهاز قديم فوراً
             await sb.from('students').update({ last_device_id: devId }).eq('id', user.id);
             
-            localStorage.setItem('fady_session', user.id); // جلسة مستمرة
+            localStorage.setItem('fady_session', user.id);
             startSession(user);
         } catch (e) {
             alert("خطأ في الاتصال");
@@ -176,13 +178,12 @@
         const name = document.getElementById('s-name').value;
         const phone = document.getElementById('s-phone').value;
         const pass = document.getElementById('s-pass').value;
-        if (name.length < 5 || phone.length < 11) return alert("برجاء إدخال بيانات صحيحة");
 
         const { data, error } = await sb.from('students').insert([{
             full_name: name, student_phone: phone, password: pass, last_device_id: getDeviceId()
         }]).select().single();
 
-        if (error) return alert("هذا الرقم مسجل بالفعل");
+        if (error) return alert("الرقم مسجل مسبقاً");
         localStorage.setItem('fady_session', data.id);
         startSession(data);
     }
@@ -190,7 +191,7 @@
     function startSession(user) {
         document.getElementById('nav-user-name').innerText = user.full_name;
         const wmText = `${user.full_name} - ${user.student_phone} `;
-        document.getElementById('wm-text').innerText = Array(200).fill(wmText).join('   ');
+        document.getElementById('wm-text').innerText = Array(150).fill(wmText).join('   ');
         document.getElementById('watermark').classList.add('active');
         showPage('home-page');
         loadCourses();
@@ -208,20 +209,16 @@
                         <img src="${c.image_url || 'https://i.ibb.co/zT82jk68/image.png'}" class="course-img">
                         <div class="course-content">
                             <h3 class="course-title">${c.title}</h3>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-weight:800; color:var(--orange); font-size:1.2rem;">${c.price} ج.م</span>
-                                <button class="btn-main" style="width:auto; padding:8px 25px;">ابدأ الآن</button>
-                            </div>
+                            <button class="btn-main">ابدأ الآن</button>
                         </div>
                     </div>`;
             });
         }
     }
 
-    // منع تصوير الشاشة والكليك يمين
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('keydown', e => {
-        if (e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J'))) {
+        if (e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C'))) {
             e.preventDefault();
             const ov = document.getElementById('capture-overlay');
             ov.classList.add('active');
@@ -229,13 +226,11 @@
         }
     });
 
-    // تفقد الجلسة عند فتح التطبيق
     window.onload = async () => {
         const id = localStorage.getItem('fady_session');
         if (id) {
             const { data } = await sb.from('students').select('*').eq('id', id).single();
             if (data) startSession(data);
-            else localStorage.removeItem('fady_session');
         }
     };
 </script>
