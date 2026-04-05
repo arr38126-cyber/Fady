@@ -10,9 +10,9 @@
 <style>
 :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --radius: 15px; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--navy); user-select: none; direction: rtl; }
+body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--navy); user-select: none; direction: rtl; overflow-x: hidden; }
 
-/* زر الواتساب الثابت */
+/* زر الواتساب */
 .whatsapp-float {
     position: fixed;
     bottom: 25px;
@@ -34,44 +34,47 @@ body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--nav
 }
 .whatsapp-float:hover { transform: scale(1.1); color: #fff; }
 
-/* Watermark */
-#watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.07; overflow: hidden; }
+/* العلامة المائية */
+#watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.08; overflow: hidden; }
 #watermark.active { display: block; }
-#watermark-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.2rem; line-height: 3; width: 200%; }
+#watermark-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.1rem; line-height: 4; width: 300%; text-align: center; color: var(--navy); }
 
-/* Navbar */
-#navbar { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; }
+/* الهيدر */
+#navbar { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 #navbar.visible { display: flex; }
-.nav-logo { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--orange); }
+.nav-logo { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--orange); object-fit: cover; }
 
-/* Pages */
+/* الصفحات */
 .page { display: none; min-height: 100vh; animation: fadeIn 0.4s ease; }
 .page.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Auth Cards */
-.auth-bg { min-height: 100vh; background: var(--navy); display: flex; align-items: center; justify-content: center; padding: 20px; }
-.auth-card { background: #fff; width: 100%; max-width: 420px; border-radius: 25px; padding: 35px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-.auth-logo { width: 100px; margin-bottom: 15px; border-radius: 50%; border: 3px solid var(--orange); }
-.auth-quote { font-family: 'Amiri', serif; background: #fff5f0; padding: 15px; border-radius: 12px; border-right: 4px solid var(--orange); margin-bottom: 25px; color: var(--orange); }
-.form-group input { width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; outline: none; }
-.btn-main { width: 100%; padding: 15px; background: var(--orange); color: #fff; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 1.1rem; }
+/* كروت الدخول */
+.auth-bg { min-height: 100vh; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.auth-card { background: #fff; width: 100%; max-width: 420px; border-radius: 25px; padding: 35px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+.auth-logo { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--orange); margin-bottom: 15px; object-fit: cover; }
+.auth-quote { font-family: 'Amiri', serif; background: #fff5f0; padding: 15px; border-radius: 12px; border-right: 4px solid var(--orange); margin-bottom: 25px; color: var(--orange); font-size: 1.1rem; line-height: 1.6; }
+.form-group input { width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; outline: none; transition: 0.3s; }
+.form-group input:focus { border-color: var(--orange); }
+.btn-main { width: 100%; padding: 15px; background: var(--orange); color: #fff; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 1.1rem; transition: 0.3s; }
+.btn-main:hover { background: var(--orange-lt); transform: translateY(-2px); }
 
-/* Grid & Items */
+/* الكورسات والدروس */
 .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; }
 .course-card { background: #fff; border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: 0.3s; border-bottom: 5px solid var(--orange); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-.course-card:hover { transform: translateY(-5px); }
+.course-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
 .course-info { padding: 20px; }
-.lesson-item { background: #fff; padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-right: 5px solid var(--orange); }
+.lesson-item { background: #fff; padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-right: 5px solid var(--orange); transition: 0.2s; }
+.lesson-item:hover { background: #fdf2ed; transform: scale(1.01); }
 
-/* Video Player */
-.video-wrap { background: #000; border-radius: 15px; overflow: hidden; margin-bottom: 20px; position: relative; padding-bottom: 56.25%; height: 0; }
+/* الفيديو */
+.video-wrap { background: #000; border-radius: 15px; overflow: hidden; margin-bottom: 25px; position: relative; padding-bottom: 56.25%; height: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-<a href="https://wa.me/201021422744" class="whatsapp-float" target="_blank">
+<a href="https://wa.me/201021422744" class="whatsapp-float" target="_blank" title="تواصل معنا">
     <i class="fab fa-whatsapp"></i>
 </a>
 
@@ -81,11 +84,11 @@ body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--nav
     <div style="display:flex; align-items:center; gap:12px;">
         <img class="nav-logo" src="https://i.ibb.co/zT82jk68/image.png">
         <div>
-            <div style="font-weight:900; font-size:0.9rem;">Dr. Fady Adel</div>
-            <div id="nav-student-name" style="color:var(--orange); font-size:0.8rem;"></div>
+            <div style="font-weight:900; font-size:1rem;">Dr. Fady Adel</div>
+            <div id="nav-student-name" style="color:var(--orange); font-size:0.85rem; font-weight:700;"></div>
         </div>
     </div>
-    <button onclick="logout()" style="background:none; border:1px solid #fff; color:#fff; padding:5px 12px; border-radius:8px; cursor:pointer;">خروج</button>
+    <button onclick="logout()" style="background:none; border:1px solid #fff; color:#fff; padding:6px 15px; border-radius:8px; cursor:pointer; font-weight:700;">تسجيل خروج</button>
 </nav>
 
 <div id="app">
@@ -99,7 +102,7 @@ body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--nav
                     <input type="password" id="l-pass" placeholder="كلمة المرور">
                 </div>
                 <button class="btn-main" onclick="handleLogin()">دخول المنصة</button>
-                <p onclick="showPage('signup-page')" style="margin-top:20px; cursor:pointer; font-weight:700;">إنشاء حساب جديد</p>
+                <p onclick="showPage('signup-page')" style="margin-top:20px; cursor:pointer; font-weight:700; color:var(--navy);">ليس لديك حساب؟ سجل الآن</p>
             </div>
         </div>
     </div>
@@ -107,145 +110,22 @@ body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--nav
     <div id="signup-page" class="page">
         <div class="auth-bg">
             <div class="auth-card">
-                <h2 style="margin-bottom:20px;">تسجيل طالب جديد</h2>
+                <h2 style="margin-bottom:20px; color:var(--navy);">إنشاء حساب طالب</h2>
                 <div class="form-group">
-                    <input type="text" id="r-name" placeholder="الاسم ثلاثي">
+                    <input type="text" id="r-name" placeholder="الاسم بالكامل">
                     <input type="tel" id="r-phone" placeholder="رقم الموبايل">
-                    <input type="password" id="r-pass" placeholder="اختر كلمة مرور">
+                    <input type="password" id="r-pass" placeholder="كلمة المرور">
                 </div>
-                <button class="btn-main" onclick="handleSignup()">تأكيد التسجيل</button>
-                <p onclick="showPage('login-page')" style="margin-top:15px; cursor:pointer;">رجوع للدخول</p>
+                <button class="btn-main" onclick="handleSignup()">تأكيد الحساب</button>
+                <p onclick="showPage('login-page')" style="margin-top:15px; cursor:pointer; font-weight:700;">العودة للدخول</p>
             </div>
         </div>
     </div>
 
     <div id="home-page" class="page">
-        <div style="padding:25px;">
-            <h2 style="margin-bottom:20px; border-right:5px solid var(--orange); padding-right:15px;">المحاضرات المتاحة</h2>
-            <div id="courses-grid" class="courses-grid"></div>
-        </div>
-    </div>
-
-    <div id="content-page" class="page">
-        <div style="padding:20px;">
-            <button onclick="showPage('home-page')" style="margin-bottom:20px; border:none; background:#ddd; padding:8px 15px; border-radius:8px; cursor:pointer;">⬅ العودة</button>
-            <h2 id="current-course-title" style="margin-bottom:20px;"></h2>
-            <div id="video-section" class="video-wrap" style="display:none;">
-                <div id="player-container" style="width:100%; height:100%;"></div>
-            </div>
-            <div id="lessons-list"></div>
-        </div>
-    </div>
-</div>
-
-<script>
-const { createClient } = supabase;
-const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
-
-let currentStudent = null;
-
-function getDeviceId() {
-    let id = localStorage.getItem('fady_dev_id') || ('FD-' + Math.random().toString(36).substr(2, 9));
-    localStorage.setItem('fady_dev_id', id);
-    return id;
-}
-
-async function handleLogin() {
-    const phone = document.getElementById('l-phone').value.trim();
-    const pass = document.getElementById('l-pass').value.trim();
-    const { data, error } = await sb.from('students').select('*').eq('phone', phone).eq('password', pass).single();
-    if (data) {
-        const devId = getDeviceId();
-        if (data.last_device_id && data.last_device_id !== devId) {
-            alert("هذا الحساب مسجل على جهاز آخر بالفعل.");
-            return;
-        }
-        await sb.from('students').update({ last_device_id: devId }).eq('id', data.id);
-        sessionStorage.setItem('fady_user_id', data.id);
-        currentStudent = data;
-        onAuthSuccess();
-    } else alert("بيانات الدخول غير صحيحة");
-}
-
-async function handleSignup() {
-    const name = document.getElementById('r-name').value.trim();
-    const phone = document.getElementById('r-phone').value.trim();
-    const pass = document.getElementById('r-pass').value.trim();
-    if(!name || !phone || !pass) return alert("اكمل البيانات");
-    const { data, error } = await sb.from('students').insert([{ name, phone, password: pass, last_device_id: getDeviceId(), role: 'student' }]).select().single();
-    if (data) {
-        currentStudent = data;
-        sessionStorage.setItem('fady_user_id', data.id);
-        onAuthSuccess();
-    } else alert("حدث خطأ أو الرقم مسجل مسبقاً");
-}
-
-function onAuthSuccess() {
-    document.getElementById('nav-student-name').innerText = currentStudent.name;
-    const wmText = `${currentStudent.name} | ${currentStudent.phone} `;
-    document.getElementById('watermark-text').innerText = Array(20).fill(wmText).join('      ');
-    document.getElementById('watermark').classList.add('active');
-    showPage('home-page');
-    loadCourses();
-}
-
-async function loadCourses() {
-    const grid = document.getElementById('courses-grid');
-    grid.innerHTML = 'جاري التحميل...';
-    const { data } = await sb.from('courses').select('*');
-    if (data) {
-        grid.innerHTML = data.map(c => `
-            <div class="course-card" onclick="openCourse('${c.id}', '${c.title}')">
-                <div class="course-info">
-                    <h3>${c.title}</h3>
-                    <p style="color:var(--orange); font-weight:bold; margin-top:10px;">فتح المحاضرات ⬅</p>
+        <div style="padding:25px; max-width:1200px; margin:0 auto;">
+            <h2 style="margin-bottom:25px; border-right:5px solid var(--orange); padding-right:15px; color:var(--navy);">المحاضرات والكورسات المتاحة</h2>
+            <div id="courses-grid" class="courses-grid">
                 </div>
-            </div>
-        `).join('');
-    }
-}
-
-async function openCourse(id, title) {
-    document.getElementById('current-course-title').innerText = title;
-    document.getElementById('video-section').style.display = 'none';
-    showPage('content-page');
-    const { data } = await sb.from('lessons').select('*').eq('course_id', id).order('order');
-    if (data) {
-        document.getElementById('lessons-list').innerHTML = data.map((l, i) => `
-            <div class="lesson-item" onclick="playVideo('${l.youtube_url}')">
-                <div><b>${i+1}. ${l.title}</b></div>
-                <span style="color:var(--orange);">▶ مشاهدة</span>
-            </div>
-        `).join('');
-    }
-}
-
-function playVideo(url) {
-    const videoId = url.split('v=')[1] || url.split('/').pop();
-    const section = document.getElementById('video-section');
-    section.style.display = 'block';
-    document.getElementById('player-container').innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" allow="autoplay" allowfullscreen></iframe>`;
-    section.scrollIntoView({ behavior: 'smooth' });
-}
-
-function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'signup-page');
-}
-
-function logout() { sessionStorage.clear(); location.reload(); }
-
-window.onload = async () => {
-    const uid = sessionStorage.getItem('fady_user_id');
-    if (uid) {
-        const { data } = await sb.from('students').select('*').eq('id', uid).single();
-        if (data && data.last_device_id === getDeviceId()) {
-            currentStudent = data;
-            onAuthSuccess();
-        } else logout();
-    }
-};
-</script>
-</body>
-</html>
+        </div>
+    </div>
