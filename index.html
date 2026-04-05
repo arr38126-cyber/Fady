@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --card-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
@@ -42,8 +41,6 @@
         /* شاشات الدخول */
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); padding: 20px; }
         .auth-card { background: #fff; width: 100%; max-width: 420px; border-radius: 25px; padding: 35px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        
-        /* تصميم بيت الشعر */
         .auth-quote { font-family: 'Amiri', serif; color: var(--orange); background: rgba(232,88,26,0.08); padding: 15px; border-radius: 15px; margin-bottom: 25px; font-size: 1.15rem; line-height: 1.6; border-right: 4px solid var(--orange); font-style: italic; }
 
         .input-group { text-align: right; margin-bottom: 20px; }
@@ -63,7 +60,7 @@
 <div id="capture-overlay">🚫 تصوير الشاشة غير مسموح به</div>
 <div id="watermark"><div id="wm-text" style="transform: rotate(-30deg); white-space: nowrap; font-size: 18px; line-height: 6;"></div></div>
 
-<a href="https://wa.me/2010744" class="whatsapp-float" target="_blank">
+<a href="https://wa.me/201" class="whatsapp-float" target="_blank">
     <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="35">
 </a>
 
@@ -85,14 +82,8 @@
                 <img src="https://i.ibb.co/zT82jk68/image.png" width="90" style="margin-bottom: 15px;">
                 <div class="auth-quote">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ<br>يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</div>
                 <h2 style="color: var(--navy); margin-bottom: 20px;">دخول الطالب</h2>
-                <div class="input-group">
-                    <label>رقم الموبايل</label>
-                    <input type="tel" id="l-phone" placeholder="01xxxxxxxxx" maxlength="11">
-                </div>
-                <div class="input-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="l-pass" placeholder="••••••••">
-                </div>
+                <div class="input-group"><label>رقم الموبايل</label><input type="tel" id="l-phone" placeholder="01xxxxxxxxx" maxlength="11"></div>
+                <div class="input-group"><label>كلمة المرور</label><input type="password" id="l-pass" placeholder="••••••••"></div>
                 <button id="login-btn" class="btn-main" onclick="handleLogin()">دخول المنصة</button>
                 <p style="margin-top: 20px; font-size: 0.9rem;">ليس لديك حساب؟ <span onclick="showPage('signup-page')" style="color: var(--orange); cursor: pointer; font-weight: 700;">أنشئ حساباً جديداً</span></p>
             </div>
@@ -124,6 +115,7 @@
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
+    // إنشاء وتثبيت بصمة الجهاز
     function getDeviceId() {
         let id = localStorage.getItem('fady_device_id');
         if (!id) {
@@ -137,6 +129,26 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', id === 'home-page');
+    }
+
+    // ══════════════════════════════════════════
+    // حارس الأمان: التأكد من أن الجهاز الحالي هو المعتمد
+    // ══════════════════════════════════════════
+    async function checkDeviceValidity() {
+        const id = localStorage.getItem('fady_session');
+        if (!id) return false;
+        
+        const currentDevId = getDeviceId();
+        const { data } = await sb.from('students').select('last_device_id').eq('id', id).single();
+        
+        // لو بصمة السيرفر متغيرة عن بصمة الجهاز الحالي = ده جهاز قديم ولازم ينطرد
+        if (data && data.last_device_id !== currentDevId) {
+            alert("⚠️ تم فتح حسابك من جهاز آخر. سيتم تسجيل الخروج للحماية.");
+            localStorage.removeItem('fady_session'); // بنمسح الجلسة من عنده بس
+            location.reload(); // بنعمل تحديث عشان يرجع لصفحة الدخول
+            return false;
+        }
+        return true;
     }
 
     async function handleLogin() {
@@ -156,7 +168,7 @@
                 btn.innerText = "دخول المنصة"; btn.disabled = false; return;
             }
 
-            // تحديث البصمة يطرد أي جهاز قديم فوراً
+            // السيرفر بيسجل الجهاز الجديد (وده بيخلي الأجهزة القديمة تسقط في الفحص)
             await sb.from('students').update({ last_device_id: devId }).eq('id', user.id);
             
             localStorage.setItem('fady_session', user.id);
@@ -169,7 +181,15 @@
 
     async function handleLogout() {
         const id = localStorage.getItem('fady_session');
-        if (id) await sb.from('students').update({ last_device_id: null }).eq('id', id);
+        const currentDevId = getDeviceId();
+        
+        if (id) {
+            // بنتأكد إننا بنصفر السيرفر بس لو الجهاز اللي بيعمل خروج هو الجهاز الأساسي
+            const { data } = await sb.from('students').select('last_device_id').eq('id', id).single();
+            if (data && data.last_device_id === currentDevId) {
+                await sb.from('students').update({ last_device_id: null }).eq('id', id);
+            }
+        }
         localStorage.removeItem('fady_session');
         location.reload();
     }
@@ -195,6 +215,9 @@
         document.getElementById('watermark').classList.add('active');
         showPage('home-page');
         loadCourses();
+        
+        // تشغيل الفحص الصامت كل 60 ثانية
+        setInterval(checkDeviceValidity, 60000); 
     }
 
     async function loadCourses() {
@@ -209,10 +232,18 @@
                         <img src="${c.image_url || 'https://i.ibb.co/zT82jk68/image.png'}" class="course-img">
                         <div class="course-content">
                             <h3 class="course-title">${c.title}</h3>
-                            <button class="btn-main">ابدأ الآن</button>
+                            <button class="btn-main" onclick="checkBeforeEnter()">ابدأ الآن</button>
                         </div>
                     </div>`;
             });
+        }
+    }
+    
+    // فحص إضافي قبل ما يفتح الكورس
+    async function checkBeforeEnter() {
+        const isValid = await checkDeviceValidity();
+        if(isValid) {
+            alert("سيتم تحويلك للمحاضرة..."); // هنا هتحط كود فتح المحاضرة بتاعك
         }
     }
 
@@ -229,8 +260,12 @@
     window.onload = async () => {
         const id = localStorage.getItem('fady_session');
         if (id) {
-            const { data } = await sb.from('students').select('*').eq('id', id).single();
-            if (data) startSession(data);
+            // قبل ما يدخل، يفحص الأول
+            const isValid = await checkDeviceValidity();
+            if (isValid) {
+                const { data } = await sb.from('students').select('*').eq('id', id).single();
+                if (data) startSession(data);
+            }
         }
     };
 </script>
