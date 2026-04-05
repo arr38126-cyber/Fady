@@ -3,208 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Panel | Dr. Fady Adel</title>
+    <title>Admin Dashboard | Dr. Fady Adel</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Amiri:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { 
-            --navy: #1B2347; --orange: #E8581A; --orange-lt: #F97316;
-            --white: #FFFFFF; --card: #ffffff; --bg: #F3F4F6;
-            --shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--navy); margin: 0; padding: 20px; text-align: right; }
-        .container { max-width: 1000px; margin: auto; }
+        :root { --navy: #1B2347; --orange: #E8581A; --orange-lt: #F97316; --white: #fff; --bg: #f0f2f5; --shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--navy); margin: 0; padding: 0; }
         
-        /* Header Style */
-        .admin-header { background: var(--navy); color: white; padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 30px; box-shadow: var(--shadow); }
-        .admin-header h1 { margin: 0; font-family: 'Amiri', serif; font-size: 2.5rem; color: var(--orange); }
-
-        /* Section Style */
-        .section { background: var(--card); border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: var(--shadow); border-right: 6px solid var(--navy); transition: 0.3s; }
-        .section:hover { transform: translateY(-5px); }
-        .section h3 { color: var(--navy); border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        /* شاشة تسجيل الدخول */
+        #auth-overlay { position: fixed; inset: 0; background: var(--navy); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: white; padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: var(--shadow); }
         
-        /* Form Elements */
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; border-radius: 10px; outline: none; font-family: 'Cairo'; transition: 0.3s; box-sizing: border-box; }
-        input:focus { border-color: var(--orange); }
+        /* الهيدر والكونتينر */
+        .container { max-width: 1100px; margin: 20px auto; padding: 20px; display: none; }
+        .admin-header { background: var(--navy); color: white; padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         
-        /* Buttons */
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; font-size: 1rem; }
+        /* الأقسام */
+        .section { background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow); border-right: 5px solid var(--orange); }
+        h3 { margin-top: 0; color: var(--navy); border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-family: 'Cairo'; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; margin-top: 10px; }
         .btn-orange { background: var(--orange); color: white; }
-        .btn-orange:hover { background: var(--orange-lt); }
         .btn-blue { background: #3498db; color: white; }
         .btn-red { background: #e74c3c; color: white; }
-        
-        /* Lists */
-        .list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg); padding: 15px; border-radius: 12px; margin-bottom: 10px; }
-        .course-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; margin-left: 15px; border: 2px solid var(--orange); }
-        .q-block { background: #fffcf9; border: 1px dashed var(--orange); padding: 20px; border-radius: 15px; margin-top: 15px; }
+
+        /* عرض بيانات الطالب */
+        .log-item { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 5px; font-size: 0.9rem; border-right: 3px solid #3498db; }
+        .badge { background: var(--navy); color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="admin-header">
-        <h1>لوحة تحكم Dr. Fady Adel</h1>
-        <p>إدارة المحتوى، الطلاب، والامتحانات</p>
+<div id="auth-overlay">
+    <div class="login-card">
+        <h2 style="color: var(--navy)">تسجيل دخول الإدارة</h2>
+        <input type="tel" id="admin-phone" placeholder="رقم الموبايل">
+        <input type="password" id="admin-pass" placeholder="كلمة المرور">
+        <button class="btn btn-orange" onclick="handleAdminLogin()">دخول</button>
     </div>
+</div>
 
-    <div class="section">
-        <h3>📂 إدارة الكورسات (المجموعات)</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <input type="text" id="courseTitle" placeholder="اسم الكورس (مثلاً: ثانوية عامة 2026)">
-            <input type="number" id="coursePrice" placeholder="السعر (ج.م)">
-        </div>
-        <input type="text" id="courseImage" placeholder="رابط صورة الكورس (ImgBB)">
-        <button class="btn btn-orange" onclick="addCourse()">إضافة الكورس للبرنامج</button>
-        <div id="coursesList" style="margin-top:20px;"></div>
+<div class="container" id="main-content">
+    <div class="admin-header">
+        <h2 style="margin:0">لوحة التحكم | Dr. Fady</h2>
+        <button class="btn btn-red" style="width:auto; margin:0" onclick="adminLogout()">خروج</button>
     </div>
 
     <div class="section" style="border-right-color: #3498db;">
-        <h3 style="color:#3498db">🎥 إضافة محاضرة (فيديو + PDF)</h3>
-        <select id="targetCourse"></select>
-        <input type="text" id="lessonTitle" placeholder="عنوان المحاضرة">
-        <input type="text" id="videoId" placeholder="رابط يوتيوب أو الـ ID">
-        <input type="text" id="pdfUrl" placeholder="رابط ملف الـ PDF (اختياري)">
-        <button class="btn btn-blue" onclick="addLesson()">نشر المحاضرة</button>
-        <hr>
-        <select id="courseFilter" onchange="loadLessonsList()"></select>
-        <div id="allLessonsList"></div>
+        <h3>🔍 مراقبة نشاط طالب</h3>
+        <div style="display: flex; gap: 10px;">
+            <input type="tel" id="search-student-phone" placeholder="أدخل رقم موبايل الطالب للبحث...">
+            <button class="btn btn-blue" style="width:150px; margin:8px 0" onclick="getStudentReport()">عرض التقرير</button>
+        </div>
+        <div id="student-report-area" style="margin-top: 15px; display: none;">
+            <h4 id="rep-name" style="margin:5px 0; color:var(--orange)"></h4>
+            <div id="rep-courses" style="margin-bottom:10px;"><strong>📚 الكورسات:</strong> <span id="c-list"></span></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div>
+                    <strong>🎥 محاضرات شاهدها:</strong>
+                    <div id="rep-lessons" style="max-height:150px; overflow-y:auto; margin-top:5px;"></div>
+                </div>
+                <div>
+                    <strong>📝 نتائج الامتحانات:</strong>
+                    <div id="rep-exams" style="max-height:150px; overflow-y:auto; margin-top:5px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="section">
+            <h3>📂 إضافة كورس</h3>
+            <input type="text" id="courseTitle" placeholder="اسم الكورس">
+            <input type="number" id="coursePrice" placeholder="السعر">
+            <input type="text" id="courseImage" placeholder="رابط الصورة">
+            <button class="btn btn-orange" onclick="addCourse()">حفظ الكورس</button>
+        </div>
+        <div class="section">
+            <h3>🎥 إضافة محاضرة</h3>
+            <select id="targetCourse"></select>
+            <input type="text" id="lessonTitle" placeholder="عنوان المحاضرة">
+            <input type="text" id="videoId" placeholder="رابط يوتيوب">
+            <button class="btn btn-blue" onclick="addLesson()">نشر المحاضرة</button>
+        </div>
     </div>
 
     <div class="section" style="border-right-color: #2ecc71;">
-        <h3 style="color:#2ecc71">🔐 تفعيل الأكواد وتصفير الأجهزة</h3>
-        <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
-            <label>تفعيل كورس لطالب:</label>
-            <input type="tel" id="studentPhone" placeholder="رقم موبايل الطالب">
-            <select id="courseToActivate"></select>
-            <button class="btn btn-orange" onclick="activateCourse()">تفعيل الآن</button>
-        </div>
-        <div style="background: #f9f9f9; padding: 15px; border-radius: 10px;">
-            <label>السماح بدخول جهاز جديد:</label>
-            <input type="tel" id="logoutStudentPhone" placeholder="رقم الموبايل">
-            <button class="btn btn-blue" onclick="forceLogout()">إعادة ضبط الجهاز (Reset)</button>
-        </div>
-    </div>
-
-    <div class="section" style="border-right-color: #f1c40f;">
-        <h3 style="color:#f39c12">📝 بنك الأسئلة والامتحانات</h3>
-        <select id="targetLesson"></select>
-        <input type="number" id="examDuration" placeholder="مدة الامتحان (بالدقائق)">
-        <div id="questionsArea">
-            <div class="q-block">
-                <input type="text" placeholder="نص السؤال" class="q-text">
-                <input type="text" placeholder="رابط صورة توضيحية (اختياري)" class="q-img">
-                <input type="text" placeholder="الاختيار الأول" class="opt">
-                <input type="text" placeholder="الاختيار الثاني" class="opt">
-                <input type="text" placeholder="الاختيار الثالث" class="opt">
-                <input type="text" placeholder="الاختيار الرابع" class="opt">
-                <input type="number" placeholder="رقم الإجابة الصحيحة (0-3)" class="correct-idx">
+        <h3>🔐 صلاحيات الوصول</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <label>تفعيل كورس لطالب:</label>
+                <input type="tel" id="studentPhone" placeholder="رقم الطالب">
+                <select id="courseToActivate"></select>
+                <button class="btn btn-orange" onclick="activateCourse()">تفعيل الكورس</button>
+            </div>
+            <div>
+                <label>تصفير جهاز:</label>
+                <input type="tel" id="resetPhone" placeholder="رقم الطالب">
+                <button class="btn btn-blue" onclick="forceLogout()">Reset Device</button>
             </div>
         </div>
-        <button class="btn btn-blue" style="width:auto; margin-top:10px;" onclick="addQuestionField()">+ إضافة سؤال</button>
-        <button class="btn btn-orange" style="margin-top:20px;" onclick="saveExam()">حفظ الامتحان ونشره</button>
     </div>
-
 </div>
 
 <script>
     const _sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    // الدخول برمز الحماية
-    async function initAdmin() {
-        const pass = prompt("برجاء إدخال كود الإدارة السري:");
-        if(pass !== "FADY_2026_ADMIN") { 
-            alert("غير مصرح لك!"); 
-            window.location.href = "index.html"; 
-        } else { 
-            loadAllData(); 
+    // 1. نظام تسجيل الدخول وحفظ الجلسة
+    async function checkSession() {
+        const savedAdmin = localStorage.getItem('fady_admin_logged');
+        if(savedAdmin === 'true') {
+            showDashboard();
         }
     }
 
-    async function loadAllData() {
-        const { data: courses } = await _sb.from('courses').select('*');
-        const { data: lessons } = await _sb.from('lessons').select('*');
+    async function handleAdminLogin() {
+        const phone = document.getElementById('admin-phone').value;
+        const pass = document.getElementById('admin-pass').value;
 
-        // تحديث القوائم المنسدلة
+        const { data, error } = await _sb.from('students').select('*')
+            .eq('student_phone', phone).eq('password', pass).single();
+
+        if(data) {
+            if(data.role === 'admin') {
+                localStorage.setItem('fady_admin_logged', 'true');
+                showDashboard();
+            } else {
+                alert("عفواً، هذا الحساب للطالبات فقط. سيتم تحويلك لصفحة الطلاب.");
+                window.location.href = "index.html";
+            }
+        } else {
+            alert("بيانات الدخول خاطئة");
+        }
+    }
+
+    function showDashboard() {
+        document.getElementById('auth-overlay').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        loadData();
+    }
+
+    function adminLogout() {
+        localStorage.removeItem('fady_admin_logged');
+        location.reload();
+    }
+
+    // 2. نظام التقرير الشامل للطالب (الميزة المطلوبة)
+    async function getStudentReport() {
+        const phone = document.getElementById('search-student-phone').value;
+        if(!phone) return;
+
+        // جلب بيانات الطالب الأساسية
+        const { data: student } = await _sb.from('students').select('*').eq('student_phone', phone).single();
+        if(!student) return alert("الطالب غير موجود");
+
+        document.getElementById('student-report-area').style.display = 'block';
+        document.getElementById('rep-name').innerText = "تقرير الطالب: " + student.full_name;
+
+        // 1. الكورسات المشترك فيها
+        const { data: access } = await _sb.from('student_access').select('courses(title)').eq('student_phone', phone);
+        document.getElementById('c-list').innerHTML = access.map(a => `<span class="badge">${a.courses.title}</span>`).join(' ');
+
+        // 2. المحاضرات المشاهدة (بناءً على جدول الـ logs لو عندك أو كتمثيل)
+        // ملاحظة: افترضنا وجود جدول باسم lesson_views يسجل متى فتح الطالب المحاضرة
+        const { data: views } = await _sb.from('lesson_views').select('lesson_title, created_at').eq('student_phone', phone);
+        document.getElementById('rep-lessons').innerHTML = views?.length ? views.map(v => `<div class="log-item">✅ ${v.lesson_title} <br><small>${new Date(v.created_at).toLocaleString('ar-EG')}</small></div>`).join('') : "لم يشاهد محاضرات بعد";
+
+        // 3. نتائج الامتحانات
+        const { data: results } = await _sb.from('exam_results').select('*').eq('student_phone', phone);
+        document.getElementById('rep-exams').innerHTML = results?.length ? results.map(r => `<div class="log-item">📝 ${r.exam_name} <br> <b>الدرجة: ${r.score}%</b></div>`).join('') : "لم يمتحن بعد";
+    }
+
+    // 3. وظائف الإدارة العادية
+    async function loadData() {
+        const { data: courses } = await _sb.from('courses').select('*');
         let opts = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
         document.getElementById('targetCourse').innerHTML = opts;
         document.getElementById('courseToActivate').innerHTML = opts;
-        document.getElementById('courseFilter').innerHTML = `<option value="">-- اختر كورس لعرض محاضراته --</option>` + opts;
-        document.getElementById('targetLesson').innerHTML = lessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
-
-        // عرض قائمة الكورسات
-        document.getElementById('coursesList').innerHTML = courses.map(c => `
-            <div class="list-item">
-                <div style="display:flex; align-items:center;">
-                    <img src="${c.image_url || 'https://via.placeholder.com/60'}" class="course-img">
-                    <div>
-                        <strong>${c.title}</strong><br>
-                        <small>${c.price} ج.م</small>
-                    </div>
-                </div>
-                <button class="btn btn-red" style="width:auto; padding:5px 15px;" onclick="deleteCourse('${c.id}')">حذف</button>
-            </div>`).join('');
     }
 
-    // وظائف الإضافة والحذف (تستخدم أسماء أعمدة جدولك)
     async function addCourse() {
         const t = document.getElementById('courseTitle').value;
-        const p = document.getElementById('coursePrice').value || 0;
+        const p = document.getElementById('coursePrice').value;
         const img = document.getElementById('courseImage').value;
-        if(!t) return alert("أدخل العنوان");
-        await _sb.from('courses').insert([{ title: t, price: parseInt(p), image_url: img }]);
-        loadAllData();
+        await _sb.from('courses').insert([{ title: t, price: p, image_url: img }]);
+        alert("تم الحفظ"); loadData();
     }
 
     async function addLesson() {
         const cId = document.getElementById('targetCourse').value;
         const title = document.getElementById('lessonTitle').value;
-        const rawUrl = document.getElementById('videoId').value;
-        const vId = rawUrl.includes('=') ? rawUrl.split('=')[1].substring(0,11) : rawUrl;
-        await _sb.from('lessons').insert([{ course_id: cId, title, video_id: vId, pdf_url: document.getElementById('pdfUrl').value }]);
-        alert("تمت الإضافة!");
-        loadAllData();
-    }
-
-    async function forceLogout() {
-        const phone = document.getElementById('logoutStudentPhone').value;
-        // التعديل هنا ليتوافق مع student_phone
-        const { error } = await _sb.from('students').update({ last_device_id: null }).eq('student_phone', phone);
-        if(!error) alert("تم تصفير الجهاز بنجاح!");
+        const vId = document.getElementById('videoId').value;
+        await _sb.from('lessons').insert([{ course_id: cId, title, video_id: vId }]);
+        alert("تم النشر");
     }
 
     async function activateCourse() {
         const p = document.getElementById('studentPhone').value;
         const cId = document.getElementById('courseToActivate').value;
         await _sb.from('student_access').insert([{ student_phone: p, course_id: cId }]);
-        alert("تم التفعيل!");
+        alert("تم التفعيل");
     }
 
-    function addQuestionField() {
-        const div = document.createElement('div');
-        div.className = "q-block";
-        div.innerHTML = `<input type="text" placeholder="السؤال" class="q-text"><input type="text" placeholder="رابط الصورة" class="q-img"><input type="text" placeholder="اختيار 1" class="opt"><input type="text" placeholder="اختيار 2" class="opt"><input type="text" placeholder="اختيار 3" class="opt"><input type="text" placeholder="اختيار 4" class="opt"><input type="number" placeholder="رقم الإجابة (0-3)" class="correct-idx">`;
-        document.getElementById('questionsArea').appendChild(div);
+    async function forceLogout() {
+        const p = document.getElementById('resetPhone').value;
+        await _sb.from('students').update({ last_device_id: null }).eq('student_phone', p);
+        alert("تم تصفير الجهاز");
     }
 
-    async function saveExam() {
-        const lId = document.getElementById('targetLesson').value;
-        const dur = document.getElementById('examDuration').value;
-        let questions = [];
-        document.querySelectorAll('.q-block').forEach(b => {
-            questions.push({
-                q: b.querySelector('.q-text').value,
-                img: b.querySelector('.q-img').value,
-                options: Array.from(b.querySelectorAll('.opt')).map(i => i.value),
-                correct: parseInt(b.querySelector('.correct-idx').value)
-            });
-        });
-        await _sb.from('exams').insert([{ lesson_id: lId, duration_minutes: dur, questions: questions }]);
-        alert("تم نشر الامتحان!");
-    }
-
-    initAdmin();
+    window.onload = checkSession;
 </script>
 </body>
 </html>
