@@ -11,260 +11,216 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
-        /* الحماية القصوى */
-        #capture-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 100000; align-items: center; justify-content: center; color: #fff; text-align: center; }
+        /* نظام الحماية */
+        #capture-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 100000; align-items: center; justify-content: center; color: #fff; text-align: center; font-size: 1.2rem; }
         #capture-overlay.active { display: flex; }
-        #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.07; overflow: hidden; }
+        #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06; overflow: hidden; }
         #watermark.active { display: block; }
 
-        /* الهيدر المحسن */
-        nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: #fff; }
+        /* الهيدر */
+        nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         nav.visible { display: flex; }
         .nav-logo { display: flex; align-items: center; gap: 10px; }
-        .nav-logo img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--orange); }
+        .nav-logo img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--orange); }
 
-        /* تصميم الكروت */
+        /* تصميم الكورسات */
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
-        .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .course-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: var(--card-shadow); transition: 0.3s transform; position: relative; }
-        .course-card:active { transform: scale(0.98); }
-        .course-img { width: 100%; height: 180px; object-fit: cover; }
-        .course-badge { position: absolute; top: 15px; right: 15px; background: var(--orange); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
-        .course-content { padding: 20px; text-align: right; }
-        .course-title { margin: 0 0 10px 0; font-size: 1.2rem; color: var(--navy); }
+        .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .course-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: var(--card-shadow); transition: 0.3s; }
+        .course-img { width: 100%; height: 170px; object-fit: cover; }
+        .course-content { padding: 18px; text-align: right; }
         
-        /* الأزرار */
-        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 1.1rem; transition: 0.3s; }
-        .btn-main:disabled { background: #ccc; }
-        .btn-outline { background: none; border: 1px solid #fff; color: #fff; padding: 6px 15px; border-radius: 8px; cursor: pointer; }
-
-        /* شاشات الدخول */
+        /* الدخول والتسجيل */
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--navy) 0%, #2a3460 100%); padding: 20px; }
-        .auth-card { background: #fff; width: 100%; max-width: 420px; border-radius: 25px; padding: 35px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        .auth-quote { font-family: 'Amiri', serif; color: var(--orange); background: rgba(232,88,26,0.08); padding: 15px; border-radius: 15px; margin-bottom: 25px; font-size: 1.15rem; line-height: 1.6; border-right: 4px solid var(--orange); font-style: italic; }
+        .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 35px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .auth-quote { font-family: 'Amiri', serif; color: var(--orange); background: rgba(232,88,26,0.06); padding: 15px; border-radius: 15px; margin-bottom: 25px; font-size: 1.1rem; border-right: 4px solid var(--orange); line-height: 1.6; }
 
-        .input-group { text-align: right; margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--navy); }
-        .input-group input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; outline: none; transition: 0.3s; box-sizing: border-box; }
+        .input-group { text-align: right; margin-bottom: 15px; }
+        .input-group input { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; font-family: 'Cairo'; outline: none; transition: 0.3s; }
         .input-group input:focus { border-color: var(--orange); }
 
-        .whatsapp-float { position: fixed; bottom: 25px; left: 25px; background: #25D366; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 5000; transition: 0.3s; }
+        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1.1rem; }
         
         .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .page.active { display: block; }
     </style>
 </head>
 <body>
 
-<div id="capture-overlay">🚫 تصوير الشاشة غير مسموح به</div>
-<div id="watermark"><div id="wm-text" style="transform: rotate(-30deg); white-space: nowrap; font-size: 18px; line-height: 6;"></div></div>
-
-<a href="https://wa.me/201000" class="whatsapp-float" target="_blank">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="35">
-</a>
+<div id="capture-overlay">🚫 تصوير الشاشة غير مسموح به لحماية المحتوى</div>
+<div id="watermark"><div id="wm-text" style="transform: rotate(-30deg); white-space: nowrap; font-size: 16px; line-height: 7;"></div></div>
 
 <nav id="navbar">
     <div class="nav-logo">
         <img src="https://i.ibb.co/zT82jk68/image.png" alt="Dr. Fady">
         <div>
             <div style="font-weight: 800; font-size: 0.9rem;">Dr. Fady Adel</div>
-            <div id="nav-user-name" style="color: var(--orange); font-size: 0.8rem;">...</div>
+            <div id="nav-user-name" style="color: var(--orange); font-size: 0.8rem;">محمل...</div>
         </div>
     </div>
-    <button class="btn-outline" onclick="handleLogout()">خروج</button>
+    <button style="background:none; border:1px solid #fff; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="handleLogout()">خروج</button>
 </nav>
 
 <div id="app">
     <div id="login-page" class="page active">
         <div class="auth-screen">
             <div class="auth-card">
-                <img src="https://i.ibb.co/zT82jk68/image.png" width="90" style="margin-bottom: 15px;">
+                <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="margin-bottom: 10px;">
                 <div class="auth-quote">"وَمَنْ لا يُحِبُّ صُعُودَ الجِبَالِ<br>يَعِشْ أَبَدَ الدَّهْرِ بَيْنَ الحُفَرِ"</div>
-                <h2 style="color: var(--navy); margin-bottom: 20px;">دخول الطالب</h2>
-                <div class="input-group"><label>رقم الموبايل</label><input type="tel" id="l-phone" placeholder="01xxxxxxxxx" maxlength="11"></div>
-                <div class="input-group"><label>كلمة المرور</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+                <h3 style="margin-bottom:20px; color:var(--navy)">دخول الطالب</h3>
+                <div class="input-group"><input type="tel" id="l-phone" placeholder="رقم الموبايل (11 رقم)" maxlength="11"></div>
+                <div class="input-group"><input type="password" id="l-pass" placeholder="كلمة المرور"></div>
                 <button id="login-btn" class="btn-main" onclick="handleLogin()">دخول المنصة</button>
-                <p style="margin-top: 20px; font-size: 0.9rem;">ليس لديك حساب؟ <span onclick="showPage('signup-page')" style="color: var(--orange); cursor: pointer; font-weight: 700;">أنشئ حساباً جديداً</span></p>
-            </div>
-        </div>
-    </div>
-
-    <div id="signup-page" class="page">
-        <div class="auth-screen">
-            <div class="auth-card">
-                <h2 style="color: var(--navy);">تسجيل حساب جديد</h2>
-                <div class="input-group"><label>الاسم بالكامل</label><input type="text" id="s-name" placeholder="أدخل اسمك ثلاثي"></div>
-                <div class="input-group"><label>رقم الموبايل</label><input type="tel" id="s-phone" maxlength="11"></div>
-                <div class="input-group"><label>كلمة المرور</label><input type="password" id="s-pass"></div>
-                <button class="btn-main" onclick="handleSignup()">تأكيد البيانات</button>
-                <p style="margin-top: 15px; cursor:pointer;" onclick="showPage('login-page')">العودة لتسجيل الدخول</p>
             </div>
         </div>
     </div>
 
     <div id="home-page" class="page">
         <div class="container">
-            <h2 style="text-align: right; color: var(--navy); border-right: 5px solid var(--orange); padding-right: 15px;">محاضراتي المتاحة</h2>
+            <h2 style="text-align: right; color: var(--navy); border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom:30px;">محاضراتي المتاحة</h2>
             <div id="courses-container" class="course-grid"></div>
         </div>
     </div>
 </div>
 
 <script>
+    // تهيئة Supabase (تأكد من صحة الروابط)
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    // إنشاء وتثبيت بصمة الجهاز
+    // 1. توليد بصمة ثابتة للجهاز لمنع الطرد العشوائي
     function getDeviceId() {
         let id = localStorage.getItem('fady_device_id');
         if (!id) {
-            id = 'FADY-' + Math.random().toString(36).substr(2, 9) + Date.now();
+            // بصمة تعتمد على نوع الجهاز والمعالج ودقة الشاشة (أكثر ثباتاً)
+            const platform = navigator.platform || 'unknown';
+            const screenRes = `${screen.width}x${screen.height}`;
+            const vendor = navigator.vendor || 'web';
+            id = `DEVICE-${platform}-${vendor}-${screenRes}-${Math.random().toString(36).substr(2, 5)}`;
             localStorage.setItem('fady_device_id', id);
         }
         return id;
     }
 
+    // 2. حارس الأمان (يفحص إذا كان الإدمن صفر الجهاز أو طالب آخر دخل)
+    async function checkDeviceValidity() {
+        const userId = localStorage.getItem('fady_session');
+        if (!userId) return;
+
+        const currentDevId = getDeviceId();
+        const { data, error } = await sb.from('students').select('last_device_id').eq('id', userId).single();
+
+        if (error || !data) return;
+
+        // الحالة الأولى: الإدمن عمل تصفير (القيمة null)
+        // الحالة الثانية: البصمة في السيرفر مختلفة عن بصمة المتصفح الحالي
+        if (data.last_device_id === null || data.last_device_id !== currentDevId) {
+            let reason = (data.last_device_id === null) ? "تصفير من الإدارة" : "دخول من جهاز آخر";
+            alert(`⚠️ تنبيه أمني: ${reason}. سيتم تسجيل الخروج.`);
+            handleLogout();
+        }
+    }
+
+    // 3. التحكم في الصفحات
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', id === 'home-page');
     }
 
-    // ══════════════════════════════════════════
-    // حارس الأمان: التأكد من أن الجهاز الحالي هو المعتمد
-    // ══════════════════════════════════════════
-    async function checkDeviceValidity() {
-        const id = localStorage.getItem('fady_session');
-        if (!id) return false;
-        
-        const currentDevId = getDeviceId();
-        const { data } = await sb.from('students').select('last_device_id').eq('id', id).single();
-        
-        // لو بصمة السيرفر متغيرة عن بصمة الجهاز الحالي = ده جهاز قديم ولازم ينطرد
-        if (data && data.last_device_id !== currentDevId) {
-            alert("⚠️ تم فتح حسابك من جهاز آخر. سيتم تسجيل الخروج للحماية.");
-            localStorage.removeItem('fady_session'); // بنمسح الجلسة من عنده بس
-            location.reload(); // بنعمل تحديث عشان يرجع لصفحة الدخول
-            return false;
-        }
-        return true;
-    }
-
+    // 4. تسجيل الدخول
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value.trim();
         const pass = document.getElementById('l-pass').value.trim();
         const btn = document.getElementById('login-btn');
         const devId = getDeviceId();
 
-        if (!phone || !pass) return alert("برجاء إدخال البيانات");
+        if (phone.length < 11) return alert("يرجى إدخال رقم هاتف صحيح");
         btn.innerText = "جاري التحقق..."; btn.disabled = true;
 
-        try {
-            const { data: user, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+        const { data: user, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
 
-            if (error || !user) {
-                alert("بيانات الدخول غير صحيحة");
-                btn.innerText = "دخول المنصة"; btn.disabled = false; return;
-            }
-
-            // السيرفر بيسجل الجهاز الجديد (وده بيخلي الأجهزة القديمة تسقط في الفحص)
+        if (user) {
+            // تحديث السيرفر بالبصمة الحالية (تطرد أي جهاز قديم)
             await sb.from('students').update({ last_device_id: devId }).eq('id', user.id);
-            
             localStorage.setItem('fady_session', user.id);
             startSession(user);
-        } catch (e) {
-            alert("خطأ في الاتصال");
+        } else {
+            alert("بيانات الدخول غير صحيحة");
             btn.innerText = "دخول المنصة"; btn.disabled = false;
         }
     }
 
-    async function handleLogout() {
-        const id = localStorage.getItem('fady_session');
-        const currentDevId = getDeviceId();
+    // 5. بدء الجلسة وتحميل البيانات
+    function startSession(user) {
+        document.getElementById('nav-user-name').innerText = user.full_name;
         
-        if (id) {
-            // بنتأكد إننا بنصفر السيرفر بس لو الجهاز اللي بيعمل خروج هو الجهاز الأساسي
-            const { data } = await sb.from('students').select('last_device_id').eq('id', id).single();
-            if (data && data.last_device_id === currentDevId) {
-                await sb.from('students').update({ last_device_id: null }).eq('id', id);
-            }
-        }
+        // الواتر مارك لحماية الفيديوهات
+        const wmText = `${user.full_name} - ${user.student_phone} `;
+        document.getElementById('wm-text').innerText = Array(200).fill(wmText).join('   ');
+        document.getElementById('watermark').classList.add('active');
+        
+        showPage('home-page');
+        loadCourses();
+        
+        // فحص دوري كل 30 ثانية للتأكد من عدم التصفير أو الدخول المزدوج
+        setInterval(checkDeviceValidity, 30000);
+    }
+
+    // 6. جلب الكورسات
+    async function loadCourses() {
+        const { data } = await sb.from('courses').select('*');
+        const container = document.getElementById('courses-container');
+        container.innerHTML = data ? data.map(c => `
+            <div class="course-card">
+                <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" class="course-img">
+                <div class="course-content">
+                    <h3 style="margin:0 0 15px 0; color:var(--navy); font-size:1.1rem;">${c.title}</h3>
+                    <button class="btn-main" onclick="openCourse('${c.id}')">مشاهدة المحتوى</button>
+                </div>
+            </div>`).join('') : '<p>لا توجد كورسات متاحة حالياً.</p>';
+    }
+
+    function openCourse(id) {
+        // فحص أمان سريع قبل الدخول للكورس
+        checkDeviceValidity().then(() => {
+            console.log("جارٍ فتح الكورس: " + id);
+            // هنا يتم توجيه الطالب لصفحة المحاضرات الخاصة بالكورس
+        });
+    }
+
+    function handleLogout() {
         localStorage.removeItem('fady_session');
         location.reload();
     }
 
-    async function handleSignup() {
-        const name = document.getElementById('s-name').value;
-        const phone = document.getElementById('s-phone').value;
-        const pass = document.getElementById('s-pass').value;
-
-        const { data, error } = await sb.from('students').insert([{
-            full_name: name, student_phone: phone, password: pass, last_device_id: getDeviceId()
-        }]).select().single();
-
-        if (error) return alert("الرقم مسجل مسبقاً");
-        localStorage.setItem('fady_session', data.id);
-        startSession(data);
-    }
-
-    function startSession(user) {
-        document.getElementById('nav-user-name').innerText = user.full_name;
-        const wmText = `${user.full_name} - ${user.student_phone} `;
-        document.getElementById('wm-text').innerText = Array(150).fill(wmText).join('   ');
-        document.getElementById('watermark').classList.add('active');
-        showPage('home-page');
-        loadCourses();
-        
-        // تشغيل الفحص الصامت كل 60 ثانية
-        setInterval(checkDeviceValidity, 60000); 
-    }
-
-    async function loadCourses() {
-        const { data } = await sb.from('courses').select('*');
-        const container = document.getElementById('courses-container');
-        container.innerHTML = '';
-        if (data) {
-            data.forEach(c => {
-                container.innerHTML += `
-                    <div class="course-card">
-                        <div class="course-badge">${c.category || 'فيزياء'}</div>
-                        <img src="${c.image_url || 'https://i.ibb.co/zT82jk68/image.png'}" class="course-img">
-                        <div class="course-content">
-                            <h3 class="course-title">${c.title}</h3>
-                            <button class="btn-main" onclick="checkBeforeEnter()">ابدأ الآن</button>
-                        </div>
-                    </div>`;
-            });
-        }
-    }
-    
-    // فحص إضافي قبل ما يفتح الكورس
-    async function checkBeforeEnter() {
-        const isValid = await checkDeviceValidity();
-        if(isValid) {
-            alert("سيتم تحويلك للمحاضرة..."); // هنا هتحط كود فتح المحاضرة بتاعك
-        }
-    }
-
+    // 7. منع تصوير الشاشة (محاكاة برمجية)
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('keydown', e => {
-        if (e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C'))) {
+        if (e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C' || e.key === 'K'))) {
             e.preventDefault();
             const ov = document.getElementById('capture-overlay');
             ov.classList.add('active');
-            setTimeout(() => ov.classList.remove('active'), 2000);
+            setTimeout(() => ov.classList.remove('active'), 2500);
         }
     });
 
+    // 8. فحص الجلسة عند فتح الموقع
     window.onload = async () => {
         const id = localStorage.getItem('fady_session');
         if (id) {
-            // قبل ما يدخل، يفحص الأول
-            const isValid = await checkDeviceValidity();
-            if (isValid) {
-                const { data } = await sb.from('students').select('*').eq('id', id).single();
-                if (data) startSession(data);
+            const { data: user } = await sb.from('students').select('*').eq('id', id).single();
+            if (user) {
+                const currentDevId = getDeviceId();
+                // إذا كانت البصمة في السيرفر مختلفة عن الجهاز الحالي، لا تفتح الجلسة
+                if (user.last_device_id !== currentDevId) {
+                    localStorage.removeItem('fady_session');
+                    showPage('login-page');
+                } else {
+                    startSession(user);
+                }
+            } else {
+                localStorage.removeItem('fady_session');
             }
         }
     };
