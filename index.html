@@ -10,12 +10,7 @@
     <style>
         :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --card-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; -webkit-user-select: none; overflow-x: hidden; color: #333; }
-
-        /* حماية ضد تسجيل الشاشة ولقطات الشاشة */
-        body.security-blur { filter: blur(30px) brightness(0.2) !important; pointer-events: none !important; }
-        #security-overlay { display: none; position: fixed; inset: 0; z-index: 100000; background: rgba(0,0,0,0.95); color: #fff; align-items: center; justify-content: center; text-align: center; font-size: 1.5rem; font-weight: bold; padding: 20px; direction: rtl; }
-        body.security-blur #security-overlay { display: flex; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
         /* الحماية والواتر مارك */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.08; overflow: hidden; }
@@ -62,7 +57,6 @@
 </head>
 <body oncontextmenu="return false;">
 
-<div id="security-overlay">🚫 تصوير الشاشة غير مسموح به لحماية الحقوق</div>
 <div id="watermark"><div id="wm-text"></div></div>
 
 <a href="https://wa.me/201021422744" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
@@ -136,24 +130,6 @@
 
     let currentStudent = null;
 
-    /* نظام الحماية المتقدمة */
-    function enableSecurity() {
-        // منع اختصارات لوحة المفاتيح
-        window.addEventListener('keydown', (e) => {
-            if (e.key === "PrintScreen" || e.keyCode === 44) {
-                alert("تنبيه: محاولة لقطة الشاشة مرصودة!");
-                document.body.classList.add('security-blur');
-                e.preventDefault();
-            }
-            if (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u')) e.preventDefault();
-            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'j' || e.key === 'c')) e.preventDefault();
-        });
-
-        // منع التسجيل عند الخروج من النافذة
-        window.addEventListener('blur', () => document.body.classList.add('security-blur'));
-        window.addEventListener('focus', () => document.body.classList.remove('security-blur'));
-    }
-
     function getDeviceId() {
         let id = localStorage.getItem('fady_device_id');
         if (!id) {
@@ -180,14 +156,29 @@
         } else alert("بيانات الدخول غير صحيحة");
     }
 
+    // دالة التسجيل المحدثة
     async function handleRegister() {
         const name = document.getElementById('r-name').value.trim();
         const phone = document.getElementById('r-phone').value.trim();
         const parentPhone = document.getElementById('r-parent').value.trim();
         const pass = document.getElementById('r-pass').value.trim();
+
         if(!name || !phone || !parentPhone || !pass) return alert("يرجى ملء كافة البيانات");
-        const { data } = await sb.from('students').insert([{ full_name: name, student_phone: phone, parent_phone: parentPhone, password: pass, last_device_id: getDeviceId() }]).select().single();
-        if (data) startSession(data); else alert("خطأ في التسجيل أو الرقم مكرر");
+
+        const { data, error } = await sb.from('students').insert([{ 
+            full_name: name, 
+            student_phone: phone, 
+            parent_phone: parentPhone, // إضافة الحقل الجديد هنا
+            password: pass, 
+            last_device_id: getDeviceId() 
+        }]).select().single();
+
+        if (data) { 
+            startSession(data); 
+        } else {
+            console.error(error);
+            alert("خطأ في التسجيل أو الرقم مكرر");
+        }
     }
 
     function startSession(user) {
@@ -198,21 +189,23 @@
         document.getElementById('watermark').classList.add('active');
         showPage('home-page');
         loadCourses();
-        enableSecurity();
     }
 
     async function loadCourses() {
         const { data: courses } = await sb.from('courses').select('*');
         const container = document.getElementById('courses-container');
-        container.innerHTML = courses.map(c => `
-            <div class="course-card">
-                <span class="price-badge" style="background:${parseFloat(c.price) === 0 ? '#2ecc71' : '#1B2347'}">${parseFloat(c.price) === 0 ? 'مجاني' : 'مدفوع'}</span>
-                <img src="${c.image_url || 'https://via.placeholder.com/300x170/1B2347/fff?text=Physics'}" class="course-img">
-                <div class="course-content">
-                    <h3 style="margin-bottom:15px;">${c.title}</h3>
-                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول المحتوى</button>
-                </div>
-            </div>`).join('');
+        container.innerHTML = courses.map(c => {
+            const isFree = parseFloat(c.price) === 0;
+            return `
+                <div class="course-card">
+                    <span class="price-badge" style="background:${isFree ? '#2ecc71' : '#1B2347'}">${isFree ? 'مجاني' : 'مدفوع'}</span>
+                    <img src="${c.image_url || 'https://via.placeholder.com/300x170/1B2347/fff?text=Physics'}" class="course-img">
+                    <div class="course-content">
+                        <h3 style="margin-bottom:15px;">${c.title}</h3>
+                        <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}', ${isFree})">دخول المحتوى</button>
+                    </div>
+                </div>`;
+        }).join('');
     }
 
     async function openCourse(courseId, title, isFree) {
@@ -221,10 +214,12 @@
             const { data: access } = await sb.from('student_access').select('*').eq('student_phone', phone).eq('course_id', courseId).single();
             if (!access) return alert("🚫 يرجى تفعيل الكورس أولاً من السكرتارية.");
         }
+
         document.getElementById('current-course-title').innerText = title;
         document.getElementById('video-section').style.display = 'none';
         showPage('content-page');
         document.getElementById('back-btn').style.display = 'block';
+
         const { data: lessons } = await sb.from('lessons').select('*').eq('course_id', courseId).order('id');
         document.getElementById('lessons-list').innerHTML = lessons?.length ? lessons.map((l, i) => `
             <div class="content-item" onclick="playVideo('${l.video_id || l.youtube_url}')">
@@ -236,16 +231,12 @@
             </div>`).join('') : '<p style="text-align:center">قريباً...</p>';
     }
 
-    /* تشغيل الفيديو مع إخفاء المعلومات */
     function playVideo(idOrUrl) {
         let vId = idOrUrl.includes('v=') ? idOrUrl.split('v=')[1].split('&')[0] : (idOrUrl.includes('be/') ? idOrUrl.split('be/')[1] : idOrUrl);
         const section = document.getElementById('video-section');
         section.style.display = 'block';
-        
-        // استخدام بارامترات يوتيوب لإخفاء الشعار والعناوين قدر الإمكان
-        // modestbranding=1 (إخفاء الشعار)، rel=0 (منع الفيديوهات المقترحة)، controls=1 (تحكم بسيط)
         document.getElementById('player-container').innerHTML = `
-            <iframe src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         `;
         section.scrollIntoView({ behavior: 'smooth' });
     }
@@ -261,7 +252,8 @@
     async function handleLogout() {
         const id = localStorage.getItem('fady_session');
         if (id) await sb.from('students').update({ last_device_id: null }).eq('id', id);
-        localStorage.clear(); location.reload(); 
+        localStorage.clear(); 
+        location.reload(); 
     }
 
     window.onload = async () => {
