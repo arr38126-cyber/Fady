@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Dr. Fady Adel</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --navy: #1B2347; --orange: #E8581A; --orange-lt: #F97316; --white: #fff; --bg: #f0f2f5; --shadow: 0 5px 15px rgba(0,0,0,0.1); }
@@ -19,7 +20,7 @@
         .admin-header { background: var(--navy); color: white; padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         
         /* الأقسام */
-        .section { background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow); border-right: 5px solid var(--orange); }
+        .section { background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow); border-right: 5px solid var(--orange); position: relative; }
         h3 { margin-top: 0; color: var(--navy); border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-family: 'Cairo'; box-sizing: border-box; }
@@ -30,7 +31,7 @@
 
         /* عرض بيانات الطالب */
         .log-item { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 5px; font-size: 0.9rem; border-right: 3px solid #3498db; }
-        .badge { background: var(--navy); color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem; }
+        .badge { background: var(--navy); color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem; display: inline-block; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -56,17 +57,21 @@
             <input type="tel" id="search-student-phone" placeholder="أدخل رقم موبايل الطالب للبحث...">
             <button class="btn btn-blue" style="width:150px; margin:8px 0" onclick="getStudentReport()">عرض التقرير</button>
         </div>
-        <div id="student-report-area" style="margin-top: 15px; display: none;">
-            <h4 id="rep-name" style="margin:5px 0; color:var(--orange)"></h4>
-            <div id="rep-courses" style="margin-bottom:10px;"><strong>📚 الكورسات:</strong> <span id="c-list"></span></div>
+        
+        <div id="student-report-area" style="margin-top: 15px; display: none; padding: 15px; background: #fff;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
+                <h4 id="rep-name" style="margin:0; color:var(--orange); font-size: 1.3rem;"></h4>
+                <button id="pdf-btn" class="btn btn-red" style="width:auto; margin:0; padding: 5px 15px;" onclick="downloadPDF()">📥 تحميل PDF</button>
+            </div>
+            <div id="rep-courses" style="margin-bottom:15px;"><strong>📚 الكورسات المشترك بها:</strong> <div id="c-list" style="margin-top:5px;"></div></div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                 <div>
-                    <strong>🎥 محاضرات شاهدها:</strong>
-                    <div id="rep-lessons" style="max-height:150px; overflow-y:auto; margin-top:5px;"></div>
+                    <strong style="color: var(--navy);">🎥 محاضرات شاهدها:</strong>
+                    <div id="rep-lessons" style="max-height:200px; overflow-y:auto; margin-top:10px;"></div>
                 </div>
                 <div>
-                    <strong>📝 نتائج الامتحانات:</strong>
-                    <div id="rep-exams" style="max-height:150px; overflow-y:auto; margin-top:5px;"></div>
+                    <strong style="color: var(--navy);">📝 نتائج الامتحانات:</strong>
+                    <div id="rep-exams" style="max-height:200px; overflow-y:auto; margin-top:10px;"></div>
                 </div>
             </div>
         </div>
@@ -90,7 +95,7 @@
     </div>
 
     <div class="section" style="border-right-color: #2ecc71;">
-        <h3>🔐 صلاحيات الوصول</h3>
+        <h3>🔐 صلاحيات الوصول وإدارة الأجهزة</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div>
                 <label>تفعيل كورس لطالب:</label>
@@ -99,9 +104,9 @@
                 <button class="btn btn-orange" onclick="activateCourse()">تفعيل الكورس</button>
             </div>
             <div>
-                <label>تصفير جهاز:</label>
-                <input type="tel" id="resetPhone" placeholder="رقم الطالب">
-                <button class="btn btn-blue" onclick="forceLogout()">Reset Device</button>
+                <label>تصفير جهاز (طرد من كل الأجهزة):</label>
+                <input type="tel" id="resetPhone" placeholder="رقم الموبايل للطالب">
+                <button class="btn btn-red" onclick="forceLogout()">تصفير الحساب</button>
             </div>
         </div>
     </div>
@@ -130,8 +135,7 @@
                 localStorage.setItem('fady_admin_logged', 'true');
                 showDashboard();
             } else {
-                alert("عفواً، هذا الحساب للطالبات فقط. سيتم تحويلك لصفحة الطلاب.");
-                window.location.href = "index.html";
+                alert("عفواً، هذا الحساب للطلاب فقط.");
             }
         } else {
             alert("بيانات الدخول خاطئة");
@@ -149,38 +153,58 @@
         location.reload();
     }
 
-    // 2. نظام التقرير الشامل للطالب (الميزة المطلوبة)
+    // 2. نظام التقرير الشامل
     async function getStudentReport() {
         const phone = document.getElementById('search-student-phone').value;
-        if(!phone) return;
+        if(!phone) return alert("أدخل رقم الطالب");
 
-        // جلب بيانات الطالب الأساسية
         const { data: student } = await _sb.from('students').select('*').eq('student_phone', phone).single();
         if(!student) return alert("الطالب غير موجود");
 
         document.getElementById('student-report-area').style.display = 'block';
         document.getElementById('rep-name').innerText = "تقرير الطالب: " + student.full_name;
 
-        // 1. الكورسات المشترك فيها
         const { data: access } = await _sb.from('student_access').select('courses(title)').eq('student_phone', phone);
-        document.getElementById('c-list').innerHTML = access.map(a => `<span class="badge">${a.courses.title}</span>`).join(' ');
+        document.getElementById('c-list').innerHTML = (access && access.length > 0) ? access.map(a => `<span class="badge">${a.courses.title}</span>`).join(' ') : "لم يشترك في كورسات بعد";
 
-        // 2. المحاضرات المشاهدة (بناءً على جدول الـ logs لو عندك أو كتمثيل)
-        // ملاحظة: افترضنا وجود جدول باسم lesson_views يسجل متى فتح الطالب المحاضرة
         const { data: views } = await _sb.from('lesson_views').select('lesson_title, created_at').eq('student_phone', phone);
         document.getElementById('rep-lessons').innerHTML = views?.length ? views.map(v => `<div class="log-item">✅ ${v.lesson_title} <br><small>${new Date(v.created_at).toLocaleString('ar-EG')}</small></div>`).join('') : "لم يشاهد محاضرات بعد";
 
-        // 3. نتائج الامتحانات
         const { data: results } = await _sb.from('exam_results').select('*').eq('student_phone', phone);
         document.getElementById('rep-exams').innerHTML = results?.length ? results.map(r => `<div class="log-item">📝 ${r.exam_name} <br> <b>الدرجة: ${r.score}%</b></div>`).join('') : "لم يمتحن بعد";
     }
 
-    // 3. وظائف الإدارة العادية
+    // 3. وظيفة تحميل التقرير كـ PDF
+    function downloadPDF() {
+        const element = document.getElementById('student-report-area');
+        const studentName = document.getElementById('rep-name').innerText.replace('تقرير الطالب: ', '').trim();
+        const pdfBtn = document.getElementById('pdf-btn');
+        
+        // إخفاء الزر أثناء التقاط الـ PDF عشان ميظهرش في الورقة
+        pdfBtn.style.display = 'none';
+
+        const opt = {
+            margin:       0.5,
+            filename:     `تقرير_${studentName}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            // إظهار الزر مرة تانية بعد التحميل
+            pdfBtn.style.display = 'inline-block';
+        });
+    }
+
+    // 4. وظائف الإدارة العادية
     async function loadData() {
         const { data: courses } = await _sb.from('courses').select('*');
-        let opts = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
-        document.getElementById('targetCourse').innerHTML = opts;
-        document.getElementById('courseToActivate').innerHTML = opts;
+        if(courses) {
+            let opts = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+            document.getElementById('targetCourse').innerHTML = opts;
+            document.getElementById('courseToActivate').innerHTML = opts;
+        }
     }
 
     async function addCourse() {
@@ -206,10 +230,20 @@
         alert("تم التفعيل");
     }
 
+    // 5. التصفير الجذري للطالب
     async function forceLogout() {
         const p = document.getElementById('resetPhone').value;
-        await _sb.from('students').update({ last_device_id: null }).eq('student_phone', p);
-        alert("تم تصفير الجهاز");
+        if(!p) return alert("برجاء إدخال رقم الطالب");
+
+        // جعل last_device_id تساوي null يسحب الجلسة من كل الأجهزة فوراً بناءً على كود الطالب
+        const { error } = await _sb.from('students').update({ last_device_id: null }).eq('student_phone', p);
+        
+        if (error) {
+            alert("حدث خطأ أثناء تصفير الحساب.");
+        } else {
+            alert("تم تصفير حساب الطالب بنجاح! سيتم طرده من أي جهاز مفتوح فوراً كأنه لم يسجل دخول من قبل.");
+            document.getElementById('resetPhone').value = '';
+        }
     }
 
     window.onload = checkSession;
