@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم المطورة | Dr. Fady Adel</title>
+    <title>لوحة التحكم الشاملة | Dr. Fady Adel</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --navy: #1B2347; --orange: #E8581A; --bg: #f0f2f5; --red: #e74c3c; --green: #2ecc71; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; }
+        :root { --navy: #1B2347; --orange: #E8581A; --bg: #f0f2f5; --red: #e74c3c; --green: #2ecc71; --blue: #3498db; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--navy); }
         
         #auth-overlay { position: fixed; inset: 0; background: var(--navy); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-card { background: white; padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; }
@@ -24,11 +24,12 @@
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; font-family: 'Cairo'; font-size: 1rem; }
         .btn { padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; }
         .btn-orange { background: var(--orange); color: white; width: 100%; }
+        .btn-blue { background: var(--blue); color: white; }
         .btn-red { background: var(--red); color: white; }
-        .btn-danger { background: #000; color: #ff4d4d; border: 1px solid #ff4d4d; width: 100%; margin-top: 10px; }
+        .btn-green { background: var(--green); color: white; }
         
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .manage-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .question-box { background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; position: relative; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         
         @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
@@ -37,7 +38,6 @@
 
 <div id="auth-overlay">
     <div class="login-card">
-        <img src="https://i.ibb.co/zT82jk68/image.png" width="80">
         <h2>دخول الإدارة</h2>
         <input type="tel" id="admin-phone" placeholder="رقم الموبايل">
         <input type="password" id="admin-pass" placeholder="كلمة المرور">
@@ -47,70 +47,28 @@
 
 <div class="container" id="main-content">
     <div class="admin-header">
-        <h2><i class="fas fa-user-shield"></i> لوحة تحكم د. فادي</h2>
-        <button class="btn btn-red" onclick="adminLogout()">خروج آمن</button>
+        <h2>لوحة تحكم د. فادي عادل</h2>
+        <button class="btn btn-red" onclick="adminLogout()">خروج</button>
     </div>
 
     <div class="section" style="border-right-color: var(--green);">
-        <h3><i class="fas fa-edit"></i> إضافة امتحان إلكتروني (اختر)</h3>
-        <select id="examCourseSelect"></select>
-        <input type="text" id="examTitle" placeholder="اسم الامتحان (مثلاً: اختبار على الفصل الأول)">
-        <div id="questions-area" style="background: #f9f9f9; padding: 15px; border-radius: 10px;">
-            <textarea id="q-text" placeholder="اكتب السؤال هنا..."></textarea>
-            <div class="grid-2">
-                <input type="text" id="opt1" placeholder="الاختيار الأول">
-                <input type="text" id="opt2" placeholder="الاختيار الثاني">
-                <input type="text" id="opt3" placeholder="الاختيار الثالث">
-                <input type="text" id="opt4" placeholder="الاختيار الرابع">
-            </div>
-            <select id="correctOpt">
-                <option value="">حدد الإجابة الصحيحة</option>
-                <option value="1">الاختيار الأول</option>
-                <option value="2">الاختيار الثاني</option>
-                <option value="3">الاختيار الثالث</option>
-                <option value="4">الاختيار الرابع</option>
-            </select>
-        </div>
-        <button class="btn btn-orange" style="margin-top:15px;" onclick="addExam()">نشر الامتحان فوراً</button>
-    </div>
-
-    <div class="grid-2">
-        <div class="section">
-            <h3><i class="fas fa-folder-plus"></i> كورس جديد</h3>
-            <input type="text" id="c-title" placeholder="اسم الكورس">
-            <input type="number" id="c-price" placeholder="السعر (0 للمجاني)">
-            <input type="text" id="c-img" placeholder="رابط الصورة">
-            <button class="btn btn-orange" onclick="addCourse()">إضافة</button>
-        </div>
-        <div class="section">
-            <h3><i class="fas fa-video"></i> محاضرة جديدة</h3>
-            <select id="targetCourse"></select>
-            <input type="text" id="l-title" placeholder="عنوان المحاضرة">
-            <input type="text" id="l-vid" placeholder="Video ID (يوتيوب)">
-            <button class="btn btn-orange" onclick="addLesson()">نشر</button>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3><i class="fas fa-tasks"></i> إدارة المحتوى (حذف وتعديل)</h3>
-        <div id="management-area" style="max-height: 400px; overflow-y: auto;">
-            <p style="text-align:center; color:#888;">جاري تحميل المحتوى...</p>
-        </div>
-    </div>
-
-    <div class="section" style="border-right-color: var(--red); background: #fff5f5;">
-        <h3 style="color: var(--red);"><i class="fas fa-exclamation-triangle"></i> منطقة العمليات الخطرة</h3>
+        <h3><i class="fas fa-stopwatch"></i> إضافة امتحان إلكتروني مؤقت</h3>
         <div class="grid-2">
-            <button class="btn btn-danger" onclick="wipeAllStudents()">
-                <i class="fas fa-users-slash"></i> مسح كافة الطلاب (ماعدا الأدمن)
-            </button>
-            <button class="btn btn-danger" onclick="wipeAllContent()">
-                <i class="fas fa-trash-alt"></i> مسح كافة الكورسات والمحاضرات
-            </button>
+            <select id="examCourse"></select>
+            <input type="number" id="examDuration" placeholder="مدة الامتحان بالدقائق (مثلاً: 30)">
         </div>
-        <p style="font-size: 0.8rem; color: #c0392b; margin-top: 10px; text-align: center;">* تنبيه: هذه العمليات لا يمكن التراجع عنها نهائياً.</p>
+        <input type="text" id="examTitle" placeholder="عنوان الامتحان (مثلاً: اختبار شامل على الباب الثاني)">
+        
+        <div id="questions-container">
+            </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn btn-blue" onclick="addNewQuestionField()">+ إضافة سؤال</button>
+            <button class="btn btn-orange" onclick="saveExam()">حفظ ونشر الامتحان</button>
+        </div>
     </div>
-</div>
+
+    </div>
 
 <script>
     const _sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
@@ -119,99 +77,90 @@
         const phone = document.getElementById('admin-phone').value;
         const pass = document.getElementById('admin-pass').value;
         const { data } = await _sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if(data && data.role === 'admin') { localStorage.setItem('fady_admin_logged', 'true'); showDashboard(); } 
-        else alert("غير مسموح لك بالدخول");
+        if(data && data.role === 'admin') { localStorage.setItem('f_admin', 'true'); showDash(); } else alert("بيانات غير صحيحة");
     }
 
-    function showDashboard() {
-        document.getElementById('auth-overlay').style.display = 'none';
-        document.getElementById('main-content').style.display = 'block';
-        loadAllData();
+    function showDash() {
+        document.getElementById('auth-overlay').style.display='none';
+        document.getElementById('main-content').style.display='block';
+        loadData();
+        addNewQuestionField(); 
     }
 
-    async function loadAllData() {
-        const { data: courses } = await _sb.from('courses').select('*');
-        if(courses) {
-            const opts = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
-            document.getElementById('examCourseSelect').innerHTML = opts;
-            document.getElementById('targetCourse').innerHTML = opts;
-            
-            // عرض المحتوى للإدارة
-            let html = '';
-            for(let c of courses) {
-                html += `<div style="background:#eee; padding:10px; margin-top:15px; font-weight:bold; border-radius:8px; display:flex; justify-content:space-between;">
-                            <span>📦 كورس: ${c.title}</span>
-                            <button onclick="deleteItem('courses', '${c.id}')" style="color:red; border:none; cursor:pointer;">حذف الكورس</button>
-                         </div>`;
-                const { data: lessons } = await _sb.from('lessons').select('*').eq('course_id', c.id);
-                lessons?.forEach(l => {
-                    html += `<div class="manage-item"><span> ↳ 🎥 ${l.title}</span> <button onclick="deleteItem('lessons', '${l.id}')" style="color:#888; border:none; cursor:pointer;">حذف</button></div>`;
-                });
-            }
-            document.getElementById('management-area').innerHTML = html;
-        }
+    let qCount = 0;
+    function addNewQuestionField() {
+        qCount++;
+        const div = document.createElement('div');
+        div.className = 'question-box';
+        div.innerHTML = `
+            <strong>سؤال ${qCount}:</strong>
+            <button onclick="this.parentElement.remove()" style="position:absolute; left:10px; top:10px; border:none; background:none; color:red; cursor:pointer;"><i class="fas fa-trash"></i></button>
+            <textarea class="q-txt" placeholder="نص السؤال..."></textarea>
+            <input type="text" class="q-img" placeholder="رابط صورة توضيحية للسؤال (إن وجد)">
+            <div class="grid-2">
+                <input type="text" class="q-o1" placeholder="الاختيار 1">
+                <input type="text" class="q-o2" placeholder="الاختيار 2">
+                <input type="text" class="q-o3" placeholder="الاختيار 3">
+                <input type="text" class="q-o4" placeholder="الاختيار 4">
+            </div>
+            <select class="q-corr">
+                <option value="1">الاختيار 1 صحيح</option>
+                <option value="2">الاختيار 2 صحيح</option>
+                <option value="3">الاختيار 3 صحيح</option>
+                <option value="4">الاختيار 4 صحيح</option>
+            </select>
+        `;
+        document.getElementById('questions-container').appendChild(div);
     }
 
-    // إضافة امتحان
-    async function addExam() {
-        const cId = document.getElementById('examCourseSelect').value;
+    async function saveExam() {
         const title = document.getElementById('examTitle').value;
-        const question = {
-            q: document.getElementById('q-text').value,
-            options: [document.getElementById('opt1').value, document.getElementById('opt2').value, document.getElementById('opt3').value, document.getElementById('opt4').value],
-            correct: document.getElementById('correctOpt').value
-        };
-        if(!title || !question.q || !question.correct) return alert("أكمل بيانات الامتحان");
+        const duration = document.getElementById('examDuration').value;
+        const cId = document.getElementById('examCourse').value;
+        const qBoxes = document.querySelectorAll('.question-box');
         
-        const { error } = await _sb.from('exams').insert([{ course_id: cId, title: title, questions: [question] }]);
-        if(!error) { alert("تم نشر الامتحان بنجاح"); location.reload(); }
-    }
+        if(!title || !duration) return alert("يرجى إدخال عنوان الامتحان والمدة الزمنية");
 
-    // دوال الإضافة العادية
-    async function addCourse() {
-        const t = document.getElementById('c-title').value;
-        const p = document.getElementById('c-price').value;
-        await _sb.from('courses').insert([{ title: t, price: Number(p), image_url: document.getElementById('c-img').value }]);
-        loadAllData();
-    }
+        let questions = [];
+        qBoxes.forEach(box => {
+            questions.push({
+                text: box.querySelector('.q-txt').value,
+                image: box.querySelector('.q-img').value,
+                options: [
+                    box.querySelector('.q-o1').value, 
+                    box.querySelector('.q-o2').value, 
+                    box.querySelector('.q-o3').value, 
+                    box.querySelector('.q-o4').value
+                ],
+                correct: box.querySelector('.q-corr').value
+            });
+        });
 
-    async function addLesson() {
-        await _sb.from('lessons').insert([{ 
-            course_id: document.getElementById('targetCourse').value, 
-            title: document.getElementById('l-title').value, 
-            video_id: document.getElementById('l-vid').value 
+        const { error } = await _sb.from('exams').insert([{ 
+            course_id: cId, 
+            title: title, 
+            duration_minutes: parseInt(duration), // حفظ المدة بالدقائق
+            questions: questions 
         }]);
-        loadAllData();
-    }
 
-    // حذف عنصر معين
-    async function deleteItem(table, id) {
-        if(confirm("هل أنت متأكد من الحذف؟")) {
-            await _sb.from(table).delete().eq('id', id);
-            loadAllData();
+        if(!error) {
+            alert("تم نشر الامتحان بنجاح");
+            location.reload();
+        } else {
+            console.error(error);
+            alert("حدث خطأ أثناء الحفظ");
         }
     }
 
-    // --- عمليات التنظيف الكبرى ---
-    async function wipeAllStudents() {
-        if(confirm("⚠ تحذير قاتل: سيتم مسح كافة حسابات الطلاب المشتركين نهائياً (باستثناء الأدمن). هل أنت متأكد؟")) {
-            const { error } = await _sb.from('students').delete().neq('role', 'admin');
-            if(!error) alert("تم تنظيف قائمة الطلاب بنجاح");
+    async function loadData() {
+        const { data: cs } = await _sb.from('courses').select('*');
+        if(cs) {
+            document.getElementById('examCourse').innerHTML = cs.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
         }
     }
 
-    async function wipeAllContent() {
-        if(confirm("⚠ تحذير: سيتم مسح كافة الكورسات، المحاضرات، والامتحانات من المنصة. هل أنت متأكد؟")) {
-            await _sb.from('lessons').delete().neq('id', 0);
-            await _sb.from('exams').delete().neq('id', 0);
-            await _sb.from('courses').delete().neq('id', 0);
-            alert("تم مسح كافة المحتويات بنجاح");
-            loadAllData();
-        }
-    }
-
-    function adminLogout() { localStorage.removeItem('fady_admin_logged'); location.reload(); }
-    window.onload = () => { if(localStorage.getItem('fady_admin_logged')==='true') showDashboard(); };
+    function adminLogout() { localStorage.clear(); location.reload(); }
+    window.onload = () => { if(localStorage.getItem('f_admin')) showDash(); };
 </script>
 </body>
 </html>
