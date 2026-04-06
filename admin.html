@@ -25,7 +25,7 @@
         .btn-green { background: var(--green); color: white; }
         .question-box { background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; position: relative; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .log-item { background: #f1f3f5; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-right: 4px solid var(--blue); display: flex; justify-content: space-between; }
+        .log-item { background: #f1f3f5; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-right: 4px solid var(--blue); display: flex; justify-content: space-between; align-items: center; }
         @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -50,7 +50,7 @@
     <div class="section" style="border-right-color: var(--blue);">
         <h3><i class="fas fa-file-invoice"></i> تقرير الطالب (أول محاولة فقط)</h3>
         <div style="display: flex; gap: 10px;">
-            <input type="tel" id="search-phone" placeholder="رقم الطالب للبحث...">
+            <input type="tel" id="search-phone" placeholder="أدخل رقم الطالب للبحث...">
             <button class="btn btn-blue" onclick="getStudentReport()">عرض التقرير</button>
         </div>
         <div id="report-area" style="display:none; margin-top:20px; padding:20px; background: #fff; border: 1px solid #eee; border-radius: 10px;">
@@ -67,10 +67,12 @@
         <h3><i class="fas fa-stopwatch"></i> إنشاء امتحان إلكتروني</h3>
         <div class="grid-2">
             <select id="examCourse" onchange="loadLessonsForExam(this.value)"></select>
-            <select id="examLesson"><option value="">-- امتحان عام للكورس --</option></select>
+            <select id="examLesson"><option value="">-- امتحان عام للكورس (بدون درس) --</option></select>
         </div>
-        <input type="text" id="examTitle" placeholder="اسم الامتحان">
-        <input type="number" id="examDuration" placeholder="المدة بالدقائق">
+        <div class="grid-2">
+            <input type="text" id="examTitle" placeholder="اسم الامتحان">
+            <input type="number" id="examDuration" placeholder="المدة بالدقائق">
+        </div>
         <div id="questions-container" style="margin-top:20px;"></div>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn btn-blue" onclick="addNewQuestionField()">+ إضافة سؤال</button>
@@ -80,20 +82,20 @@
 
     <div class="grid-2">
         <div class="section" style="border-right-color: var(--green);">
-            <h3><i class="fas fa-key"></i> تفعيل كورس</h3>
-            <input type="tel" id="act-phone" placeholder="رقم الطالب">
+            <h3><i class="fas fa-key"></i> تفعيل كورس لطالب</h3>
+            <input type="tel" id="act-phone" placeholder="رقم موبايل الطالب">
             <select id="act-course"></select>
             <button class="btn btn-green" onclick="activateCourse()" style="width:100%">تفعيل الوصول</button>
         </div>
         <div class="section" style="border-right-color: var(--red);">
-            <h3><i class="fas fa-mobile-alt"></i> تصفير الأجهزة</h3>
-            <input type="tel" id="reset-phone" placeholder="رقم الطالب">
+            <h3><i class="fas fa-mobile-alt"></i> تصفير الأجهزة (Reset)</h3>
+            <input type="tel" id="reset-phone" placeholder="رقم موبايل الطالب">
             <button class="btn btn-red" onclick="resetDevice()" style="width:100%">طرد وتصفير الجهاز</button>
         </div>
     </div>
 
     <div class="section">
-        <h3><i class="fas fa-tasks"></i> إدارة المحتوى (المحاضرات والامتحانات)</h3>
+        <h3><i class="fas fa-tasks"></i> إدارة المحتوى الحالي</h3>
         <div id="manage-list" style="max-height: 500px; overflow-y: auto;"></div>
     </div>
 </div>
@@ -117,9 +119,11 @@
 
     function adminLogout() { localStorage.removeItem('f_admin_logged'); location.reload(); }
 
-    // --- نظام التقرير (أول تجربة فقط لكل امتحان) ---
+    // --- التقرير (أول تجربة فقط لكل امتحان) ---
     async function getStudentReport() {
-        const p = document.getElementById('search-phone').value;
+        const p = document.getElementById('search-phone').value.trim();
+        if(!p) return alert("أدخل رقم الطالب");
+
         const { data: st } = await _sb.from('students').select('*').eq('student_phone', p).single();
         if(!st) return alert("الطالب غير موجود");
 
@@ -127,13 +131,11 @@
         document.getElementById('rep-name').innerText = st.full_name;
         document.getElementById('rep-phone-display').innerText = "رقم الطالب: " + st.student_phone;
 
-        // جلب كافة المحاولات مرتبة من الأقدم للأحدث
+        // جلب النتائج مرتبة من الأقدم للأحدث لضمان أخذ أول محاولة
         const { data: results } = await _sb.from('exam_results').select('*').eq('student_phone', p).order('created_at', { ascending: true });
-        
-        // فلترة النتائج لأخذ أول محاولة فقط لكل اسم امتحان
+
         const firstAttempts = [];
         const seenExams = new Set();
-
         results?.forEach(res => {
             if (!seenExams.has(res.exam_name)) {
                 firstAttempts.push(res);
@@ -147,15 +149,23 @@
                 <div class="log-item">
                     <span>${r.exam_name}</span>
                     <b style="color:var(--orange)">${r.score}%</b>
-                    <small style="font-size:0.7rem; color:#999;">${new Date(r.created_at).toLocaleDateString('ar-EG')}</small>
+                    <small style="color:#999">${new Date(r.created_at).toLocaleDateString('ar-EG')}</small>
                 </div>`).join('');
         } else {
-            html += "لم يقم الطالب بأي اختبارات بعد.";
+            html += "لا توجد امتحانات مسجلة لهذا الطالب.";
         }
         document.getElementById('rep-details').innerHTML = html;
     }
 
-    // --- إدارة المحتوى (إظهار الامتحانات والفيديوهات) ---
+    // --- تصفير الجهاز ---
+    async function resetDevice() {
+        const p = document.getElementById('reset-phone').value;
+        if(!p) return alert("أدخل رقم الطالب");
+        const { error } = await _sb.from('students').update({ device_id: null }).eq('student_phone', p);
+        if(!error) { alert("تم تصفير الجهاز بنجاح"); document.getElementById('reset-phone').value=""; }
+    }
+
+    // --- إدارة المحتوى (إظهار الفيديوهات والامتحانات) ---
     async function loadAllData() {
         const { data: cs } = await _sb.from('courses').select('*');
         if(cs) {
@@ -191,13 +201,6 @@
         }
     }
 
-    async function resetDevice() {
-        const p = document.getElementById('reset-phone').value;
-        if(!p) return alert("أدخل الرقم");
-        const { error } = await _sb.from('students').update({ device_id: null }).eq('student_phone', p);
-        if(!error) alert("تم التصفير بنجاح");
-    }
-
     async function del(tbl, id) { if(confirm("حذف نهائي؟")) { await _sb.from(tbl).delete().eq('id', id); loadAllData(); } }
     
     let qCount = 0;
@@ -205,7 +208,7 @@
         qCount++;
         const div = document.createElement('div');
         div.className = 'question-box';
-        div.innerHTML = `<strong>سؤال ${qCount}:</strong><textarea class="q-txt" placeholder="نص السؤال"></textarea><div class="grid-2"><input type="text" class="q-o1" placeholder="1"><input type="text" class="q-o2" placeholder="2"><input type="text" class="q-o3" placeholder="3"><input type="text" class="q-o4" placeholder="4"></div>رقم الإجابة: <input type="number" class="q-corr" min="1" max="4">`;
+        div.innerHTML = `<strong>سؤال ${qCount}:</strong><textarea class="q-txt" placeholder="نص السؤال"></textarea><div class="grid-2"><input type="text" class="q-o1" placeholder="1"><input type="text" class="q-o2" placeholder="2"><input type="text" class="q-o3" placeholder="3"><input type="text" class="q-o4" placeholder="4"></div>الإجابة الصحيحة (1-4): <input type="number" class="q-corr" min="1" max="4">`;
         document.getElementById('questions-container').appendChild(div);
     }
 
@@ -218,15 +221,20 @@
             questions.push({ text: box.querySelector('.q-txt').value, options: [box.querySelector('.q-o1').value, box.querySelector('.q-o2').value, box.querySelector('.q-o3').value, box.querySelector('.q-o4').value], correct: parseInt(box.querySelector('.q-corr').value)});
         });
         await _sb.from('exams').insert([{ course_id: cId, title: title, duration_minutes: parseInt(dur), questions: questions }]);
-        alert("تم الحفظ"); location.reload();
+        alert("تم حفظ الامتحان"); location.reload();
     }
 
     async function loadLessonsForExam(cId) {
         const { data: ls } = await _sb.from('lessons').select('*').eq('course_id', cId);
-        document.getElementById('examLesson').innerHTML = '<option value="">-- امتحان عام للكورس --</option>' + ls?.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+        document.getElementById('examLesson').innerHTML = '<option value="">-- امتحان عام للكورس (بدون درس) --</option>' + ls?.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
     }
 
-    function downloadPDF() { html2pdf().from(document.getElementById('pdf-content')).save('تقرير.pdf'); }
+    async function activateCourse() {
+        await _sb.from('student_access').insert([{ student_phone: document.getElementById('act-phone').value, course_id: document.getElementById('act-course').value }]);
+        alert("تم التفعيل");
+    }
+
+    function downloadPDF() { html2pdf().from(document.getElementById('pdf-content')).save('تقرير_طالب.pdf'); }
     window.onload = () => { if(localStorage.getItem('f_admin_logged')) showDash(); };
 </script>
 </body>
