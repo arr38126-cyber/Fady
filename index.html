@@ -33,27 +33,22 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* بيت الشعر */
         .poetic-line { font-family: 'Amiri', serif; font-style: italic; color: var(--orange); margin: 20px 0; font-size: 1.25rem; font-weight: 700; text-align: center; line-height: 1.6; }
 
-        /* الأزرار العائمة */
         .floating-wa {
             position: fixed; bottom: 25px; right: 25px; background-color: #25D366; color: white;
             border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center;
             justify-content: center; font-size: 35px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); z-index: 10000; text-decoration: none;
         }
 
-        /* الكروت والمدخلات */
         .auth-card, .profile-card, .review-card { background: #fff; border-radius: 20px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 20px; }
         .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 15px; font-family: 'Cairo'; text-align: center; font-size: 1rem; outline: none; }
         .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1.1rem; }
         
-        /* الجداول */
         .grades-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         .grades-table th { background: var(--navy); color: #fff; padding: 12px; border-radius: 5px; }
         .grades-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-weight: 600; }
 
-        /* مراجعة الأسئلة */
         .q-box { border-right: 5px solid #ccc; padding: 15px; margin-bottom: 15px; background: #f9f9f9; border-radius: 10px; }
         .q-box.correct { border-right-color: var(--green); }
         .q-box.wrong { border-right-color: var(--red); }
@@ -64,16 +59,7 @@
 </head>
 <body oncontextmenu="return false;">
 
-
-    
-    
-    
-    
-    
-    
-    
-    <a href="https://wa.me/201055427975" target="_blank" class="floating-wa"><i class="fab fa-whatsapp"></i></a>
-
+<a href="https://wa.me/201055427975" target="_blank" class="floating-wa"><i class="fab fa-whatsapp"></i></a>
 <div id="watermark"><div id="wm-text"></div></div>
 
 <nav id="navbar">
@@ -98,14 +84,6 @@
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
                 <p onclick="showPage('register-page')" style="margin-top:15px; cursor:pointer; font-weight:bold; color:var(--navy);">إنشاء حساب جديد</p>
-         
-                
-                
-                
-                
-                
-                
-                
                 <a href="https://wa.me/201055427975" target="_blank" style="display:block; margin-top:15px; color:#25D366; text-decoration:none; font-weight:bold;">الدعم الفني <i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
@@ -138,7 +116,9 @@
             <button onclick="showPage('home-page')" style="border:none; background:none; color:var(--navy); font-weight:bold; cursor:pointer; margin-bottom:15px;"><i class="fas fa-arrow-right"></i> العودة للكورسات</button>
             <h3 id="current-course-title" style="text-align:right;"></h3>
             <div id="video-section" style="display:none; margin-bottom:20px;">
-                <div id="yt-player" style="width:100%; aspect-ratio:16/9; border-radius:15px; overflow:hidden; background:#000;"></div>
+                <div style="width:100%; aspect-ratio:16/9; border-radius:15px; overflow:hidden; background:#000;">
+                    <div id="yt-player"></div>
+                </div>
             </div>
             <div id="lessons-list"></div>
         </div>
@@ -175,7 +155,17 @@
 
 <script>
     const sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
-    let ytPlayer, currentCourseId;
+    let ytPlayer, apiReady = false;
+
+    // 1. نظام البصمة: إنشاء معرف فريد للجهاز
+    function getDeviceFingerprint() {
+        return btoa(navigator.userAgent + screen.width + screen.height);
+    }
+
+    // 2. نظام اليوتيوب: التأكد من جاهزية المكتبة
+    function onYouTubeIframeAPIReady() {
+        apiReady = true;
+    }
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -186,16 +176,53 @@
 
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value, pass = document.getElementById('l-pass').value;
-        const { data } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if (data) { localStorage.setItem('f_user', JSON.stringify(data)); startApp(data); } else alert("بيانات تسجيل الدخول غير صحيحة");
+        const currentFingerprint = getDeviceFingerprint();
+
+        const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+        
+        if (data) {
+            // التحقق من الحماية (جهاز واحد فقط)
+            if (data.device_id && data.device_id !== currentFingerprint) {
+                alert("الحساب مفتوح على جهاز آخر. سجل خروج منه أولاً.");
+                return;
+            }
+            // تسجيل البصمة الحالية
+            await sb.from('students').update({ device_id: currentFingerprint }).eq('student_phone', phone);
+            
+            localStorage.setItem('f_user', JSON.stringify(data)); 
+            startApp(data); 
+        } else {
+            alert("بيانات تسجيل الدخول غير صحيحة");
+        }
     }
 
     async function handleRegister() {
         const name = document.getElementById('r-name').value, phone = document.getElementById('r-phone').value;
         const parent = document.getElementById('r-parent').value, pass = document.getElementById('r-pass').value;
+        const currentFingerprint = getDeviceFingerprint();
+
         if(!name || !phone || !pass) return alert("أكمل البيانات");
-        const { data, error } = await sb.from('students').insert([{ full_name: name, student_phone: phone, parent_phone: parent, password: pass }]).select().single();
-        if (data) { localStorage.setItem('f_user', JSON.stringify(data)); startApp(data); } else alert("خطأ: ربما الرقم مسجل مسبقاً");
+        
+        const { data, error } = await sb.from('students').insert([{ 
+            full_name: name, student_phone: phone, parent_phone: parent, password: pass, device_id: currentFingerprint 
+        }]).select().single();
+
+        if (data) { 
+            localStorage.setItem('f_user', JSON.stringify(data)); 
+            startApp(data); 
+        } else {
+            alert("خطأ: ربما الرقم مسجل مسبقاً");
+        }
+    }
+
+    async function handleLogout() {
+        const user = JSON.parse(localStorage.getItem('f_user'));
+        if (user) {
+            // مسح البصمة من السيرفر عند الخروج لإتاحة الدخول من جهاز آخر
+            await sb.from('students').update({ device_id: null }).eq('student_phone', user.student_phone);
+        }
+        localStorage.clear(); 
+        location.reload(); 
     }
 
     function startApp(user) {
@@ -208,7 +235,7 @@
 
     async function loadCourses() {
         const { data } = await sb.from('courses').select('*');
-        document.getElementById('courses-container').innerHTML = data.map(c => `
+        document.getElementById('courses-container').innerHTML = (data || []).map(c => `
             <div class="auth-card" style="padding:0; overflow:hidden;">
                 <img src="${c.image_url}" style="width:100%; height:160px; object-fit:cover;">
                 <div style="padding:15px; text-align:right;">
@@ -216,13 +243,7 @@
                     <p style="color:var(--green); font-weight:800; margin:10px 0;">${parseFloat(c.price) === 0 ? 'كورس مجاني' : 'السعر: ' + c.price + ' ج.م'}</p>
                     <div style="display:flex; gap:8px;">
                         <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول</button>
-          
-                        
-                                                                                     
-                                                                                     
-    
-    
-    <a href="https://wa.me/201055427975" target="_blank" style="background:#25D366; color:#fff; width:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; text-decoration:none;"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://wa.me/201055427975" target="_blank" style="background:#25D366; color:#fff; width:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; text-decoration:none;"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
             </div>`).join('');
@@ -235,18 +256,34 @@
 
     async function loadLessons() {
         const { data } = await sb.from('lessons').select('*').eq('course_id', currentCourseId);
-        document.getElementById('lessons-list').innerHTML = data.map(l => `
+        document.getElementById('lessons-list').innerHTML = (data || []).map(l => `
             <div style="background:#fff; padding:15px; margin-bottom:10px; border-radius:12px; display:flex; justify-content:space-between; cursor:pointer; border-right:4px solid var(--orange);" onclick="playVideo('${l.video_id}')">
                 <span>${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange);"></i>
             </div>`).join('');
     }
 
+    // استخراج ID الفيديو بشكل دقيق
+    function extractVideoID(url) {
+        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[7].length === 11) ? match[7] : url;
+    }
+
     function playVideo(vid) {
+        if (!apiReady) return alert("جاري تحميل مشغل الفيديو...");
         document.getElementById('video-section').style.display = 'block';
-        if (ytPlayer) ytPlayer.destroy();
-        const vId = vid.includes('v=') ? vid.split('v=')[1].substring(0,11) : vid;
-        ytPlayer = new YT.Player('yt-player', { videoId: vId, playerVars: { 'autoplay': 1 } });
-        window.scrollTo(0,0);
+        const vId = extractVideoID(vid);
+
+        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+            ytPlayer.loadVideoById(vId);
+        } else {
+            ytPlayer = new YT.Player('yt-player', {
+                height: '100%', width: '100%', videoId: vId,
+                playerVars: { 'autoplay': 1, 'rel': 0, 'modestbranding': 1 },
+                events: { 'onReady': (e) => e.target.playVideo() }
+            });
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function loadProfile() {
@@ -270,7 +307,7 @@
         showPage('review-page');
         document.getElementById('review-title').innerText = "مراجعة: " + title;
         const { data } = await sb.from('student_answers').select('*').eq('result_id', resId);
-        document.getElementById('review-container').innerHTML = data.map((q, i) => `
+        document.getElementById('review-container').innerHTML = (data || []).map((q, i) => `
             <div class="q-box ${q.user_answer === q.correct_answer ? 'correct' : 'wrong'}">
                 <p><b>س${i+1}: ${q.question_text}</b></p>
                 <div class="opt ${q.user_answer === 'A' ? 'user' : ''} ${q.correct_answer === 'A' ? 'correct' : ''}">أ) ${q.option_a}</div>
@@ -280,12 +317,10 @@
             </div>`).join('');
     }
 
-    function handleLogout() { localStorage.clear(); location.reload(); }
-
     window.onload = () => {
         const user = localStorage.getItem('f_user');
         if (user) startApp(JSON.parse(user));
     }
 </script>
 </body>
-                </html>
+</html>
