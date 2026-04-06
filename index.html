@@ -9,16 +9,21 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5;
-            --green: #2ecc71; --red: #e74c3c;
+            --navy: #1B2347;
+            --orange: #E8581A;
+            --bg: #F0F2F5;
+            --card-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            --green: #2ecc71;
+            --red: #e74c3c;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
-        /* العلامة المائية */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.07; overflow: hidden; }
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.2rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
+
+        .poetic-line { font-family: 'Amiri', serif; font-style: italic; color: var(--orange); margin-bottom: 25px; font-size: 1.2rem; font-weight: 700; line-height: 1.6; border-bottom: 1px solid #eee; padding-bottom: 15px; }
 
         nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         nav.visible { display: flex; }
@@ -29,7 +34,7 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* مشغل الفيديو */
+        /* ========= VIDEO PLAYER SYSTEM ========= */
         .video-player-wrapper {
             position: relative;
             background: #000;
@@ -40,55 +45,275 @@
             box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
 
-        .video-aspect { position: relative; padding-bottom: 56.25%; height: 0; background: #000; }
+        .video-aspect {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            background: #000;
+        }
 
-        /* تصحيح الشاشة السوداء: الـ div الذي سيستبدله يوتيوب */
-        #yt-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        /* The actual YouTube iframe */
+        #yt-player {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none;
+            pointer-events: none; /* Let overlay handle all clicks */
+        }
 
-        /* الطبقة الشفافة للحماية */
+        /* Transparent protective overlay - blocks all direct YouTube interaction */
         #video-overlay {
             position: absolute;
             top: 0; left: 0;
-            width: 100%; 
-            height: calc(100% - 60px); /* نترك مساحة للشريط السفلي */
+            width: 100%; height: 100%;
             z-index: 10;
             background: transparent;
+            cursor: default;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        /* شريط التحكم المخصص */
+        /* ========= CUSTOM CONTROL BAR ========= */
         .custom-controls {
             background: linear-gradient(135deg, var(--navy) 0%, #0f1628 100%);
             padding: 10px 14px 12px;
             border-radius: 0 0 18px 18px;
+            border: 2px solid var(--navy);
+            border-top: none;
             position: relative;
             z-index: 20;
         }
 
-        .progress-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .time-display { color: #fff; font-size: 0.75rem; min-width: 85px; text-align: center; direction: ltr; }
-        .seek-bar-track { flex: 1; height: 5px; background: rgba(255,255,255,0.2); border-radius: 10px; position: relative; cursor: pointer; }
-        .seek-bar-fill { height: 100%; background: var(--orange); border-radius: 10px; width: 0%; transition: width 0.1s linear; }
+        /* Progress / Seek Bar */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
 
-        .controls-row { display: flex; align-items: center; justify-content: space-between; }
-        .ctrl-btn { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; transition: 0.2s; }
-        .ctrl-btn:hover { background: var(--orange); }
+        .time-display {
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+            min-width: 85px;
+            text-align: center;
+            font-family: 'Cairo', sans-serif;
+            direction: ltr;
+        }
 
-        .speed-select { background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 5px; border-radius: 8px; font-size: 0.8rem; }
+        .seek-bar-track {
+            flex: 1;
+            height: 5px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: height 0.15s;
+        }
+        .seek-bar-track:hover { height: 7px; }
 
-        .video-spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 5; display: none; }
+        .seek-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--orange), #ff8c42);
+            border-radius: 10px;
+            position: relative;
+            min-width: 0;
+            transition: width 0.1s linear;
+        }
+
+        .seek-bar-thumb {
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px; height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(232,88,26,0.8);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .seek-bar-track:hover .seek-bar-thumb { opacity: 1; }
+
+        /* Buffered bar */
+        .seek-bar-buffer {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+        }
+
+        /* Buttons Row */
+        .controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            flex-wrap: nowrap;
+        }
+
+        .controls-left, .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .ctrl-btn {
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: #fff;
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, transform 0.1s;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ctrl-btn:hover { background: var(--orange); transform: scale(1.05); }
+        .ctrl-btn:active { transform: scale(0.95); }
+        .ctrl-btn.active { background: var(--orange); }
+
+        /* Play button - slightly larger */
+        #play-btn { width: 42px; height: 42px; font-size: 1.1rem; background: var(--orange); border-radius: 50%; }
+        #play-btn:hover { background: #ff6b2b; }
+
+        /* Volume control */
+        .volume-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .volume-slider-wrap {
+            width: 0;
+            overflow: hidden;
+            transition: width 0.3s ease;
+        }
+        .volume-group:hover .volume-slider-wrap,
+        .volume-group:focus-within .volume-slider-wrap {
+            width: 65px;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 10px;
+            outline: none;
+            width: 60px;
+            cursor: pointer;
+            display: block;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: var(--orange);
+            cursor: pointer;
+            box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+        .volume-slider::-moz-range-thumb {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: var(--orange);
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Speed control dropdown */
+        .speed-select {
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: #fff;
+            padding: 4px 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            outline: none;
+            height: 36px;
+            -webkit-appearance: none;
+            appearance: none;
+            text-align: center;
+            min-width: 42px;
+        }
+        .speed-select option { background: var(--navy); color: #fff; }
+        .speed-select:hover { background: rgba(232,88,26,0.6); }
+
+        /* Loading spinner */
+        .video-spinner {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            display: none;
+        }
         .video-spinner.active { display: block; }
-        .spinner-ring { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .spinner-ring {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: var(--orange);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        #play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 11; background: rgba(232,88,26,0.9); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        #play-overlay.hidden { display: none; }
+        /* Play overlay (click-to-play big button) */
+        #play-overlay {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 11;
+            background: rgba(232,88,26,0.9);
+            width: 70px; height: 70px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.3s, transform 0.2s;
+            box-shadow: 0 0 30px rgba(232,88,26,0.5);
+        }
+        #play-overlay:hover { transform: translate(-50%, -50%) scale(1.1); }
+        #play-overlay.hidden { opacity: 0; pointer-events: none; }
+        #play-overlay i { color: #fff; font-size: 1.6rem; margin-right: -3px; }
 
-        /* باقي التنسيقات الأصلية */
-        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; }
-        .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; }
-        .poetic-line { font-family: 'Amiri', serif; color: var(--orange); margin-bottom: 25px; font-size: 1.2rem; font-weight: 700; line-height: 1.6; text-align: center; }
+        /* Fullscreen styles */
+        .video-player-wrapper:-webkit-full-screen { border-radius: 0; }
+        .video-player-wrapper:-webkit-full-screen .video-aspect { padding-bottom: 0; height: 100vh; }
+        .video-player-wrapper:fullscreen { border-radius: 0; }
+
+        /* ======================================= */
+        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1rem; }
+
+        .timer-box { background: var(--navy); color: #fff; padding: 10px 20px; border-radius: 50px; font-weight: 800; font-size: 1.2rem; display: inline-block; margin-bottom: 20px; }
+        .q-img { width: 100%; max-width: 400px; border-radius: 15px; margin: 15px 0; border: 1px solid #ddd; }
+        .option-btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; background: #f9f9f9; text-align: right; font-family: 'Cairo'; font-weight: 600; cursor: pointer; }
+        .option-btn.selected { border-color: var(--orange); background: #fff5f0; }
+        .correct-ans { border: 2px solid var(--green) !important; background: #eafff2 !important; }
+        .wrong-ans { border: 2px solid var(--red) !important; background: #fff0f0 !important; }
+
+        #review-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:20000; overflow-y:auto; padding:20px; }
+
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
         .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 35px; text-align: center; }
+        .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; outline: none; font-size: 1rem; }
+
+        .course-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
+
+        /* Mobile adjustments */
+        @media (max-width: 480px) {
+            .controls-row { gap: 3px; }
+            .ctrl-btn { width: 32px; height: 32px; font-size: 0.8rem; }
+            #play-btn { width: 38px; height: 38px; font-size: 1rem; }
+            .time-display { font-size: 0.65rem; min-width: 75px; }
+            .speed-select { min-width: 38px; font-size: 0.7rem; padding: 3px 4px; }
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -97,22 +322,27 @@
 
 <nav id="navbar">
     <div class="nav-logo">
-        <img src="https://i.ibb.co/zT82jk68/image.png">
-        <div><div id="nav-user-name" style="font-weight: 800;"></div><div style="color: var(--orange); font-size: 0.8rem;">فيزياء - د. فادي عادل</div></div>
+        <img src="https://i.ibb.co/zT82jk68/image.png" alt="Logo">
+        <div>
+            <div id="nav-user-name" style="font-weight: 800;">جاري التحميل...</div>
+            <div style="color: var(--orange); font-size: 0.8rem;">فيزياء - د. فادي عادل</div>
+        </div>
     </div>
     <div style="display:flex; gap:10px;">
-        <button id="profile-btn" style="background:var(--orange); border:none; color:#fff; padding:6px 12px; border-radius:8px;" onclick="loadProfilePage()">حسابي</button>
-        <button id="back-btn" style="display:none; background:rgba(255,255,255,0.2); border:none; color:#fff; padding:6px 12px; border-radius:8px;" onclick="showPage('home-page')">الرئيسية</button>
-        <button onclick="handleLogout()" style="background:none; border:1px solid #fff; color:#fff; padding:6px 12px; border-radius:8px;">خروج</button>
+        <button id="profile-btn" style="background:var(--orange); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="loadProfilePage()">حسابي</button>
+        <button id="back-btn" style="display:none; background:rgba(255,255,255,0.2); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="showPage('home-page')">الرئيسية</button>
+        <button onclick="handleLogout()" style="background:none; border:1px solid #fff; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;">خروج</button>
     </div>
 </nav>
 
 <div id="app">
+    <!-- Login -->
     <div id="login-page" class="page active">
         <div class="auth-screen">
             <div class="auth-card">
-                <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="border-radius: 50%; margin-bottom: 10px;">
+                <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="margin-bottom: 15px; border-radius: 50%;" alt="Logo">
                 <div class="poetic-line">"وَمَن لايهوى صُعُودَ الجِبَالِ <br> يَعِش أَبَدَ الدَّهرِ بَيْنَ الحُفَرِ"</div>
+                <h3 style="margin-bottom: 20px;">تسجيل الدخول</h3>
                 <input type="tel" id="l-phone" placeholder="رقم الموبايل" class="input-group">
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
@@ -121,12 +351,14 @@
         </div>
     </div>
 
+    <!-- Register -->
     <div id="register-page" class="page">
         <div class="auth-screen">
             <div class="auth-card">
-                <h3>فتح حساب جديد</h3>
+                <h3 style="margin-bottom:20px;">فتح حساب طالب جديد</h3>
                 <input type="text" id="r-name" placeholder="الاسم ثلاثي" class="input-group">
-                <input type="tel" id="r-phone" placeholder="رقم الموبايل" class="input-group">
+                <input type="tel" id="r-phone" placeholder="رقم موبايلك" class="input-group">
+                <input type="tel" id="r-parent" placeholder="رقم ولي الأمر" class="input-group">
                 <input type="password" id="r-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleRegister()">تأكيد التسجيل</button>
                 <p style="margin-top:15px; cursor:pointer;" onclick="showPage('login-page')">رجوع</p>
@@ -134,6 +366,7 @@
         </div>
     </div>
 
+    <!-- Home -->
     <div id="home-page" class="page">
         <div class="container">
             <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom: 25px;">محاضراتي المتاحة</h2>
@@ -141,126 +374,490 @@
         </div>
     </div>
 
+    <!-- Profile -->
+    <div id="profile-page" class="page">
+        <div class="container">
+            <div style="background:var(--navy); color:#fff; padding:30px; border-radius:25px; text-align:center; margin-bottom:20px;">
+                <h2 id="p-name"></h2>
+                <p id="p-phone" style="opacity:0.8;"></p>
+            </div>
+            <h3 style="text-align:right;"><i class="fas fa-chart-bar" style="color:var(--orange)"></i> سجل نتائجك</h3>
+            <div id="grades-list"></div>
+        </div>
+    </div>
+
+    <!-- Content / Video -->
     <div id="content-page" class="page">
         <div class="container">
             <h2 id="current-course-title" style="text-align: right; color: var(--navy);"></h2>
-            <div id="video-section" style="display:none;">
+
+            <!-- Protected Video Player -->
+            <div id="video-section" style="display:none; margin-top:20px;">
                 <div class="video-player-wrapper" id="player-wrapper">
-                    <div class="video-aspect">
+                    <div class="video-aspect" id="video-aspect">
+                        <!-- YouTube iframe injected here by API -->
                         <div id="yt-player"></div>
-                        <div id="video-overlay" onclick="togglePlay()"></div>
-                        <div class="video-spinner" id="video-spinner"><div class="spinner-ring"></div></div>
-                        <div id="play-overlay" onclick="togglePlay()"><i class="fas fa-play" style="color:white; font-size:1.5rem;"></i></div>
+
+                        <!-- Transparent Protection Overlay -->
+                        <div id="video-overlay"
+                             oncontextmenu="return false;"
+                             ondragstart="return false;"
+                             onclick="handleOverlayClick()"
+                             ontouchstart="handleOverlayTouch(event)"
+                             ontouchend="return false;">
+                        </div>
+
+                        <!-- Loading Spinner -->
+                        <div class="video-spinner active" id="video-spinner">
+                            <div class="spinner-ring"></div>
+                        </div>
+
+                        <!-- Big play button overlay (shown when paused) -->
+                        <div id="play-overlay" onclick="togglePlay()">
+                            <i class="fas fa-play"></i>
+                        </div>
                     </div>
-                    <div class="custom-controls">
+
+                    <!-- ===== CUSTOM CONTROL BAR ===== -->
+                    <div class="custom-controls" id="custom-controls">
+                        <!-- Seek / Progress Bar -->
                         <div class="progress-container">
                             <span class="time-display" id="time-display">0:00 / 0:00</span>
-                            <div class="seek-bar-track" id="seek-track" onclick="seekTo(event)">
-                                <div class="seek-bar-fill" id="seek-fill"></div>
+                            <div class="seek-bar-track" id="seek-track"
+                                 onclick="seekTo(event)"
+                                 ontouchstart="seekTouchStart(event)"
+                                 ontouchmove="seekTouchMove(event)"
+                                 ontouchend="seekTouchEnd(event)">
+                                <div class="seek-bar-buffer" id="seek-buffer" style="width:0%"></div>
+                                <div class="seek-bar-fill" id="seek-fill" style="width:0%">
+                                    <div class="seek-bar-thumb"></div>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Buttons Row -->
                         <div class="controls-row">
-                            <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
-                            <select class="speed-select" id="speed-select" onchange="setSpeed(this.value)">
-                                <option value="1">1x</option>
-                                <option value="1.25">1.25x</option>
-                                <option value="1.5">1.5x</option>
-                                <option value="2">2x</option>
-                            </select>
-                            <button class="ctrl-btn" onclick="toggleFullscreen()"><i class="fas fa-expand"></i></button>
+                            <div class="controls-left">
+                                <!-- Play/Pause -->
+                                <button class="ctrl-btn active" id="play-btn" onclick="togglePlay()" title="تشغيل / إيقاف">
+                                    <i class="fas fa-play" id="play-icon"></i>
+                                </button>
+
+                                <!-- Volume -->
+                                <div class="volume-group">
+                                    <button class="ctrl-btn" id="mute-btn" onclick="toggleMute()" title="كتم الصوت">
+                                        <i class="fas fa-volume-up" id="mute-icon"></i>
+                                    </button>
+                                    <div class="volume-slider-wrap">
+                                        <input type="range" class="volume-slider" id="vol-slider"
+                                               min="0" max="100" value="100"
+                                               oninput="setVolume(this.value)"
+                                               ontouchstart="event.stopPropagation()"
+                                               ontouchmove="event.stopPropagation()">
+                                    </div>
+                                </div>
+
+                                <!-- Speed -->
+                                <select class="speed-select" id="speed-select" onchange="setSpeed(this.value)" title="سرعة التشغيل">
+                                    <option value="0.5">0.5x</option>
+                                    <option value="0.75">0.75x</option>
+                                    <option value="1" selected>1x</option>
+                                    <option value="1.25">1.25x</option>
+                                    <option value="1.5">1.5x</option>
+                                    <option value="2">2x</option>
+                                </select>
+                            </div>
+
+                            <div class="controls-right">
+                                <!-- Fullscreen -->
+                                <button class="ctrl-btn" id="fs-btn" onclick="toggleFullscreen()" title="ملء الشاشة">
+                                    <i class="fas fa-expand" id="fs-icon"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="tab-content" style="margin-top:20px;"></div>
+            <!-- End Video Player -->
+
+            <div id="tabs" style="display:flex; gap:10px; margin:20px 0;">
+                <button class="btn-main" style="background:var(--navy)" onclick="loadLessonsTab()">📺 المحاضرات</button>
+                <button class="btn-main" style="background:var(--green)" onclick="loadExamsTab()">📝 الامتحانات</button>
+            </div>
+            <div id="tab-content" style="margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <!-- Exam -->
+    <div id="exam-page" class="page">
+        <div class="container" style="text-align:center;">
+            <div class="timer-box"><i class="fas fa-clock"></i> <span id="timer-display">00:00</span></div>
+            <h3 id="active-exam-title"></h3>
+            <div id="exam-body" style="text-align:right; margin-top:20px;"></div>
+            <button class="btn-main" id="submit-exam-btn" style="margin-top:30px;" onclick="submitExam()">تسليم الامتحان</button>
         </div>
     </div>
 </div>
 
+<!-- Review Modal -->
+<div id="review-modal">
+    <div style="background:#fff; max-width:700px; margin:20px auto; border-radius:25px; padding:25px; position:relative;">
+        <button onclick="closeReview()" style="position:absolute; top:20px; left:20px; background:red; color:#fff; border:none; padding:8px 15px; border-radius:10px; cursor:pointer;">إغلاق</button>
+        <h3 id="rev-title" style="margin-bottom:20px; text-align:right;"></h3>
+        <div id="rev-body" style="text-align:right;"></div>
+    </div>
+</div>
+
+<!-- YouTube IFrame API -->
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    let ytPlayer = null, playerReady = false, progressTimer = null;
+    let currentCourseId, examData, timerInterval;
+    let studentAnswers = {};
 
-    function onYouTubeIframeAPIReady() { console.log("API Ready"); }
+    // ==========================================
+    //   YOUTUBE PLAYER (IFrame API)
+    // ==========================================
+    let ytPlayer = null;
+    let playerReady = false;
+    let isMuted = false;
+    let progressTimer = null;
+    let isSeeking = false;
+    let pendingVideoId = null;
+
+    // Called automatically by YouTube API when script loads
+    function onYouTubeIframeAPIReady() {
+        console.log('YouTube API ready');
+    }
 
     function initPlayer(videoId) {
-        if (ytPlayer) { ytPlayer.destroy(); }
-        document.getElementById('video-spinner').classList.add('active');
-        
+        // Destroy old player if exists
+        if (ytPlayer) {
+            try { ytPlayer.destroy(); } catch(e) {}
+            ytPlayer = null;
+            playerReady = false;
+        }
+
+        // Reset UI
+        document.getElementById('seek-fill').style.width = '0%';
+        document.getElementById('seek-buffer').style.width = '0%';
+        document.getElementById('time-display').textContent = '0:00 / 0:00';
+        setPlayIcon(false);
+        showSpinner(true);
+        showPlayOverlay(true);
+
         ytPlayer = new YT.Player('yt-player', {
             videoId: videoId,
-            playerVars: { 'controls': 0, 'disablekb': 1, 'rel': 0, 'modestbranding': 1, 'iv_load_policy': 3, 'playsinline': 1 },
+            playerVars: {
+                controls: 0,          // Hide native YouTube controls
+                disablekb: 1,         // Disable keyboard shortcuts
+                rel: 0,               // No related videos
+                modestbranding: 1,    // Minimal YouTube branding
+                iv_load_policy: 3,    // No video annotations
+                fs: 0,                // Disable native fullscreen button
+                playsinline: 1,       // iOS inline playback
+                cc_load_policy: 0,    // No captions auto
+                origin: window.location.origin || 'https://dr-fady.com',
+                enablejsapi: 1,
+                autohide: 1,
+                showinfo: 0
+            },
             events: {
-                'onReady': (e) => { 
-                    playerReady = true; 
-                    document.getElementById('video-spinner').classList.remove('active');
-                    progressTimer = setInterval(updateProgress, 500);
-                },
-                'onStateChange': (e) => {
-                    const icon = document.getElementById('play-icon');
-                    const overlay = document.getElementById('play-overlay');
-                    if (e.data == 1) { icon.className = 'fas fa-pause'; overlay.classList.add('hidden'); }
-                    else { icon.className = 'fas fa-play'; overlay.classList.remove('hidden'); }
-                }
+                onReady: onPlayerReady,
+                onStateChange: onPlayerStateChange,
+                onError: onPlayerError
             }
         });
     }
 
-    function togglePlay() {
-        if (!playerReady) return;
-        if (ytPlayer.getPlayerState() == 1) ytPlayer.pauseVideo();
-        else ytPlayer.playVideo();
+    function onPlayerReady(event) {
+        playerReady = true;
+        showSpinner(false);
+        // Start progress tracking
+        clearInterval(progressTimer);
+        progressTimer = setInterval(updateProgress, 500);
     }
 
-    function updateProgress() {
-        if (!playerReady) return;
-        const cur = ytPlayer.getCurrentTime(), dur = ytPlayer.getDuration();
-        if (dur > 0) {
-            document.getElementById('seek-fill').style.width = (cur/dur*100) + '%';
-            document.getElementById('time-display').innerText = formatTime(cur) + ' / ' + formatTime(dur);
+    function onPlayerStateChange(event) {
+        const state = event.data;
+        // YT.PlayerState: UNSTARTED=-1, ENDED=0, PLAYING=1, PAUSED=2, BUFFERING=3, CUED=5
+        if (state === YT.PlayerState.PLAYING) {
+            setPlayIcon(true);
+            showPlayOverlay(false);
+            showSpinner(false);
+        } else if (state === YT.PlayerState.PAUSED) {
+            setPlayIcon(false);
+            showPlayOverlay(true);
+        } else if (state === YT.PlayerState.ENDED) {
+            setPlayIcon(false);
+            showPlayOverlay(true);
+        } else if (state === YT.PlayerState.BUFFERING) {
+            showSpinner(true);
+            showPlayOverlay(false);
+        } else if (state === YT.PlayerState.CUED) {
+            showSpinner(false);
         }
     }
 
+    function onPlayerError(event) {
+        showSpinner(false);
+        console.error('YouTube Player Error:', event.data);
+    }
+
+    function updateProgress() {
+        if (!playerReady || !ytPlayer || isSeeking) return;
+        try {
+            const current = ytPlayer.getCurrentTime() || 0;
+            const duration = ytPlayer.getDuration() || 0;
+            const buffered = ytPlayer.getVideoLoadedFraction() || 0;
+
+            if (duration > 0) {
+                const pct = (current / duration) * 100;
+                document.getElementById('seek-fill').style.width = pct + '%';
+                document.getElementById('seek-buffer').style.width = (buffered * 100) + '%';
+                document.getElementById('time-display').textContent = formatTime(current) + ' / ' + formatTime(duration);
+            }
+        } catch(e) {}
+    }
+
     function formatTime(s) {
-        let m = Math.floor(s/60), sec = Math.floor(s%60);
+        s = Math.floor(s);
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
         return m + ':' + (sec < 10 ? '0' : '') + sec;
     }
 
+    // ==========================================
+    //   CONTROL ACTIONS
+    // ==========================================
+    function togglePlay() {
+        if (!playerReady || !ytPlayer) return;
+        try {
+            const state = ytPlayer.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+                ytPlayer.pauseVideo();
+            } else {
+                ytPlayer.playVideo();
+            }
+        } catch(e) {}
+    }
+
+    function handleOverlayClick() {
+        // Single click on overlay = toggle play
+        togglePlay();
+    }
+
+    // Touch on overlay: allow seek-bar touches to pass, toggle play for taps
+    let touchStartTime = 0;
+    function handleOverlayTouch(e) {
+        touchStartTime = Date.now();
+    }
+
+    function toggleMute() {
+        if (!playerReady || !ytPlayer) return;
+        try {
+            if (isMuted) {
+                ytPlayer.unMute();
+                isMuted = false;
+                document.getElementById('mute-icon').className = 'fas fa-volume-up';
+                const vol = parseInt(document.getElementById('vol-slider').value) || 100;
+                ytPlayer.setVolume(vol);
+            } else {
+                ytPlayer.mute();
+                isMuted = true;
+                document.getElementById('mute-icon').className = 'fas fa-volume-mute';
+            }
+        } catch(e) {}
+    }
+
+    function setVolume(val) {
+        if (!playerReady || !ytPlayer) return;
+        try {
+            ytPlayer.setVolume(parseInt(val));
+            if (parseInt(val) === 0) {
+                ytPlayer.mute();
+                isMuted = true;
+                document.getElementById('mute-icon').className = 'fas fa-volume-mute';
+            } else if (isMuted) {
+                ytPlayer.unMute();
+                isMuted = false;
+                document.getElementById('mute-icon').className = 'fas fa-volume-up';
+            }
+        } catch(e) {}
+    }
+
+    function setSpeed(val) {
+        if (!playerReady || !ytPlayer) return;
+        try {
+            ytPlayer.setPlaybackRate(parseFloat(val));
+        } catch(e) {}
+    }
+
+    // Seek bar - mouse click
     function seekTo(e) {
-        if (!playerReady) return;
-        const rect = document.getElementById('seek-track').getBoundingClientRect();
-        const ratio = (e.clientX - rect.left) / rect.width;
-        ytPlayer.seekTo(ratio * ytPlayer.getDuration());
+        if (!playerReady || !ytPlayer) return;
+        try {
+            const track = document.getElementById('seek-track');
+            const rect = track.getBoundingClientRect();
+            // RTL: invert the ratio
+            const ratio = 1 - ((e.clientX - rect.left) / rect.width);
+            const duration = ytPlayer.getDuration() || 0;
+            if (duration > 0) {
+                ytPlayer.seekTo(ratio * duration, true);
+            }
+        } catch(e) {}
     }
 
-    function setSpeed(v) { if(playerReady) ytPlayer.setPlaybackRate(parseFloat(v)); }
+    // Seek bar - touch support
+    let seekTouching = false;
+    function seekTouchStart(e) {
+        seekTouching = true;
+        isSeeking = true;
+        e.preventDefault();
+        seekTouchMove(e);
+    }
+    function seekTouchMove(e) {
+        if (!seekTouching || !playerReady || !ytPlayer) return;
+        e.preventDefault();
+        try {
+            const touch = e.touches[0];
+            const track = document.getElementById('seek-track');
+            const rect = track.getBoundingClientRect();
+            const ratio = Math.min(1, Math.max(0, 1 - ((touch.clientX - rect.left) / rect.width)));
+            const duration = ytPlayer.getDuration() || 0;
+            if (duration > 0) {
+                const pct = ratio * 100;
+                document.getElementById('seek-fill').style.width = pct + '%';
+                document.getElementById('time-display').textContent = formatTime(ratio * duration) + ' / ' + formatTime(duration);
+            }
+        } catch(e) {}
+    }
+    function seekTouchEnd(e) {
+        if (!seekTouching) return;
+        seekTouching = false;
+        try {
+            const track = document.getElementById('seek-track');
+            const fill = document.getElementById('seek-fill');
+            const pct = parseFloat(fill.style.width) / 100;
+            const duration = ytPlayer.getDuration() || 0;
+            if (duration > 0) ytPlayer.seekTo(pct * duration, true);
+        } catch(e) {}
+        setTimeout(() => { isSeeking = false; }, 300);
+    }
 
+    // Fullscreen
     function toggleFullscreen() {
-        const el = document.getElementById('player-wrapper');
-        if (!document.fullscreenElement) el.requestFullscreen();
-        else document.exitFullscreen();
+        const wrapper = document.getElementById('player-wrapper');
+        const icon = document.getElementById('fs-icon');
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            const req = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen || wrapper.mozRequestFullScreen;
+            if (req) {
+                req.call(wrapper);
+                icon.className = 'fas fa-compress';
+            }
+        } else {
+            const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
+            if (exit) {
+                exit.call(document);
+                icon.className = 'fas fa-expand';
+            }
+        }
     }
 
-    // AUTH LOGIC
+    // UI helpers
+    function setPlayIcon(playing) {
+        document.getElementById('play-icon').className = playing ? 'fas fa-pause' : 'fas fa-play';
+    }
+    function showSpinner(show) {
+        document.getElementById('video-spinner').classList.toggle('active', show);
+    }
+    function showPlayOverlay(show) {
+        document.getElementById('play-overlay').classList.toggle('hidden', !show);
+    }
+
+    // Prevent keyboard shortcuts on video area
+    document.addEventListener('keydown', function(e) {
+        if (['Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyF', 'KeyK', 'KeyM'].includes(e.code)) {
+            e.preventDefault();
+        }
+    });
+
+    // Prevent right-click and context menu everywhere
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // ==========================================
+    //   AUTH & PLATFORM LOGIC
+    // ==========================================
+    function getDeviceID() {
+        let did = localStorage.getItem('device_fingerprint');
+        if (!did) {
+            did = 'device_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+            localStorage.setItem('device_fingerprint', did);
+        }
+        return did;
+    }
+
+    function getYouTubeId(url) {
+        if (!url) return url;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : url;
+    }
+
     async function handleLogin() {
-        const phone = document.getElementById('l-phone').value, pass = document.getElementById('l-pass').value;
+        const phone = document.getElementById('l-phone').value.trim();
+        const pass = document.getElementById('l-pass').value.trim();
         const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if (user) { localStorage.setItem('f_id', user.id); setup(user); } else alert("خطأ!");
+        if (user) {
+            const fp = getDeviceID();
+            if (user.device_id && user.device_id !== fp) {
+                alert("عذراً، هذا الحساب مفتوح بالفعل على جهاز آخر. يرجى تسجيل الخروج من الجهاز الأول.");
+                return;
+            }
+            if (!user.device_id) {
+                await sb.from('students').update({ device_id: fp }).eq('id', user.id);
+            }
+            localStorage.setItem('f_id', user.id);
+            localStorage.setItem('f_p', user.student_phone);
+            start(user);
+        } else alert("بيانات خاطئة");
     }
 
     async function handleRegister() {
-        const name = document.getElementById('r-name').value, phone = document.getElementById('r-phone').value, pass = document.getElementById('r-pass').value;
-        const { data: user } = await sb.from('students').insert([{ full_name: name, student_phone: phone, password: pass }]).select().single();
-        if (user) { localStorage.setItem('f_id', user.id); setup(user); }
+        const fp = getDeviceID();
+        const { data: user } = await sb.from('students').insert([{
+            full_name: document.getElementById('r-name').value,
+            student_phone: document.getElementById('r-phone').value,
+            parent_phone: document.getElementById('r-parent').value,
+            password: document.getElementById('r-pass').value,
+            device_id: fp
+        }]).select().single();
+        if (user) {
+            localStorage.setItem('f_id', user.id);
+            localStorage.setItem('f_p', user.student_phone);
+            start(user);
+        }
     }
 
-    function setup(user) {
+    async function handleLogout() {
+        const userId = localStorage.getItem('f_id');
+        if (userId) {
+            await sb.from('students').update({ device_id: null }).eq('id', userId);
+        }
+        // Destroy player
+        if (ytPlayer) { try { ytPlayer.destroy(); } catch(e) {} ytPlayer = null; }
+        clearInterval(progressTimer);
+        localStorage.removeItem('f_id');
+        localStorage.removeItem('f_p');
+        location.reload();
+    }
+
+    function start(user) {
         document.getElementById('nav-user-name').innerText = user.full_name;
-        document.getElementById('wm-text').innerText = Array(30).fill(user.full_name + " " + user.student_phone).join('   ');
+        document.getElementById('wm-text').innerText = Array(40).fill(`${user.full_name} | ${user.student_phone}`).join('   ');
         document.getElementById('watermark').classList.add('active');
         showPage('home-page');
         loadCourses();
@@ -269,43 +866,170 @@
     async function loadCourses() {
         const { data: cs } = await sb.from('courses').select('*');
         document.getElementById('courses-container').innerHTML = cs.map(c => `
-            <div class="auth-card" style="margin-bottom:20px; cursor:pointer;" onclick="openCourse('${c.id}', '${c.title}')">
-                <h3>${c.title}</h3>
-                <button class="btn-main">دخول المحاضرة</button>
+            <div class="course-card">
+                <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" style="width:100%; height:170px; object-fit:cover;" alt="${c.title}">
+                <div style="padding:15px; text-align:right;">
+                    <h3>${c.title}</h3>
+                    <button class="btn-main" onclick="checkAccess('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول</button>
+                </div>
             </div>`).join('');
     }
 
-    async function openCourse(id, title) {
+    async function checkAccess(id, title, isFree) {
+        if (!isFree) {
+            const { data: a } = await sb.from('student_access').select('*').eq('student_phone', localStorage.getItem('f_p')).eq('course_id', id).single();
+            if (!a) return alert("يرجى تفعيل الكورس أولاً");
+        }
+        currentCourseId = id;
         document.getElementById('current-course-title').innerText = title;
         showPage('content-page');
-        const { data: ls } = await sb.from('lessons').select('*').eq('course_id', id);
-        document.getElementById('tab-content').innerHTML = ls.map(l => `
-            <div class="auth-card" style="padding:15px; margin-bottom:10px; display:flex; justify-content:space-between;" onclick="playVideo('${l.video_id}')">
-                <span>${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange)"></i>
+        loadLessonsTab();
+    }
+
+    async function loadLessonsTab() {
+        const { data: ls } = await sb.from('lessons').select('*').eq('course_id', currentCourseId).order('id');
+        document.getElementById('tab-content').innerHTML = ls.map((l, i) => `
+            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--orange); cursor:pointer;" onclick="playVideo('${l.video_id}')">
+                <span><b>${i+1}.</b> ${l.title}</span>
+                <i class="fas fa-play-circle" style="color:var(--orange); font-size:1.5rem;"></i>
             </div>`).join('');
     }
 
-    function playVideo(id) {
+    function playVideo(rawUrl) {
+        const id = getYouTubeId(rawUrl);
         document.getElementById('video-section').style.display = 'block';
-        initPlayer(id);
-        window.scrollTo(0,0);
+
+        // Reset speed
+        document.getElementById('speed-select').value = '1';
+
+        // Check if YouTube API is ready
+        if (typeof YT !== 'undefined' && YT.Player) {
+            initPlayer(id);
+        } else {
+            // Queue it until API is ready
+            pendingVideoId = id;
+            window.onYouTubeIframeAPIReady = function() {
+                initPlayer(pendingVideoId);
+            };
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    async function loadExamsTab() {
+        const { data: ex } = await sb.from('exams').select('*').eq('course_id', currentCourseId).order('id');
+        document.getElementById('tab-content').innerHTML = ex.map((e, i) => `
+            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--green); cursor:pointer;" onclick='startExamFlow(${JSON.stringify(e)})'>
+                <span><b>${i+1}.</b> ${e.title}</span>
+                <i class="fas fa-edit" style="color:var(--green); font-size:1.5rem;"></i>
+            </div>`).join('');
+    }
+
+    function startExamFlow(exam) {
+        if (!confirm(`هل أنت مستعد؟ الوقت: ${exam.duration_minutes} دقيقة.`)) return;
+        examData = exam; studentAnswers = {};
+        showPage('exam-page');
+        document.getElementById('active-exam-title').innerText = exam.title;
+        document.getElementById('exam-body').innerHTML = exam.questions.map((q, i) => `
+            <div style="margin-bottom:30px; border-bottom:1px solid #eee; padding-bottom:15px;">
+                <p><b>س ${i+1}:</b> ${q.text}</p>
+                ${q.image ? `<img src="${q.image}" class="q-img">` : ''}
+                ${q.options.map((opt, oi) => `<button class="option-btn" id="q${i}_o${oi}" onclick="selectAnswer(${i}, ${oi+1})">${opt}</button>`).join('')}
+            </div>`).join('');
+        startTimer(exam.duration_minutes);
+    }
+
+    function selectAnswer(qi, choice) {
+        studentAnswers[qi] = choice;
+        document.querySelectorAll(`[id^="q${qi}_"]`).forEach(b => b.classList.remove('selected'));
+        document.getElementById(`q${qi}_o${choice-1}`).classList.add('selected');
+    }
+
+    function startTimer(m) {
+        let s = m * 60;
+        timerInterval = setInterval(() => {
+            let min = Math.floor(s / 60), sec = s % 60;
+            document.getElementById('timer-display').innerText = `${min}:${sec < 10 ? '0' + sec : sec}`;
+            if (s-- <= 0) { clearInterval(timerInterval); submitExam(); }
+        }, 1000);
+    }
+
+    async function submitExam() {
+        clearInterval(timerInterval);
+        let scoreCount = 0;
+        examData.questions.forEach((q, i) => { if (studentAnswers[i] == q.correct) scoreCount++; });
+        const finalScore = Math.round((scoreCount / examData.questions.length) * 100);
+        await sb.from('exam_results').insert([{
+            student_phone: localStorage.getItem('f_p'),
+            exam_name: examData.title,
+            score: finalScore,
+            student_answers: studentAnswers
+        }]);
+        alert(`تم التسليم! درجتك هي: ${finalScore}%`);
+        showPage('home-page');
+    }
+
+    async function loadProfilePage() {
+        showPage('profile-page');
+        const phone = localStorage.getItem('f_p');
+        document.getElementById('p-name').innerText = document.getElementById('nav-user-name').innerText;
+        document.getElementById('p-phone').innerText = phone;
+        const { data: results } = await sb.from('exam_results').select('*').eq('student_phone', phone).order('created_at', { ascending: false });
+        document.getElementById('grades-list').innerHTML = results.map(res => `
+            <div style="background:#fff; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="text-align:right;"><b>${res.exam_name}</b><br><small>${new Date(res.created_at).toLocaleDateString('ar-EG')}</small></div>
+                <div style="font-weight:bold; color:var(--orange)">${res.score}%</div>
+                <button onclick='showReview(${JSON.stringify(res)})' style="background:var(--navy); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer;">مراجعة</button>
+            </div>`).join('');
+    }
+
+    async function showReview(res) {
+        const { data: exam } = await sb.from('exams').select('*').eq('title', res.exam_name).single();
+        if (!exam) return;
+        document.getElementById('review-modal').style.display = 'block';
+        document.getElementById('rev-title').innerText = "مراجعة: " + res.exam_name;
+        document.getElementById('rev-body').innerHTML = exam.questions.map((q, i) => {
+            const studentChoice = res.student_answers ? res.student_answers[i] : null;
+            return `
+                <div style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:15px;">
+                    <p><b>س ${i+1}:</b> ${q.text}</p>
+                    ${q.options.map((opt, oi) => {
+                        let cls = '';
+                        if (oi + 1 == q.correct) cls = 'correct-ans';
+                        if (studentChoice == oi + 1 && studentChoice != q.correct) cls = 'wrong-ans';
+                        return `<div class="option-btn ${cls}" style="cursor:default">${opt} ${oi + 1 == q.correct ? '✅' : (studentChoice == oi + 1 ? '❌' : '')}</div>`;
+                    }).join('')}
+                </div>`;
+        }).join('');
+    }
+
+    function closeReview() { document.getElementById('review-modal').style.display = 'none'; }
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
-        document.getElementById('back-btn').style.display = (id === 'content-page') ? 'block' : 'none';
-        if (id !== 'content-page' && ytPlayer) { try { ytPlayer.pauseVideo(); } catch(e){} }
+        document.getElementById('back-btn').style.display = (id !== 'home-page' && id !== 'login-page') ? 'block' : 'none';
+        document.getElementById('profile-btn').style.display = (id === 'home-page') ? 'block' : 'none';
+        if (id !== 'exam-page') clearInterval(timerInterval);
+        // Pause video when navigating away
+        if (id !== 'content-page' && ytPlayer && playerReady) {
+            try { ytPlayer.pauseVideo(); } catch(e) {}
+        }
     }
-
-    function handleLogout() { localStorage.clear(); location.reload(); }
 
     window.onload = async () => {
         const id = localStorage.getItem('f_id');
         if (id) {
             const { data: u } = await sb.from('students').select('*').eq('id', id).single();
-            if (u) setup(u);
+            if (u) {
+                const fp = getDeviceID();
+                if (u.device_id && u.device_id !== fp) {
+                    alert("تم تسجيل الدخول من جهاز آخر. سيتم تسجيل خروجك لحماية الحساب.");
+                    handleLogout();
+                } else {
+                    start(u);
+                }
+            }
         }
     };
 </script>
