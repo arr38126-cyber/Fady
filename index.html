@@ -6,7 +6,11 @@
     <title>منصة Dr. Fady Adel | فيزياء</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://www.youtube.com/iframe_api"></script>
+
     <style>
         :root {
             --navy: #1B2347;
@@ -23,8 +27,6 @@
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.2rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
 
-        .poetic-line { font-family: 'Amiri', serif; font-style: italic; color: var(--orange); margin-bottom: 25px; font-size: 1.2rem; font-weight: 700; line-height: 1.6; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-
         nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         nav.visible { display: flex; }
         .nav-logo { display: flex; align-items: center; gap: 10px; }
@@ -34,115 +36,59 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* ========= FLOATING WHATSAPP BUTTON ========= */
+        /* زر واتساب العائم */
         .floating-wa {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background-color: #25D366;
-            color: white;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 35px;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
-            z-index: 10000;
-            text-decoration: none;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .floating-wa:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+            position: fixed; bottom: 25px; right: 25px; background-color: #25D366; color: white;
+            border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center;
+            justify-content: center; font-size: 35px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            z-index: 10000; text-decoration: none; transition: 0.3s;
         }
 
-        /* ========= VIDEO PLAYER SYSTEM ========= */
+        /* نظام مشغل الفيديو */
         .video-player-wrapper { position: relative; background: #000; border-radius: 20px; overflow: hidden; margin-bottom: 10px; border: 2px solid var(--navy); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
         .video-aspect { position: relative; padding-bottom: 56.25%; height: 0; background: #000; }
         #yt-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; }
-        #video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; cursor: default; user-select: none; }
-        .custom-controls { background: linear-gradient(135deg, var(--navy) 0%, #0f1628 100%); padding: 10px 14px 12px; border-radius: 0 0 18px 18px; border: 2px solid var(--navy); border-top: none; position: relative; z-index: 20; }
-        .progress-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .time-display { color: #fff; font-size: 0.72rem; font-weight: 700; white-space: nowrap; min-width: 85px; text-align: center; font-family: 'Cairo', sans-serif; direction: ltr; }
-        .seek-bar-track { flex: 1; height: 5px; background: rgba(255,255,255,0.2); border-radius: 10px; position: relative; cursor: pointer; transition: height 0.15s; }
-        .seek-bar-track:hover { height: 7px; }
-        .seek-bar-fill { height: 100%; background: linear-gradient(90deg, var(--orange), #ff8c42); border-radius: 10px; position: relative; min-width: 0; transition: width 0.1s linear; }
-        .seek-bar-thumb { position: absolute; right: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; background: #fff; border-radius: 50%; box-shadow: 0 0 6px rgba(232,88,26,0.8); opacity: 0; transition: opacity 0.2s; }
-        .seek-bar-track:hover .seek-bar-thumb { opacity: 1; }
-        .seek-bar-buffer { position: absolute; top: 0; left: 0; height: 100%; background: rgba(255,255,255,0.15); border-radius: 10px; }
-        .controls-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: nowrap; }
-        .controls-left, .controls-right { display: flex; align-items: center; gap: 4px; }
-        .ctrl-btn { background: rgba(255,255,255,0.08); border: none; color: #fff; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s; flex-shrink: 0; }
-        .ctrl-btn:hover { background: var(--orange); transform: scale(1.05); }
-        .ctrl-btn:active { transform: scale(0.95); }
-        .ctrl-btn.active { background: var(--orange); }
-        #play-btn { width: 42px; height: 42px; font-size: 1.1rem; background: var(--orange); border-radius: 50%; }
-        #play-btn:hover { background: #ff6b2b; }
-        .volume-group { display: flex; align-items: center; gap: 6px; }
-        .volume-slider-wrap { width: 0; overflow: hidden; transition: width 0.3s ease; }
-        .volume-group:hover .volume-slider-wrap, .volume-group:focus-within .volume-slider-wrap { width: 65px; }
-        .volume-slider { -webkit-appearance: none; appearance: none; height: 4px; background: rgba(255,255,255,0.25); border-radius: 10px; outline: none; width: 60px; cursor: pointer; display: block; }
-        .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--orange); cursor: pointer; box-shadow: 0 0 4px rgba(0,0,0,0.3); }
-        .speed-select { background: rgba(255,255,255,0.08); border: none; color: #fff; padding: 4px 6px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.75rem; font-weight: 700; outline: none; height: 36px; text-align: center; min-width: 42px; }
-        .speed-select option { background: var(--navy); color: #fff; }
-        .speed-select:hover { background: rgba(232,88,26,0.6); }
-        .video-spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 5; display: none; }
-        .video-spinner.active { display: block; }
-        .spinner-ring { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        #play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 11; background: rgba(232,88,26,0.9); width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 0.3s, transform 0.2s; box-shadow: 0 0 30px rgba(232,88,26,0.5); }
-        #play-overlay:hover { transform: translate(-50%, -50%) scale(1.1); }
-        #play-overlay.hidden { opacity: 0; pointer-events: none; }
-        #play-overlay i { color: #fff; font-size: 1.6rem; margin-right: -3px; }
-        .video-player-wrapper:-webkit-full-screen { border-radius: 0; }
-        .video-player-wrapper:-webkit-full-screen .video-aspect { padding-bottom: 0; height: 100vh; }
-        .video-player-wrapper:fullscreen { border-radius: 0; }
+        #video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; }
+        
+        .custom-controls { background: var(--navy); padding: 10px; border-radius: 0 0 18px 18px; position: relative; z-index: 20; }
+        .progress-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .time-display { color: #fff; font-size: 0.75rem; min-width: 80px; text-align: center; font-family: monospace; }
+        .seek-bar-track { flex: 1; height: 5px; background: rgba(255,255,255,0.2); border-radius: 5px; position: relative; cursor: pointer; }
+        .seek-bar-fill { height: 100%; background: var(--orange); border-radius: 5px; width: 0%; }
+        
+        .controls-row { display: flex; align-items: center; justify-content: space-between; }
+        .ctrl-btn { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; }
+        #play-btn { width: 45px; height: 45px; background: var(--orange); border-radius: 50%; font-size: 1.2rem; }
 
-        /* ======================================= */
-        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1rem; transition: 0.2s; }
-        .btn-main:hover { opacity: 0.9; }
-        .timer-box { background: var(--navy); color: #fff; padding: 10px 20px; border-radius: 50px; font-weight: 800; font-size: 1.2rem; display: inline-block; margin-bottom: 20px; }
-        .q-img { width: 100%; max-width: 400px; border-radius: 15px; margin: 15px 0; border: 1px solid #ddd; }
-        .option-btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; background: #f9f9f9; text-align: right; font-family: 'Cairo'; font-weight: 600; cursor: pointer; }
-        .option-btn.selected { border-color: var(--orange); background: #fff5f0; }
-        .correct-ans { border: 2px solid var(--green) !important; background: #eafff2 !important; }
-        .wrong-ans { border: 2px solid var(--red) !important; background: #fff0f0 !important; }
-        #review-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:20000; overflow-y:auto; padding:20px; }
+        .video-spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 15; display: none; }
+        .video-spinner.active { display: block; }
+        .spinner-ring { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 12; background: rgba(232,88,26,0.9); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        #play-overlay.hidden { display: none; }
+
+        /* باقي التنسيقات */
+        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; }
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
-        .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 35px; text-align: center; }
-        .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; outline: none; font-size: 1rem; }
+        .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 30px; text-align: center; }
+        .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 10px; font-family: 'Cairo'; text-align: center; }
         .course-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
-        @media (max-width: 480px) {
-            .controls-row { gap: 3px; }
-            .ctrl-btn { width: 32px; height: 32px; font-size: 0.8rem; }
-            #play-btn { width: 38px; height: 38px; font-size: 1rem; }
-            .time-display { font-size: 0.65rem; min-width: 75px; }
-            .speed-select { min-width: 38px; font-size: 0.7rem; padding: 3px 4px; }
-        }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<a href="https://wa.me/201014169548" target="_blank" class="floating-wa" title="تواصل مع الدعم الفني">
-    <i class="fab fa-whatsapp"></i>
-</a>
-
+<a href="https://wa.me/201014169548" target="_blank" class="floating-wa"><i class="fab fa-whatsapp"></i></a>
 <div id="watermark"><div id="wm-text"></div></div>
 
 <nav id="navbar">
     <div class="nav-logo">
         <img src="https://i.ibb.co/zT82jk68/image.png" alt="Logo">
-        <div>
-            <div id="nav-user-name" style="font-weight: 800;">جاري التحميل...</div>
-            <div style="color: var(--orange); font-size: 0.8rem;">فيزياء - د. فادي عادل</div>
-        </div>
+        <div><div id="nav-user-name" style="font-weight: 800;">تحميل...</div><div style="color: var(--orange); font-size: 0.8rem;">فيزياء - د. فادي عادل</div></div>
     </div>
-    <div style="display:flex; gap:10px;">
-        <button id="profile-btn" style="background:var(--orange); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="loadProfilePage()">حسابي</button>
-        <button id="back-btn" style="display:none; background:rgba(255,255,255,0.2); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="showPage('home-page')">الرئيسية</button>
-        <button onclick="handleLogout()" style="background:none; border:1px solid #fff; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;">خروج</button>
+    <div style="display:flex; gap:8px;">
+        <button id="back-btn" style="display:none; background:rgba(255,255,255,0.2); border:none; color:#fff; padding:6px 10px; border-radius:8px;" onclick="showPage('home-page')">الرئيسية</button>
+        <button onclick="handleLogout()" style="background:none; border:1px solid #fff; color:#fff; padding:6px 10px; border-radius:8px;">خروج</button>
     </div>
 </nav>
 
@@ -150,19 +96,13 @@
     <div id="login-page" class="page active">
         <div class="auth-screen">
             <div class="auth-card">
-                <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="margin-bottom: 15px; border-radius: 50%;" alt="Logo">
-                <div class="poetic-line">"وَمَن لايهوى صُعُودَ الجِبَالِ <br> يَعِش أَبَدَ الدَّهرِ بَيْنَ الحُفَرِ"</div>
-                <h3 style="margin-bottom: 20px;">تسجيل الدخول</h3>
+                <img src="https://i.ibb.co/zT82jk68/image.png" width="70" style="border-radius:50%; margin-bottom:10px;">
+                <h3>تسجيل الدخول</h3>
                 <input type="tel" id="l-phone" placeholder="رقم الموبايل" class="input-group">
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
-                <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
-                <p style="margin-top:20px; font-weight:700; color:var(--navy); cursor:pointer;" onclick="showPage('register-page')">إنشاء حساب جديد</p>
-                
-                <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
-                    <a href="https://wa.me/201014169548" target="_blank" style="display: flex; justify-content: center; align-items: center; gap: 10px; background: #25D366; color: #fff; padding: 12px; border-radius: 12px; text-decoration: none; font-weight: 800; font-family: 'Cairo';">
-                        <i class="fab fa-whatsapp" style="font-size: 1.5rem;"></i> الدعم الفني (واتساب)
-                    </a>
-                </div>
+                <button class="btn-main" onclick="handleLogin()">دخول</button>
+                <p onclick="showPage('register-page')" style="margin-top:15px; cursor:pointer; font-weight:bold;">إنشاء حساب جديد</p>
+                <a href="https://wa.me/201014169548" target="_blank" style="display:block; margin-top:20px; color:#25D366; text-decoration:none; font-weight:800;"><i class="fab fa-whatsapp"></i> الدعم الفني</a>
             </div>
         </div>
     </div>
@@ -170,451 +110,195 @@
     <div id="register-page" class="page">
         <div class="auth-screen">
             <div class="auth-card">
-                <h3 style="margin-bottom:20px;">فتح حساب طالب جديد</h3>
+                <h3>حساب جديد</h3>
                 <input type="text" id="r-name" placeholder="الاسم ثلاثي" class="input-group">
                 <input type="tel" id="r-phone" placeholder="رقم موبايلك" class="input-group">
-                <input type="tel" id="r-parent" placeholder="رقم ولي الأمر" class="input-group">
                 <input type="password" id="r-pass" placeholder="كلمة المرور" class="input-group">
-                <button class="btn-main" onclick="handleRegister()">تأكيد التسجيل</button>
-                <p style="margin-top:15px; font-weight:bold; cursor:pointer;" onclick="showPage('login-page')">الرجوع لتسجيل الدخول</p>
-
-                <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
-                    <a href="https://wa.me/201014169548" target="_blank" style="display: flex; justify-content: center; align-items: center; gap: 10px; background: #25D366; color: #fff; padding: 12px; border-radius: 12px; text-decoration: none; font-weight: 800; font-family: 'Cairo';">
-                        <i class="fab fa-whatsapp" style="font-size: 1.5rem;"></i> الدعم الفني (واتساب)
-                    </a>
-                </div>
+                <button class="btn-main" onclick="handleRegister()">تسجيل</button>
+                <p onclick="showPage('login-page')" style="margin-top:15px; cursor:pointer;">رجوع</p>
             </div>
         </div>
     </div>
 
     <div id="home-page" class="page">
         <div class="container">
-            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom: 25px;">الكورسات المتاحة</h2>
-            <div id="courses-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;"></div>
-        </div>
-    </div>
-
-    <div id="profile-page" class="page">
-        <div class="container">
-            <div style="background:var(--navy); color:#fff; padding:30px; border-radius:25px; text-align:center; margin-bottom:20px;">
-                <h2 id="p-name"></h2>
-                <p id="p-phone" style="opacity:0.8;"></p>
-            </div>
-            <h3 style="text-align:right;"><i class="fas fa-chart-bar" style="color:var(--orange)"></i> سجل نتائجك</h3>
-            <div id="grades-list"></div>
+            <h2 style="text-align:right; border-right:4px solid var(--orange); padding-right:10px;">الكورسات المتاحة</h2>
+            <div id="courses-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;"></div>
         </div>
     </div>
 
     <div id="content-page" class="page">
         <div class="container">
-            <h2 id="current-course-title" style="text-align: right; color: var(--navy);"></h2>
-            <div id="video-section" style="display:none; margin-top:20px;">
+            <h3 id="current-course-title" style="text-align:right;"></h3>
+            
+            <div id="video-section" style="display:none;">
                 <div class="video-player-wrapper" id="player-wrapper">
-                    <div class="video-aspect" id="video-aspect">
+                    <div class="video-aspect">
                         <div id="yt-player"></div>
-                        <div id="video-overlay" oncontextmenu="return false;" onclick="handleOverlayClick()"></div>
-                        <div class="video-spinner active" id="video-spinner">
-                            <div class="spinner-ring"></div>
-                        </div>
-                        <div id="play-overlay" onclick="togglePlay()">
-                            <i class="fas fa-play"></i>
-                        </div>
+                        <div id="video-overlay" onclick="togglePlay()"></div>
+                        <div class="video-spinner" id="video-spinner"><div class="spinner-ring"></div></div>
+                        <div id="play-overlay" onclick="togglePlay()"><i class="fas fa-play" style="color:#fff;"></i></div>
                     </div>
-                    <div class="custom-controls" id="custom-controls">
+                    <div class="custom-controls">
                         <div class="progress-container">
                             <span class="time-display" id="time-display">0:00 / 0:00</span>
-                            <div class="seek-bar-track" id="seek-track" onclick="seekTo(event)">
-                                <div class="seek-bar-buffer" id="seek-buffer" style="width:0%"></div>
-                                <div class="seek-bar-fill" id="seek-fill" style="width:0%">
-                                    <div class="seek-bar-thumb"></div>
-                                </div>
-                            </div>
+                            <div class="seek-bar-track" onclick="seekTo(event)"><div class="seek-bar-fill" id="seek-fill"></div></div>
                         </div>
                         <div class="controls-row">
-                            <div class="controls-left">
-                                <button class="ctrl-btn active" id="play-btn" onclick="togglePlay()">
-                                    <i class="fas fa-play" id="play-icon"></i>
-                                </button>
-                                <div class="volume-group">
-                                    <button class="ctrl-btn" id="mute-btn" onclick="toggleMute()">
-                                        <i class="fas fa-volume-up" id="mute-icon"></i>
-                                    </button>
-                                    <div class="volume-slider-wrap">
-                                        <input type="range" class="volume-slider" id="vol-slider" min="0" max="100" value="100" oninput="setVolume(this.value)">
-                                    </div>
-                                </div>
-                                <select class="speed-select" id="speed-select" onchange="setSpeed(this.value)">
-                                    <option value="0.5">0.5x</option>
-                                    <option value="0.75">0.75x</option>
-                                    <option value="1" selected>1x</option>
-                                    <option value="1.25">1.25x</option>
-                                    <option value="1.5">1.5x</option>
-                                    <option value="2">2x</option>
-                                </select>
-                            </div>
-                            <div class="controls-right">
-                                <button class="ctrl-btn" id="fs-btn" onclick="toggleFullscreen()">
-                                    <i class="fas fa-expand" id="fs-icon"></i>
-                                </button>
-                            </div>
+                            <button class="ctrl-btn" id="play-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
+                            <select onchange="setSpeed(this.value)" style="background:rgba(255,255,255,0.1); color:#fff; border:none; border-radius:5px; padding:5px;">
+                                <option value="1">1x</option><option value="1.5">1.5x</option><option value="2">2x</option>
+                            </select>
+                            <button class="ctrl-btn" onclick="toggleFullscreen()"><i class="fas fa-expand"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="tabs" style="display:flex; gap:10px; margin:20px 0;">
-                <button class="btn-main" style="background:var(--navy)" onclick="loadLessonsTab()">📺 المحاضرات</button>
-                <button class="btn-main" style="background:var(--green)" onclick="loadExamsTab()">📝 الامتحانات</button>
+
+            <div style="display:flex; gap:10px; margin:20px 0;">
+                <button class="btn-main" style="background:var(--navy)" onclick="loadLessonsTab()">المحاضرات</button>
+                <button class="btn-main" style="background:var(--green)" onclick="loadExamsTab()">الامتحانات</button>
             </div>
-            <div id="tab-content" style="margin-top:10px;"></div>
-        </div>
-    </div>
-
-    <div id="exam-page" class="page">
-        <div class="container" style="text-align:center;">
-            <div class="timer-box"><i class="fas fa-clock"></i> <span id="timer-display">00:00</span></div>
-            <h3 id="active-exam-title"></h3>
-            <div id="exam-body" style="text-align:right; margin-top:20px;"></div>
-            <button class="btn-main" id="submit-exam-btn" style="margin-top:30px;" onclick="submitExam()">تسليم الامتحان</button>
+            <div id="tab-content"></div>
         </div>
     </div>
 </div>
-
-<div id="review-modal">
-    <div style="background:#fff; max-width:700px; margin:20px auto; border-radius:25px; padding:25px; position:relative;">
-        <button onclick="closeReview()" style="position:absolute; top:20px; left:20px; background:var(--red); color:#fff; border:none; padding:8px 15px; border-radius:10px; cursor:pointer;">إغلاق</button>
-        <h3 id="rev-title" style="margin-bottom:20px; text-align:right;"></h3>
-        <div id="rev-body" style="text-align:right;"></div>
-    </div>
-</div>
-
-<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
-    // التأكد من تهيئة قاعدة البيانات بشكل سليم
-    let sb = null;
-    if (typeof supabase !== 'undefined') {
-        sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
+    const sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
+    let ytPlayer, playerReady = false, progressTimer;
+
+    // دالة استخراج ID الفيديو بشكل احترافي
+    function getYoutubeID(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : url;
     }
 
-    let currentCourseId, examData, timerInterval;
-    let studentAnswers = {};
-    let cachedExams = [];
-    let cachedResults = [];
-
-    // مشغل الفيديو
-    let ytPlayer = null;
-    let playerReady = false;
-    let isMuted = false;
-    let progressTimer = null;
-    let isSeeking = false;
-
-    function onYouTubeIframeAPIReady() {}
+    function onYouTubeIframeAPIReady() { console.log("YouTube API Ready"); }
 
     function initPlayer(videoId) {
-        if (ytPlayer) { try { ytPlayer.destroy(); } catch(e) {} ytPlayer = null; playerReady = false; }
-        document.getElementById('seek-fill').style.width = '0%';
-        document.getElementById('seek-buffer').style.width = '0%';
-        document.getElementById('time-display').textContent = '0:00 / 0:00';
-        setPlayIcon(false); showSpinner(true); showPlayOverlay(true);
+        if (ytPlayer) { ytPlayer.destroy(); }
+        playerReady = false;
+        document.getElementById('video-spinner').classList.add('active');
+        document.getElementById('play-overlay').classList.remove('hidden');
 
         ytPlayer = new YT.Player('yt-player', {
             videoId: videoId,
-            playerVars: { controls: 0, disablekb: 1, rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 0, playsinline: 1, enablejsapi: 1 },
-            events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange }
+            playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'showinfo': 0, 'iv_load_policy': 3, 'playsinline': 1 },
+            events: {
+                'onReady': (e) => { 
+                    playerReady = true; 
+                    document.getElementById('video-spinner').classList.remove('active');
+                    progressTimer = setInterval(updateProgress, 500);
+                },
+                'onStateChange': (e) => {
+                    const icon = document.getElementById('play-icon');
+                    if (e.data === YT.PlayerState.PLAYING) {
+                        icon.className = 'fas fa-pause';
+                        document.getElementById('play-overlay').classList.add('hidden');
+                        document.getElementById('video-spinner').classList.remove('active');
+                    } else {
+                        icon.className = 'fas fa-play';
+                        document.getElementById('play-overlay').classList.remove('hidden');
+                        if (e.data === YT.PlayerState.BUFFERING) document.getElementById('video-spinner').classList.add('active');
+                    }
+                }
+            }
         });
     }
 
-    function onPlayerReady() { playerReady = true; showSpinner(false); clearInterval(progressTimer); progressTimer = setInterval(updateProgress, 500); }
-    function onPlayerStateChange(event) {
-        if (event.data === 1) { setPlayIcon(true); showPlayOverlay(false); showSpinner(false); }
-        else { setPlayIcon(false); showPlayOverlay(true); }
-    }
-
     function updateProgress() {
-        if (!playerReady || isSeeking || !ytPlayer) return;
-        try {
-            const current = ytPlayer.getCurrentTime() || 0, duration = ytPlayer.getDuration() || 0;
-            if (duration > 0) {
-                document.getElementById('seek-fill').style.width = (current / duration * 100) + '%';
-                document.getElementById('time-display').textContent = formatTime(current) + ' / ' + formatTime(duration);
-            }
-        } catch(e) {}
+        if (!playerReady) return;
+        const curr = ytPlayer.getCurrentTime();
+        const dur = ytPlayer.getDuration();
+        if (dur > 0) {
+            document.getElementById('seek-fill').style.width = (curr / dur * 100) + '%';
+            document.getElementById('time-display').innerText = formatTime(curr) + ' / ' + formatTime(dur);
+        }
     }
 
     function formatTime(s) { s = Math.floor(s); return Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60); }
-    function togglePlay() { if (playerReady && ytPlayer) { try { ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); } catch(e){} } }
-    function toggleMute() { if (playerReady && ytPlayer) { try { isMuted ? ytPlayer.unMute() : ytPlayer.mute(); isMuted = !isMuted; document.getElementById('mute-icon').className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'; } catch(e){} } }
-    function setVolume(v) { if (playerReady && ytPlayer) { try { ytPlayer.setVolume(v); } catch(e){} } }
-    function setSpeed(v) { if (playerReady && ytPlayer) { try { ytPlayer.setPlaybackRate(parseFloat(v)); } catch(e){} } }
-    function seekTo(e) { if (playerReady && ytPlayer) { try { const rect = document.getElementById('seek-track').getBoundingClientRect(); ytPlayer.seekTo((1 - ((e.clientX - rect.left) / rect.width)) * ytPlayer.getDuration(), true); } catch(e){} } }
-    function toggleFullscreen() { const w = document.getElementById('player-wrapper'); if (!document.fullscreenElement) { if(w.requestFullscreen) w.requestFullscreen(); } else { if(document.exitFullscreen) document.exitFullscreen(); } }
-    function setPlayIcon(p) { document.getElementById('play-icon').className = p ? 'fas fa-pause' : 'fas fa-play'; }
-    function showSpinner(s) { document.getElementById('video-spinner').classList.toggle('active', s); }
-    function showPlayOverlay(s) { document.getElementById('play-overlay').classList.toggle('hidden', !s); }
-    function handleOverlayClick() { togglePlay(); }
-
-    function getDeviceID() {
-        let did = localStorage.getItem('device_fingerprint');
-        if (!did) { did = 'device_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('device_fingerprint', did); }
-        return did;
+    function togglePlay() { if(playerReady) { ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); } }
+    function setSpeed(v) { if(playerReady) ytPlayer.setPlaybackRate(parseFloat(v)); }
+    function seekTo(e) { 
+        if(playerReady) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            ytPlayer.seekTo(pos * ytPlayer.getDuration());
+        }
+    }
+    function toggleFullscreen() {
+        const el = document.getElementById('player-wrapper');
+        if (!document.fullscreenElement) el.requestFullscreen().catch(err => {});
+        else document.exitFullscreen();
     }
 
-    // التنقل بين الصفحات
+    // نظام الصفحات والبيانات
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
-        document.getElementById('back-btn').style.display = (id !== 'home-page' && id !== 'login-page' && id !== 'register-page') ? 'block' : 'none';
-        document.getElementById('profile-btn').style.display = (id === 'home-page') ? 'block' : 'none';
+        document.getElementById('back-btn').style.display = (id === 'content-page') ? 'block' : 'none';
     }
 
     async function handleLogin() {
-        if (!sb) return alert("حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة والتأكد من الإنترنت.");
-        const phone = document.getElementById('l-phone').value.trim();
-        const pass = document.getElementById('l-pass').value.trim();
-        
-        if (!phone || !pass) return alert("يرجى إدخال رقم الموبايل وكلمة المرور.");
-
-        try {
-            const { data: user, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-            if (error || !user) {
-                alert("البيانات غير صحيحة، أو الحساب غير مسجل.");
-                return;
-            }
-            
-            const fp = getDeviceID();
-            if (user.device_id && user.device_id !== fp) {
-                alert("عذراً، هذا الحساب مفتوح بالفعل على جهاز آخر.");
-                return;
-            }
-            if (!user.device_id) {
-                await sb.from('students').update({ device_id: fp }).eq('id', user.id);
-            }
-            
-            localStorage.setItem('f_id', user.id); 
-            localStorage.setItem('f_p', user.student_phone); 
-            start(user);
-        } catch (err) {
-            console.error(err);
-            alert("حدث خطأ في الاتصال بالخادم.");
-        }
+        const phone = document.getElementById('l-phone').value;
+        const pass = document.getElementById('l-pass').value;
+        const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+        if (data) {
+            localStorage.setItem('f_user', JSON.stringify(data));
+            startApp(data);
+        } else alert("بيانات خطأ");
     }
 
-    async function handleRegister() {
-        if (!sb) return alert("حدث خطأ في تحميل البيانات.");
-        const name = document.getElementById('r-name').value.trim();
-        const phone = document.getElementById('r-phone').value.trim();
-        const parent = document.getElementById('r-parent').value.trim();
-        const pass = document.getElementById('r-pass').value.trim();
-
-        if(!name || !phone || !pass) return alert("يرجى إكمال البيانات الأساسية");
-
-        try {
-            const { data: user, error } = await sb.from('students').insert([{
-                full_name: name, student_phone: phone, parent_phone: parent, password: pass, device_id: getDeviceID()
-            }]).select().single();
-            
-            if (error) {
-                if(error.code === '23505') alert("رقم الموبايل مسجل بالفعل!");
-                else alert("حدث خطأ أثناء التسجيل.");
-                return;
-            }
-            if (user) { 
-                localStorage.setItem('f_id', user.id); 
-                localStorage.setItem('f_p', user.student_phone); 
-                start(user); 
-            }
-        } catch(err) {
-            console.error(err);
-            alert("حدث خطأ في الاتصال.");
-        }
-    }
-
-    async function handleLogout() {
-        if(sb && localStorage.getItem('f_id')) {
-            await sb.from('students').update({ device_id: null }).eq('id', localStorage.getItem('f_id'));
-        }
-        localStorage.clear(); 
-        location.reload();
-    }
-
-    function start(user) {
+    function startApp(user) {
         document.getElementById('nav-user-name').innerText = user.full_name;
-        document.getElementById('wm-text').innerText = Array(40).fill(`${user.full_name} | ${user.student_phone}`).join('   ');
+        document.getElementById('wm-text').innerText = Array(30).fill(user.full_name + " " + user.student_phone).join("   ");
         document.getElementById('watermark').classList.add('active');
-        showPage('home-page'); 
+        showPage('home-page');
         loadCourses();
     }
 
     async function loadCourses() {
-        try {
-            const { data: cs } = await sb.from('courses').select('*');
-            document.getElementById('courses-container').innerHTML = cs.map(c => `
-                <div class="course-card">
-                    <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" style="width:100%; height:170px; object-fit:cover;">
-                    <div style="padding:15px; text-align:right;">
-                        <h3 style="margin-bottom:5px;">${c.title}</h3>
-                        
-                        <div style="color: var(--green); font-weight: 800; font-size: 1.1rem; margin-bottom: 15px;">
-                            ${parseFloat(c.price) === 0 ? 'مجاني' : 'السعر: ' + (c.price || '0') + ' جنيه'}
-                        </div>
-                        
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn-main" onclick="checkAccess('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول للكورس</button>
-                            
-                            <a href="https://wa.me/201014169548" target="_blank" 
-                               style="background: #25D366; color: white; width: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.4rem;" title="تواصل معنا">
-                                <i class="fab fa-whatsapp"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>`).join('');
-        } catch(e) {
-            console.error(e);
-        }
+        const { data } = await sb.from('courses').select('*');
+        document.getElementById('courses-container').innerHTML = data.map(c => `
+            <div class="course-card">
+                <img src="${c.image_url}" style="width:100%; height:160px; object-fit:cover;">
+                <div style="padding:15px; text-align:right;">
+                    <h4>${c.title}</h4>
+                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول</button>
+                </div>
+            </div>`).join('');
     }
 
-    async function checkAccess(id, title, isFree) {
-        if (!isFree) {
-            const { data: a } = await sb.from('student_access').select('*').eq('student_phone', localStorage.getItem('f_p')).eq('course_id', id).single();
-            if (!a) return alert("يرجى تفعيل الكورس أولاً (تواصل مع السكرتارية عن طريق أيقونة الواتساب).");
-        }
-        currentCourseId = id; 
+    async function openCourse(id, title) {
+        currentCourseId = id;
         document.getElementById('current-course-title').innerText = title;
-        showPage('content-page'); 
+        showPage('content-page');
         loadLessonsTab();
     }
 
     async function loadLessonsTab() {
-        const { data: ls } = await sb.from('lessons').select('*').eq('course_id', currentCourseId).order('id');
-        if(!ls || ls.length === 0) { document.getElementById('tab-content').innerHTML = '<h3 style="text-align:center;">لا توجد محاضرات بعد</h3>'; return; }
-        document.getElementById('tab-content').innerHTML = ls.map((l, i) => `
-            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--orange); cursor:pointer;" onclick="playVideo('${l.video_id}')">
-                <span><b>${i+1}.</b> ${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange); font-size:1.5rem;"></i>
+        const { data } = await sb.from('lessons').select('*').eq('course_id', currentCourseId);
+        document.getElementById('tab-content').innerHTML = data.map(l => `
+            <div style="background:#fff; padding:12px; margin-bottom:8px; border-radius:10px; display:flex; justify-content:space-between; cursor:pointer;" onclick="playVideo('${l.video_id}')">
+                <span>${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange);"></i>
             </div>`).join('');
     }
 
     function playVideo(url) {
-        let id = url;
-        if(url.includes('v=')) id = url.split('v=')[1].split('&')[0];
-        else if(url.includes('/')) id = url.split('/').pop();
-        
         document.getElementById('video-section').style.display = 'block';
-        initPlayer(id); 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        initPlayer(getYoutubeID(url));
+        window.scrollTo(0,0);
     }
 
-    async function loadExamsTab() {
-        const { data: ex } = await sb.from('exams').select('*').eq('course_id', currentCourseId).order('id');
-        cachedExams = ex || [];
-        if(cachedExams.length === 0) { document.getElementById('tab-content').innerHTML = '<h3 style="text-align:center;">لا توجد امتحانات بعد</h3>'; return; }
-        
-        document.getElementById('tab-content').innerHTML = cachedExams.map((e, i) => `
-            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--green); cursor:pointer;" onclick="startExamFlow(${i})">
-                <span><b>${i+1}.</b> ${e.title}</span><i class="fas fa-edit" style="color:var(--green); font-size:1.5rem;"></i>
-            </div>`).join('');
+    function handleLogout() { localStorage.clear(); location.reload(); }
+
+    window.onload = () => {
+        const user = localStorage.getItem('f_user');
+        if (user) startApp(JSON.parse(user));
     }
-
-    function startExamFlow(index) {
-        const exam = cachedExams[index];
-        if (!confirm(`وقت الامتحان: ${exam.duration_minutes} دقيقة. هل أنت مستعد للبدء؟`)) return;
-        examData = exam; 
-        studentAnswers = {}; 
-        showPage('exam-page');
-        document.getElementById('active-exam-title').innerText = exam.title;
-        document.getElementById('exam-body').innerHTML = exam.questions.map((q, i) => `
-            <div style="margin-bottom:30px; text-align:right;">
-                <p><b>س ${i+1}:</b> ${q.text}</p>
-                ${q.image ? `<img src="${q.image}" class="q-img">` : ''}
-                ${q.options.map((o, oi) => `<button class="option-btn" id="q${i}_o${oi}" onclick="selectAnswer(${i}, ${oi+1})">${o}</button>`).join('')}
-            </div>`).join('');
-        startTimer(exam.duration_minutes);
-    }
-
-    function selectAnswer(qi, c) { 
-        studentAnswers[qi] = c; 
-        document.querySelectorAll(`[id^="q${qi}_"]`).forEach(b => b.classList.remove('selected')); 
-        document.getElementById(`q${qi}_o${c-1}`).classList.add('selected'); 
-    }
-
-    function startTimer(m) {
-        let s = m * 60;
-        timerInterval = setInterval(() => {
-            document.getElementById('timer-display').innerText = Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60);
-            if (s-- <= 0) submitExam();
-        }, 1000);
-    }
-
-    async function submitExam() {
-        clearInterval(timerInterval);
-        let score = 0; 
-        examData.questions.forEach((q, i) => { if (studentAnswers[i] == q.correct) score++; });
-        const finalScore = Math.round(score / examData.questions.length * 100);
-        
-        await sb.from('exam_results').insert([{ 
-            student_phone: localStorage.getItem('f_p'), 
-            exam_name: examData.title, 
-            score: finalScore, 
-            student_answers: studentAnswers 
-        }]);
-        
-        alert(`تم تسليم الامتحان. درجتك: ${finalScore}%`); 
-        showPage('home-page');
-    }
-
-    async function loadProfilePage() {
-        showPage('profile-page');
-        document.getElementById('p-name').innerText = document.getElementById('nav-user-name').innerText;
-        document.getElementById('p-phone').innerText = localStorage.getItem('f_p');
-        
-        const { data: res } = await sb.from('exam_results').select('*').eq('student_phone', localStorage.getItem('f_p')).order('created_at', { ascending: false });
-        cachedResults = res || [];
-        
-        document.getElementById('grades-list').innerHTML = cachedResults.map((r, i) => `
-            <div style="background:#fff; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                <div style="text-align:right;"><b>${r.exam_name}</b><br><small>${new Date(r.created_at).toLocaleDateString('ar-EG')}</small></div>
-                <div style="font-weight:bold; color:var(--orange)">${r.score}%</div>
-                <button onclick="showReview(${i})" style="background:var(--navy); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer;">مراجعة</button>
-            </div>`).join('');
-    }
-
-    async function showReview(index) {
-        const res = cachedResults[index];
-        const { data: exam } = await sb.from('exams').select('*').eq('title', res.exam_name).single();
-        if(!exam) return;
-        
-        document.getElementById('review-modal').style.display = 'block';
-        document.getElementById('rev-title').innerText = "مراجعة: " + res.exam_name;
-        document.getElementById('rev-body').innerHTML = exam.questions.map((q, i) => `
-            <div style="margin-bottom:20px; text-align:right; border-bottom: 1px solid #eee; padding-bottom: 15px;">
-                <p><b>س ${i+1}:</b> ${q.text}</p>
-                ${q.options.map((o, oi) => {
-                    let cls = ''; 
-                    if (oi+1 == q.correct) cls = 'correct-ans'; 
-                    else if (res.student_answers && res.student_answers[i] == oi+1) cls = 'wrong-ans';
-                    return `<div class="option-btn ${cls}" style="cursor:default">${o}</div>`;
-                }).join('')}
-            </div>`).join('');
-    }
-
-    function closeReview() { document.getElementById('review-modal').style.display = 'none'; }
-
-    // بدء التشغيل التلقائي إذا كان مسجل دخول
-    window.addEventListener('DOMContentLoaded', async () => {
-        const id = localStorage.getItem('f_id');
-        if (id && sb) {
-            try {
-                const { data: u } = await sb.from('students').select('*').eq('id', id).single();
-                if (u && (u.device_id === getDeviceID())) {
-                    start(u); 
-                } else {
-                    localStorage.clear();
-                }
-            } catch(e) {
-                console.error("Auto login error:", e);
-            }
-        }
-    });
 </script>
 </body>
 </html>
