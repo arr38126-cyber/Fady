@@ -9,51 +9,48 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --card-shadow: 0 10px 25px rgba(0,0,0,0.1); --green: #2ecc71; --red: #e74c3c; }
+        :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --green: #2ecc71; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; direction: rtl; }
 
-        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background-color: #25d366; color: #FFF; border-radius: 50px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 10000; text-decoration: none; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25d366; color: #FFF; border-radius: 50px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 10000; text-decoration: none; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.07; overflow: hidden; }
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.2rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
 
-        .poetic-line { font-family: 'Amiri', serif; font-style: italic; color: var(--orange); margin-bottom: 25px; font-size: 1.2rem; font-weight: 700; line-height: 1.6; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-
-        nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         nav.visible { display: flex; }
-        .nav-logo { display: flex; align-items: center; gap: 10px; }
         .nav-logo img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--orange); }
 
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .page { display: none; }
         .page.active { display: block; }
 
-        /* Video Security */
+        /* Auth Styles */
+        .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
+        .auth-card { background: #fff; width: 100%; max-width: 420px; border-radius: 25px; padding: 35px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+        .poetic-line { font-family: 'Amiri', serif; color: var(--orange); font-size: 1.3rem; font-weight: 700; margin-bottom: 25px; line-height: 1.6; }
+        .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; outline: none; transition: 0.3s; }
+        .input-group:focus { border-color: var(--orange); }
+
+        /* Video & Cards */
         .video-player-container { position: relative; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid var(--navy); }
         .video-aspect { position: relative; padding-bottom: 56.25%; height: 0; }
         #yt-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         #video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; cursor: pointer; }
-
-        .custom-controls { background: var(--navy); padding: 12px 15px; color: white; display: flex; flex-direction: column; gap: 10px; }
-        .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; position: relative; }
+        .custom-controls { background: var(--navy); padding: 12px 15px; color: white; display: flex; flex-direction: column; gap: 8px; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; }
         .progress-fill { height: 100%; background: var(--orange); width: 0%; border-radius: 5px; }
-        .controls-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-        .ctrl-btn { background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; }
-        .speed-select { background: rgba(255,255,255,0.1); color: white; border: 1px solid #444; border-radius: 5px; padding: 2px 8px; font-family: 'Cairo'; outline: none; }
-
-        .course-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); position: relative; }
-        .price-tag { position: absolute; top: 10px; left: 10px; background: var(--orange); color: white; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; z-index: 5; }
-        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; }
-
-        /* Exam Styles */
-        .timer-box { background: var(--navy); color: #fff; padding: 10px 20px; border-radius: 50px; font-weight: 800; font-size: 1.2rem; display: inline-block; margin-bottom: 20px; }
-        .option-btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; background: #f9f9f9; text-align: right; font-family: 'Cairo'; font-weight: 600; cursor: pointer; }
-        .option-btn.selected { border-color: var(--orange); background: #fff5f0; }
-
-        .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
-        .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 35px; text-align: center; }
-        .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; outline: none; }
+        .controls-row { display: flex; align-items: center; justify-content: space-between; }
+        
+        .card { background: #fff; border-radius: 15px; padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-right: 6px solid var(--orange); cursor: pointer; transition: 0.2s; }
+        .card:hover { transform: translateX(-5px); }
+        .exam-card { border-right-color: var(--green); }
+        .btn-main { background: var(--orange); color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-family: 'Cairo'; font-weight: 800; width: 100%; font-size: 1rem; }
+        
+        .timer-box { background: var(--navy); color: white; padding: 12px 25px; border-radius: 50px; font-weight: 800; font-size: 1.3rem; margin-bottom: 20px; display: inline-block; }
+        .option-btn { display: block; width: 100%; padding: 16px; margin: 12px 0; border: 2px solid #eee; border-radius: 12px; background: #fdfdfd; text-align: right; cursor: pointer; font-family: 'Cairo'; font-weight: 600; }
+        .option-btn.selected { border-color: var(--orange); background: #fff5f0; box-shadow: 0 4px 10px rgba(232, 88, 26, 0.1); }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -62,17 +59,14 @@
 <div id="watermark"><div id="wm-text"></div></div>
 
 <nav id="navbar">
-    <div class="nav-logo">
+    <div style="display:flex; align-items:center; gap:10px;">
         <img src="https://i.ibb.co/zT82jk68/image.png">
-        <div>
-            <div id="nav-user-name" style="font-weight: 800;">جاري التحميل...</div>
-            <div style="color: var(--orange); font-size: 0.8rem;">فيزياء - د. فادي عادل</div>
-        </div>
+        <span id="nav-user-name" style="font-weight: 800;"></span>
     </div>
-    <div style="display:flex; gap:10px;">
-        <button id="profile-btn" style="background:var(--orange); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="loadProfilePage()">حسابي</button>
-        <button id="back-btn" style="display:none; background:rgba(255,255,255,0.2); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="showPage('home-page')">الرئيسية</button>
-        <button onclick="handleLogout()" style="background:none; border:1px solid #fff; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;">خروج</button>
+    <div style="display:flex; gap:8px;">
+        <button onclick="showPage('home-page')" style="background:none; border:1px solid #fff; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;">الرئيسية</button>
+        <button onclick="loadProfile()" style="background:var(--orange); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;">حسابي</button>
+        <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer;"><i class="fas fa-power-off"></i></button>
     </div>
 </nav>
 
@@ -80,12 +74,14 @@
     <div id="login-page" class="page active">
         <div class="auth-screen">
             <div class="auth-card">
-                <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="margin-bottom: 15px; border-radius: 50%;">
+                <img src="https://i.ibb.co/zT82jk68/image.png" width="90" style="border-radius:50%; margin-bottom:15px; border:3px solid var(--navy);">
                 <div class="poetic-line">"وَمَن لايهوى صُعُودَ الجِبَالِ <br> يَعِش أَبَدَ الدَّهرِ بَيْنَ الحُفَرِ"</div>
                 <input type="tel" id="l-phone" placeholder="رقم الموبايل" class="input-group">
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
-                <p style="margin-top:20px; font-weight:700; color:var(--navy); cursor:pointer;" onclick="showPage('register-page')">إنشاء حساب جديد</p>
+                <div style="margin-top:20px; font-size:0.9rem;">
+                    ليس لديك حساب؟ <span style="color:var(--orange); font-weight:800; cursor:pointer;" onclick="showPage('register-page')">اضغط هنا لإنشاء حساب</span>
+                </div>
             </div>
         </div>
     </div>
@@ -93,83 +89,73 @@
     <div id="register-page" class="page">
         <div class="auth-screen">
             <div class="auth-card">
-                <h3 style="margin-bottom:20px;">فتح حساب طالب جديد</h3>
+                <h2 style="margin-bottom:25px; color:var(--navy);">إنشاء حساب طالب جديد</h2>
                 <input type="text" id="r-name" placeholder="الاسم ثلاثي" class="input-group">
                 <input type="tel" id="r-phone" placeholder="رقم موبايلك" class="input-group">
                 <input type="tel" id="r-parent" placeholder="رقم ولي الأمر" class="input-group">
                 <input type="password" id="r-pass" placeholder="كلمة المرور" class="input-group">
-                <button class="btn-main" onclick="handleRegister()">تأكيد التسجيل</button>
-                <p style="margin-top:15px; cursor:pointer;" onclick="showPage('login-page')">رجوع</p>
+                <button class="btn-main" onclick="handleRegister()" style="background:var(--navy);">تأكيد وتسجيل الحساب</button>
+                <div style="margin-top:20px;">
+                    لديك حساب بالفعل؟ <span style="color:var(--orange); font-weight:800; cursor:pointer;" onclick="showPage('login-page')">تسجيل دخول</span>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="home-page" class="page">
         <div class="container">
-            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom: 25px;">محاضراتي المتاحة</h2>
-            <div id="courses-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;"></div>
-        </div>
-    </div>
-
-    <div id="profile-page" class="page">
-        <div class="container">
-            <div style="background:var(--navy); color:#fff; padding:30px; border-radius:25px; text-align:center; margin-bottom:20px;">
-                <h2 id="p-name"></h2>
-                <p id="p-phone" style="opacity:0.8;"></p>
-            </div>
-            <h3 style="text-align:right;"><i class="fas fa-chart-bar" style="color:var(--orange)"></i> سجل نتائجك</h3>
-            <div id="grades-list"></div>
+            <h2 style="text-align:right; border-right:5px solid var(--orange); padding-right:15px; margin-bottom:30px;">المحاضرات المتوفرة</h2>
+            <div id="courses-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;"></div>
         </div>
     </div>
 
     <div id="content-page" class="page">
         <div class="container">
-            <h2 id="current-course-title" style="text-align: right; color: var(--navy);"></h2>
-            
-            <div id="video-section" style="display:none; margin-top:20px;">
+            <h3 id="course-title" style="text-align:right; color:var(--navy);"></h3>
+            <div id="video-wrapper" style="display:none; margin-bottom:25px;">
                 <div class="video-player-container" id="v-container">
-                    <div class="video-aspect">
-                        <div id="yt-player"></div>
-                        <div id="video-overlay" onclick="togglePlay()"></div>
-                    </div>
+                    <div class="video-aspect"><div id="yt-player"></div><div id="video-overlay" onclick="togglePlay()"></div></div>
                     <div class="custom-controls">
-                        <div class="progress-bar" id="p-bar" onclick="seekVideo(event)">
-                            <div class="progress-fill" id="progress-fill"></div>
-                        </div>
+                        <div class="progress-bar" onclick="seek(event)"><div class="progress-fill" id="p-fill"></div></div>
                         <div class="controls-row">
-                            <div style="display:flex; align-items:center; gap:15px;">
-                                <button class="ctrl-btn" onclick="togglePlay()"><i id="play-icon" class="fas fa-play"></i></button>
-                                <span style="font-size:0.85rem; font-family:monospace;"><span id="cur-time">00:00</span> / <span id="dur-time">00:00</span></span>
+                            <div style="display:flex; gap:15px; align-items:center;">
+                                <button class="ctrl-btn" style="background:none; border:none; color:white;" onclick="togglePlay()"><i id="play-btn" class="fas fa-play"></i></button>
+                                <span style="font-family:monospace; font-size:0.9rem;"><span id="cur">00:00</span> / <span id="dur">00:00</span></span>
                             </div>
-                            <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="display:flex; gap:10px;">
                                 <select class="speed-select" onchange="player.setPlaybackRate(parseFloat(this.value))">
                                     <option value="0.75">0.75x</option>
-                                    <option value="1" selected>العادية</option>
+                                    <option value="1" selected>1x</option>
                                     <option value="1.25">1.25x</option>
                                     <option value="1.5">1.5x</option>
                                     <option value="2">2x</option>
                                 </select>
-                                <button class="ctrl-btn" onclick="toggleFS()"><i class="fas fa-expand"></i></button>
+                                <button class="ctrl-btn" style="background:none; border:none; color:white;" onclick="toggleFS()"><i class="fas fa-expand"></i></button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div id="tabs" style="display:flex; gap:10px; margin:20px 0;">
-                <button class="btn-main" style="background:var(--navy)" onclick="loadLessonsTab()">📺 المحاضرات</button>
-                <button class="btn-main" style="background:var(--green)" onclick="loadExamsTab()">📝 الامتحانات</button>
-            </div>
-            <div id="tab-content" style="margin-top:10px;"></div>
+            <div id="lessons-list"></div>
         </div>
     </div>
 
     <div id="exam-page" class="page">
         <div class="container" style="text-align:center;">
-            <div class="timer-box"><i class="fas fa-clock"></i> <span id="timer-display">00:00</span></div>
-            <h3 id="active-exam-title"></h3>
-            <div id="exam-body" style="text-align:right; margin-top:20px;"></div>
-            <button class="btn-main" id="submit-exam-btn" style="margin-top:30px;" onclick="submitExam()">تسليم الامتحان</button>
+            <div class="timer-box" id="exam-timer">00:00</div>
+            <div id="exam-area" style="text-align:right;"></div>
+            <button class="btn-main" onclick="finishExam()" style="margin-top:30px; background:var(--green);">إرسال الإجابات والإنهاء</button>
+        </div>
+    </div>
+
+    <div id="profile-page" class="page">
+        <div class="container">
+            <div style="background:var(--navy); color:white; padding:35px; border-radius:25px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.1);">
+                <h2 id="prof-name"></h2>
+                <p id="prof-phone" style="opacity:0.8;"></p>
+            </div>
+            <h3 style="margin-top:30px; border-right:4px solid var(--orange); padding-right:10px;">نتائج اختباراتك</h3>
+            <div id="results-list"></div>
         </div>
     </div>
 </div>
@@ -178,112 +164,87 @@
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    let player, currentCourseId, examData, timerInterval, studentAnswers = {};
-
-    function getYouTubeId(url) {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : url;
-    }
+    let player, currentExam, examTimer, answers = {};
 
     async function handleLogin() {
-        const phone = document.getElementById('l-phone').value.trim();
-        const pass = document.getElementById('l-pass').value.trim();
+        const phone = document.getElementById('l-phone').value;
+        const pass = document.getElementById('l-pass').value;
         const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if (user) { localStorage.setItem('f_id', user.id); localStorage.setItem('f_p', user.student_phone); start(user); } 
-        else alert("بيانات خاطئة");
+        if(user) { localStorage.setItem('sid', user.id); setupUser(user); } else alert("رقم الموبايل أو كلمة المرور غير صحيحة");
     }
 
-    function start(user) {
+    async function handleRegister() {
+        const name = document.getElementById('r-name').value;
+        const phone = document.getElementById('r-phone').value;
+        const parent = document.getElementById('r-parent').value;
+        const pass = document.getElementById('r-pass').value;
+
+        if(!name || !phone || !pass) return alert("يرجى ملء البيانات الأساسية");
+
+        const { error } = await sb.from('students').insert([
+            { full_name: name, student_phone: phone, parent_phone: parent, password: pass }
+        ]);
+
+        if(!error) {
+            alert("تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.");
+            showPage('login-page');
+        } else {
+            alert("هذا الرقم مسجل مسبقاً أو هناك خطأ في البيانات.");
+        }
+    }
+
+    function setupUser(user) {
         document.getElementById('nav-user-name').innerText = user.full_name;
-        document.getElementById('wm-text').innerText = Array(40).fill(`${user.full_name} | ${user.student_phone}`).join('   ');
+        document.getElementById('wm-text').innerText = Array(40).fill(user.full_name + " | " + user.student_phone).join("   ");
         document.getElementById('watermark').classList.add('active');
-        showPage('home-page'); loadCourses();
+        showPage('home-page');
+        loadCourses();
     }
 
     async function loadCourses() {
         const { data: cs } = await sb.from('courses').select('*');
-        document.getElementById('courses-container').innerHTML = cs.map(c => `
-            <div class="course-card">
-                <div class="price-tag">${c.price > 0 ? c.price + ' ج.م' : 'مجاني'}</div>
-                <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" style="width:100%; height:170px; object-fit:cover;">
-                <div style="padding:15px; text-align:right;">
-                    <h3>${c.title}</h3>
-                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول</button>
+        document.getElementById('courses-grid').innerHTML = cs.map(c => `
+            <div style="background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.08);">
+                <img src="${c.image_url}" style="width:100%; height:180px; object-fit:cover;">
+                <div style="padding:20px;">
+                    <h3 style="margin:0 0 15px 0;">${c.title}</h3>
+                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول المحاضرة</button>
                 </div>
             </div>`).join('');
     }
 
     async function openCourse(id, title) {
-        currentCourseId = id;
-        document.getElementById('current-course-title').innerText = title;
+        document.getElementById('course-title').innerText = title;
         showPage('content-page');
-        loadLessonsTab();
+        const { data: ls } = await sb.from('lessons').select('*').eq('course_id', id).order('id');
+        let html = '';
+        for (let l of ls) {
+            html += `<div class="card" onclick="playVideo('${l.video_id}')">
+                        <span><i class="fas fa-play-circle" style="color:var(--orange); margin-left:10px;"></i> ${l.title}</span>
+                        <small style="background:#eee; padding:3px 8px; border-radius:5px;">فيديو</small>
+                    </div>`;
+            const { data: ex } = await sb.from('exams').select('*').eq('lesson_id', l.id);
+            if(ex) ex.forEach(e => {
+                html += `<div class="card exam-card" onclick='startExam(${JSON.stringify(e)})'>
+                            <span><i class="fas fa-file-alt" style="color:var(--green); margin-left:10px;"></i> اختبار: ${e.title}</span>
+                            <small style="color:var(--green); font-weight:bold;">${e.duration_minutes} دقيقة</small>
+                        </div>`;
+            });
+        }
+        document.getElementById('lessons-list').innerHTML = html;
     }
 
-    async function loadLessonsTab() {
-        const { data: ls } = await sb.from('lessons').select('*').eq('course_id', currentCourseId).order('id');
-        document.getElementById('tab-content').innerHTML = ls.map((l, i) => `
-            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--orange); cursor:pointer;" onclick="playVideo('${l.video_id}')">
-                <span><b>${i+1}.</b> ${l.title}</span> <i class="fas fa-play-circle" style="color:var(--orange)"></i>
-            </div>`).join('');
-    }
-
-    async function loadExamsTab() {
-        const { data: ex } = await sb.from('exams').select('*').eq('course_id', currentCourseId).order('id');
-        document.getElementById('tab-content').innerHTML = ex.map((e, i) => `
-            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--green); cursor:pointer;" onclick='startExamFlow(${JSON.stringify(e)})'>
-                <span><b>${i+1}.</b> ${e.title}</span> <i class="fas fa-edit" style="color:var(--green)"></i>
-            </div>`).join('');
-    }
-
-    function startExamFlow(exam) {
-        if(!confirm(`هل أنت مستعد؟ الوقت: ${exam.duration_minutes} دقيقة.`)) return;
-        examData = exam; studentAnswers = {};
-        showPage('exam-page');
-        document.getElementById('active-exam-title').innerText = exam.title;
-        document.getElementById('exam-body').innerHTML = exam.questions.map((q, i) => `
-            <div style="margin-bottom:30px; border-bottom:1px solid #eee; padding-bottom:15px;">
-                <p><b>س ${i+1}:</b> ${q.text}</p>
-                ${q.options.map((opt, oi) => `<button class="option-btn" id="q${i}_o${oi}" onclick="selectAnswer(${i}, ${oi+1})">${opt}</button>`).join('')}
-            </div>`).join('');
-        startTimer(exam.duration_minutes);
-    }
-
-    function selectAnswer(qi, choice) {
-        studentAnswers[qi] = choice;
-        document.querySelectorAll(`[id^="q${qi}_"]`).forEach(b => b.classList.remove('selected'));
-        document.getElementById(`q${qi}_o${choice-1}`).classList.add('selected');
-    }
-
-    function startTimer(m) {
-        let s = m * 60;
-        timerInterval = setInterval(() => {
-            let min = Math.floor(s/60), sec = s%60;
-            document.getElementById('timer-display').innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
-            if(s-- <= 0) { clearInterval(timerInterval); submitExam(); }
-        }, 1000);
-    }
-
-    async function submitExam() {
-        clearInterval(timerInterval);
-        let scoreCount = 0;
-        examData.questions.forEach((q, i) => { if(studentAnswers[i] == q.correct) scoreCount++; });
-        const finalScore = Math.round((scoreCount / examData.questions.length) * 100);
-        await sb.from('exam_results').insert([{ student_phone: localStorage.getItem('f_p'), exam_name: examData.title, score: finalScore, student_answers: studentAnswers }]);
-        alert(`تم التسليم! درجتك هي: ${finalScore}%`);
-        showPage('home-page');
-    }
-
-    function playVideo(rawUrl) {
-        const videoId = getYouTubeId(rawUrl);
-        document.getElementById('video-section').style.display = 'block';
-        if (player) { player.loadVideoById(videoId); } 
+    function playVideo(vid) {
+        document.getElementById('video-wrapper').style.display = 'block';
+        const id = vid.includes('v=') ? vid.split('v=')[1].split('&')[0] : vid;
+        if(player) player.loadVideoById(id);
         else {
             player = new YT.Player('yt-player', {
-                videoId: videoId,
-                playerVars: { 'controls': 0, 'disablekb': 1, 'modestbranding': 1, 'rel': 0 },
-                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+                videoId: id,
+                playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'showinfo': 0 },
+                events: { 'onReady': onPlayerReady, 'onStateChange': (e) => {
+                    document.getElementById('play-btn').className = e.data == 1 ? 'fas fa-pause' : 'fas fa-play';
+                }}
             });
         }
         window.scrollTo({top: 0, behavior: 'smooth'});
@@ -291,71 +252,98 @@
 
     function onPlayerReady() {
         setInterval(() => {
-            if (player && player.getCurrentTime) {
-                const cur = player.getCurrentTime();
-                const dur = player.getDuration();
-                document.getElementById('progress-fill').style.width = (cur/dur*100) + '%';
-                document.getElementById('cur-time').innerText = formatT(cur);
-                document.getElementById('dur-time').innerText = formatT(dur);
+            if(player && player.getCurrentTime) {
+                const cur = player.getCurrentTime(), dur = player.getDuration();
+                document.getElementById('p-fill').style.width = (cur/dur*100) + '%';
+                document.getElementById('cur').innerText = formatTime(cur);
+                document.getElementById('dur').innerText = formatTime(dur);
             }
         }, 1000);
     }
 
-    function onPlayerStateChange(e) {
-        document.getElementById('play-icon').className = (e.data == YT.PlayerState.PLAYING) ? 'fas fa-pause' : 'fas fa-play';
-    }
-
-    function formatT(s) {
+    function formatTime(s) {
         let m = Math.floor(s/60); s = Math.floor(s%60);
         return `${m}:${s < 10 ? '0'+s : s}`;
     }
 
-    function togglePlay() {
-        if (player.getPlayerState() == YT.PlayerState.PLAYING) player.pauseVideo();
-        else player.playVideo();
-    }
-
-    function seekVideo(e) {
-        const rect = document.getElementById('p-bar').getBoundingClientRect();
+    function togglePlay() { player.getPlayerState() == 1 ? player.pauseVideo() : player.playVideo(); }
+    function seek(e) { 
+        const rect = e.target.closest('.progress-bar').getBoundingClientRect();
         player.seekTo(((e.clientX - rect.left) / rect.width) * player.getDuration());
     }
-
     function toggleFS() {
-        const el = document.getElementById('v-container');
-        if (!document.fullscreenElement) el.requestFullscreen(); else document.exitFullscreen();
+        const v = document.getElementById('v-container');
+        if(!document.fullscreenElement) v.requestFullscreen(); else document.exitFullscreen();
     }
 
-    async function loadProfilePage() {
-        showPage('profile-page');
-        document.getElementById('p-name').innerText = document.getElementById('nav-user-name').innerText;
-        document.getElementById('p-phone').innerText = localStorage.getItem('f_p');
-        const { data: results } = await sb.from('exam_results').select('*').eq('student_phone', localStorage.getItem('f_p')).order('created_at', {ascending:false});
-        document.getElementById('grades-list').innerHTML = results.map(res => `
-            <div style="background:#fff; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                <div style="text-align:right;"><b>${res.exam_name}</b><br><small>${new Date(res.created_at).toLocaleDateString('ar-EG')}</small></div>
-                <div style="font-weight:bold; color:var(--orange)">${res.score}%</div>
+    function startExam(exam) {
+        if(!confirm("هل أنت مستعد لبدء الامتحان؟")) return;
+        currentExam = exam; answers = {};
+        showPage('exam-page');
+        const qs = typeof exam.questions === 'string' ? JSON.parse(exam.questions) : exam.questions;
+        document.getElementById('exam-area').innerHTML = qs.map((q, i) => `
+            <div style="margin-bottom:20px; padding:20px; background:#fff; border-radius:15px; box-shadow:0 5px 10px rgba(0,0,0,0.05);">
+                <p style="font-weight:800; font-size:1.1rem; margin-bottom:15px;">س ${i+1}: ${q.text}</p>
+                ${q.options.map((opt, oi) => `<button class="option-btn" id="q${i}_o${oi}" onclick="ans(${i},${oi+1})">${opt}</button>`).join('')}
             </div>`).join('');
+        
+        let time = exam.duration_minutes * 60;
+        examTimer = setInterval(() => {
+            let m = Math.floor(time/60), s = time%60;
+            document.getElementById('exam-timer').innerText = `${m}:${s<10?'0'+s:s}`;
+            if(time-- <= 0) { clearInterval(examTimer); finishExam(); }
+        }, 1000);
+    }
+
+    function ans(qi, oi) {
+        answers[qi] = oi;
+        document.querySelectorAll(`[id^="q${qi}_"]`).forEach(b => b.classList.remove('selected'));
+        document.getElementById(`q${qi}_o${oi-1}`).classList.add('selected');
+    }
+
+    async function finishExam() {
+        clearInterval(examTimer);
+        const qs = typeof currentExam.questions === 'string' ? JSON.parse(currentExam.questions) : currentExam.questions;
+        let score = 0;
+        qs.forEach((q, i) => { if(answers[i] == q.correct) score++; });
+        const final = Math.round((score/qs.length)*100);
+        
+        const { data: u } = await sb.from('students').select('student_phone').eq('id', localStorage.getItem('sid')).single();
+        await sb.from('exam_results').insert([{ student_phone: u.student_phone, exam_name: currentExam.title, score: final }]);
+        
+        alert(`تم إنهاء الامتحان بنجاح! درجتك: ${final}%`);
+        showPage('home-page');
+    }
+
+    async function loadProfile() {
+        showPage('profile-page');
+        const { data: u } = await sb.from('students').select('*').eq('id', localStorage.getItem('sid')).single();
+        document.getElementById('prof-name').innerText = u.full_name;
+        document.getElementById('prof-phone').innerText = u.student_phone;
+        const { data: res } = await sb.from('exam_results').select('*').eq('student_phone', u.student_phone).order('created_at', {ascending:false});
+        document.getElementById('results-list').innerHTML = res.length ? res.map(r => `
+            <div class="card">
+                <span style="font-weight:bold;">${r.exam_name}</span>
+                <b style="color:var(--orange); font-size:1.2rem;">${r.score}%</b>
+            </div>`).join('') : '<p style="text-align:center; opacity:0.6;">لم تقم بأداء أي اختبارات بعد.</p>';
     }
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
-        document.getElementById('back-btn').style.display = (id !== 'home-page' && id !== 'login-page') ? 'block' : 'none';
-        document.getElementById('profile-btn').style.display = (id === 'home-page') ? 'block' : 'none';
-        if (id !== 'content-page' && player) player.pauseVideo();
-        if (id !== 'exam-page') clearInterval(timerInterval);
+        if(id !== 'content-page' && player) player.pauseVideo();
     }
 
     function handleLogout() { localStorage.clear(); location.reload(); }
 
     window.onload = async () => {
-        const id = localStorage.getItem('f_id');
-        if (id) {
+        const id = localStorage.getItem('sid');
+        if(id) {
             const { data: u } = await sb.from('students').select('*').eq('id', id).single();
-            if (u) start(u);
+            if(u) setupUser(u);
         }
-    };
+    }
 </script>
 </body>
 </html>
