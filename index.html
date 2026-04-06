@@ -4,88 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>منصة Dr. Fady Adel | فيزياء</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --green: #2ecc71; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; }
+        :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --card-shadow: 0 10px 25px rgba(0,0,0,0.1); --green: #2ecc71; --red: #e74c3c; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
         /* WhatsApp */
-        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background-color: #25d366; color: #FFF; border-radius: 50px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 10000; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); text-decoration: none; }
+        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background-color: #25d366; color: #FFF; border-radius: 50px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 10000; text-decoration: none; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
 
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.07; overflow: hidden; }
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.2rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
 
-        nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; }
+        .poetic-line { font-family: 'Amiri', serif; font-style: italic; color: var(--orange); margin-bottom: 25px; font-size: 1.2rem; font-weight: 700; line-height: 1.6; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+
+        nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         nav.visible { display: flex; }
+        .nav-logo { display: flex; align-items: center; gap: 10px; }
+        .nav-logo img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--orange); }
 
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .page { display: none; }
         .page.active { display: block; }
 
-        /* Advanced Video Player */
+        /* Video Security System */
         .video-player-container { position: relative; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid var(--navy); }
         .video-aspect { position: relative; padding-bottom: 56.25%; height: 0; }
         #yt-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        #video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; cursor: pointer; }
+        #video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; cursor: pointer; background: transparent; }
 
-        .custom-controls { background: var(--navy); padding: 12px 15px; color: white; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .progress-bar { flex-basis: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; margin-bottom: 8px; position: relative; }
+        .custom-controls { background: var(--navy); padding: 12px 15px; color: white; display: flex; flex-direction: column; gap: 10px; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; position: relative; }
         .progress-fill { height: 100%; background: var(--orange); width: 0%; border-radius: 5px; }
         
-        .ctrl-group { display: flex; align-items: center; gap: 15px; flex-grow: 1; }
-        .ctrl-btn { background: none; border: none; color: white; cursor: pointer; font-size: 1.1rem; padding: 5px; transition: 0.2s; }
-        .ctrl-btn:hover { color: var(--orange); }
-        
-        .speed-select { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; padding: 2px 5px; font-family: 'Cairo'; font-size: 0.8rem; outline: none; cursor: pointer; }
-        .video-timer { font-size: 0.85rem; font-family: monospace; direction: ltr; }
+        .controls-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .ctrl-btn { background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; }
+        .speed-select { background: rgba(255,255,255,0.1); color: white; border: 1px solid #444; border-radius: 5px; padding: 2px 8px; font-family: 'Cairo'; outline: none; }
 
-        .course-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08); position: relative; }
+        .course-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); position: relative; }
         .price-tag { position: absolute; top: 10px; left: 10px; background: var(--orange); color: white; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; z-index: 5; }
-        .btn-main { width: 100%; padding: 12px; background: var(--orange); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-family: 'Cairo'; }
+
+        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; }
+        
+        .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
+        .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 35px; text-align: center; }
+        .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; outline: none; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <a href="https://wa.me/201234567890" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
 <div id="watermark"><div id="wm-text"></div></div>
 
 <nav id="navbar">
-    <div style="display:flex; align-items:center; gap:10px;">
-        <img src="https://i.ibb.co/zT82jk68/image.png" width="40" style="border-radius:50%">
-        <span id="nav-user-name" style="font-weight: 800;"></span>
+    <div class="nav-logo">
+        <img src="https://i.ibb.co/zT82jk68/image.png">
+        <div>
+            <div id="nav-user-name" style="font-weight: 800;">جاري التحميل...</div>
+            <div style="color: var(--orange); font-size: 0.8rem;">فيزياء - د. فادي عادل</div>
+        </div>
     </div>
-    <button onclick="handleLogout()" style="background:none; border:1px solid #fff; color:#fff; padding:5px 10px; border-radius:8px; cursor:pointer;">خروج</button>
+    <div style="display:flex; gap:10px;">
+        <button id="profile-btn" style="background:var(--orange); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="loadProfilePage()">حسابي</button>
+        <button id="back-btn" style="display:none; background:rgba(255,255,255,0.2); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="showPage('home-page')">الرئيسية</button>
+        <button onclick="handleLogout()" style="background:none; border:1px solid #fff; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;">خروج</button>
+    </div>
 </nav>
 
 <div id="app">
     <div id="login-page" class="page active">
-        <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy);">
-            <div style="background:#fff; padding:35px; border-radius:25px; width:90%; max-width:400px; text-align:center;">
-                <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="border-radius:50%; margin-bottom:15px;">
-                <input type="tel" id="l-phone" placeholder="رقم الموبايل" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px; border:1px solid #ddd; text-align:center;">
-                <input type="password" id="l-pass" placeholder="كلمة المرور" style="width:100%; padding:12px; margin-bottom:15px; border-radius:10px; border:1px solid #ddd; text-align:center;">
+        <div class="auth-screen">
+            <div class="auth-card">
+                <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="margin-bottom: 15px; border-radius: 50%;">
+                <div class="poetic-line">"وَمَن لايهوى صُعُودَ الجِبَالِ <br> يَعِش أَبَدَ الدَّهرِ بَيْنَ الحُفَرِ"</div>
+                <h3 style="margin-bottom: 20px;">تسجيل الدخول</h3>
+                <input type="tel" id="l-phone" placeholder="رقم الموبايل" class="input-group">
+                <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
+                <p style="margin-top:20px; font-weight:700; color:var(--navy); cursor:pointer;" onclick="showPage('register-page')">إنشاء حساب جديد</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="register-page" class="page">
+        <div class="auth-screen">
+            <div class="auth-card">
+                <h3 style="margin-bottom:20px;">فتح حساب طالب جديد</h3>
+                <input type="text" id="r-name" placeholder="الاسم ثلاثي" class="input-group">
+                <input type="tel" id="r-phone" placeholder="رقم موبايلك" class="input-group">
+                <input type="tel" id="r-parent" placeholder="رقم ولي الأمر" class="input-group">
+                <input type="password" id="r-pass" placeholder="كلمة المرور" class="input-group">
+                <button class="btn-main" onclick="handleRegister()">تأكيد التسجيل</button>
+                <p style="margin-top:15px; cursor:pointer;" onclick="showPage('login-page')">رجوع</p>
             </div>
         </div>
     </div>
 
     <div id="home-page" class="page">
         <div class="container">
-            <h2 style="text-align:right; border-right:4px solid var(--orange); padding-right:10px;">الكورسات المتاحة</h2>
-            <div id="courses-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;"></div>
+            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom: 25px;">محاضراتي المتاحة</h2>
+            <div id="courses-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;"></div>
+        </div>
+    </div>
+
+    <div id="profile-page" class="page">
+        <div class="container">
+            <div style="background:var(--navy); color:#fff; padding:30px; border-radius:25px; text-align:center; margin-bottom:20px;">
+                <h2 id="p-name"></h2>
+                <p id="p-phone" style="opacity:0.8;"></p>
+            </div>
+            <h3 style="text-align:right;"><i class="fas fa-chart-bar" style="color:var(--orange)"></i> سجل نتائجك</h3>
+            <div id="grades-list"></div>
         </div>
     </div>
 
     <div id="content-page" class="page">
         <div class="container">
-            <h3 id="current-course-title" style="text-align:right; color:var(--navy);"></h3>
+            <h2 id="current-course-title" style="text-align: right; color: var(--navy);"></h2>
             
-            <div id="video-section" style="display:none;">
-                <div class="video-player-container" id="main-player-container">
+            <div id="video-section" style="display:none; margin-top:20px;">
+                <div class="video-player-container" id="v-container">
                     <div class="video-aspect">
                         <div id="yt-player"></div>
                         <div id="video-overlay" onclick="togglePlay()"></div>
@@ -94,24 +136,21 @@
                         <div class="progress-bar" id="p-bar" onclick="seekVideo(event)">
                             <div class="progress-fill" id="progress-fill"></div>
                         </div>
-                        
-                        <div class="ctrl-group">
-                            <button class="ctrl-btn" onclick="togglePlay()"><i id="play-icon" class="fas fa-play"></i></button>
-                            <div class="video-timer">
-                                <span id="current-time">00:00</span> / <span id="duration-time">00:00</span>
+                        <div class="controls-row">
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <button class="ctrl-btn" onclick="togglePlay()"><i id="play-icon" class="fas fa-play"></i></button>
+                                <span style="font-size:0.85rem; font-family:monospace;"><span id="cur-time">00:00</span> / <span id="dur-time">00:00</span></span>
                             </div>
-                        </div>
-
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <select class="speed-select" onchange="changeSpeed(this.value)">
-                                <option value="0.5">0.5x</option>
-                                <option value="0.75">0.75x</option>
-                                <option value="1" selected>Normal</option>
-                                <option value="1.25">1.25x</option>
-                                <option value="1.5">1.5x</option>
-                                <option value="2">2x</option>
-                            </select>
-                            <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <select class="speed-select" onchange="player.setPlaybackRate(parseFloat(this.value))">
+                                    <option value="0.75">0.75x</option>
+                                    <option value="1" selected>العادية</option>
+                                    <option value="1.25">1.25x</option>
+                                    <option value="1.5">1.5x</option>
+                                    <option value="2">2x</option>
+                                </select>
+                                <button class="ctrl-btn" onclick="toggleFS()"><i class="fas fa-expand"></i></button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -126,7 +165,7 @@
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    let player, timerUpdate;
+    let player;
 
     function getYouTubeId(url) {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -138,16 +177,13 @@
         const phone = document.getElementById('l-phone').value.trim();
         const pass = document.getElementById('l-pass').value.trim();
         const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if (user) { 
-            localStorage.setItem('f_id', user.id); 
-            localStorage.setItem('f_p', user.student_phone); 
-            start(user); 
-        } else alert("بيانات خاطئة");
+        if (user) { localStorage.setItem('f_id', user.id); localStorage.setItem('f_p', user.student_phone); start(user); } 
+        else alert("بيانات خاطئة");
     }
 
     function start(user) {
         document.getElementById('nav-user-name').innerText = user.full_name;
-        document.getElementById('wm-text').innerText = Array(50).fill(`${user.full_name} | ${user.student_phone}`).join('   ');
+        document.getElementById('wm-text').innerText = Array(40).fill(`${user.full_name} | ${user.student_phone}`).join('   ');
         document.getElementById('watermark').classList.add('active');
         showPage('home-page'); loadCourses();
     }
@@ -170,7 +206,7 @@
         showPage('content-page');
         const { data: ls } = await sb.from('lessons').select('*').eq('course_id', id).order('id');
         document.getElementById('tab-content').innerHTML = ls.map((l, i) => `
-            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="playVideo('${l.video_id}')">
+            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--orange); cursor:pointer;" onclick="playVideo('${l.video_id}')">
                 <span><b>${i+1}.</b> ${l.title}</span> <i class="fas fa-play-circle" style="color:var(--orange)"></i>
             </div>`).join('');
     }
@@ -178,9 +214,8 @@
     function playVideo(rawUrl) {
         const videoId = getYouTubeId(rawUrl);
         document.getElementById('video-section').style.display = 'block';
-        if (player) {
-            player.loadVideoById(videoId);
-        } else {
+        if (player) { player.loadVideoById(videoId); } 
+        else {
             player = new YT.Player('yt-player', {
                 videoId: videoId,
                 playerVars: { 'controls': 0, 'disablekb': 1, 'modestbranding': 1, 'rel': 0 },
@@ -191,19 +226,24 @@
     }
 
     function onPlayerReady() {
-        startTimer();
-        const duration = player.getDuration();
-        document.getElementById('duration-time').innerText = formatTime(duration);
+        setInterval(() => {
+            if (player && player.getCurrentTime) {
+                const cur = player.getCurrentTime();
+                const dur = player.getDuration();
+                document.getElementById('progress-fill').style.width = (cur/dur*100) + '%';
+                document.getElementById('cur-time').innerText = formatT(cur);
+                document.getElementById('dur-time').innerText = formatT(dur);
+            }
+        }, 1000);
     }
 
-    function onPlayerStateChange(event) {
-        const icon = document.getElementById('play-icon');
-        if (event.data == YT.PlayerState.PLAYING) icon.className = 'fas fa-pause';
-        else icon.className = 'fas fa-play';
-        
-        if (event.data == YT.PlayerState.PLAYING) {
-            document.getElementById('duration-time').innerText = formatTime(player.getDuration());
-        }
+    function onPlayerStateChange(e) {
+        document.getElementById('play-icon').className = (e.data == YT.PlayerState.PLAYING) ? 'fas fa-pause' : 'fas fa-play';
+    }
+
+    function formatT(s) {
+        let m = Math.floor(s/60); s = Math.floor(s%60);
+        return `${m}:${s < 10 ? '0'+s : s}`;
     }
 
     function togglePlay() {
@@ -211,43 +251,34 @@
         else player.playVideo();
     }
 
-    function startTimer() {
-        setInterval(() => {
-            if (player && player.getCurrentTime) {
-                const current = player.getCurrentTime();
-                const duration = player.getDuration();
-                document.getElementById('progress-fill').style.width = (current / duration * 100) + '%';
-                document.getElementById('current-time').innerText = formatTime(current);
-            }
-        }, 1000);
-    }
-
-    function formatTime(time) {
-        let min = Math.floor(time / 60);
-        let sec = Math.floor(time % 60);
-        return `${min}:${sec < 10 ? '0' + sec : sec}`;
-    }
-
     function seekVideo(e) {
         const rect = document.getElementById('p-bar').getBoundingClientRect();
-        const pct = (e.clientX - rect.left) / rect.width;
-        player.seekTo(pct * player.getDuration());
+        player.seekTo(((e.clientX - rect.left) / rect.width) * player.getDuration());
     }
 
-    function changeSpeed(val) {
-        player.setPlaybackRate(parseFloat(val));
+    function toggleFS() {
+        const el = document.getElementById('v-container');
+        if (!document.fullscreenElement) el.requestFullscreen(); else document.exitFullscreen();
     }
 
-    function toggleFullScreen() {
-        const container = document.getElementById('main-player-container');
-        if (!document.fullscreenElement) container.requestFullscreen();
-        else document.exitFullscreen();
+    async function loadProfilePage() {
+        showPage('profile-page');
+        document.getElementById('p-name').innerText = document.getElementById('nav-user-name').innerText;
+        document.getElementById('p-phone').innerText = localStorage.getItem('f_p');
+        const { data: results } = await sb.from('exam_results').select('*').eq('student_phone', localStorage.getItem('f_p')).order('created_at', {ascending:false});
+        document.getElementById('grades-list').innerHTML = results.map(res => `
+            <div style="background:#fff; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="text-align:right;"><b>${res.exam_name}</b><br><small>${new Date(res.created_at).toLocaleDateString('ar-EG')}</small></div>
+                <div style="font-weight:bold; color:var(--orange)">${res.score}%</div>
+            </div>`).join('');
     }
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        document.getElementById('navbar').classList.toggle('visible', id !== 'login-page');
+        document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
+        document.getElementById('back-btn').style.display = (id !== 'home-page' && id !== 'login-page') ? 'block' : 'none';
+        document.getElementById('profile-btn').style.display = (id === 'home-page') ? 'block' : 'none';
         if (id !== 'content-page' && player) player.pauseVideo();
     }
 
