@@ -12,7 +12,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
-        /* واترمارك */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.07; overflow: hidden; }
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.2rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
@@ -33,7 +32,6 @@
 
         .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; }
         
-        /* ستايل الامتحان والمراجعة */
         .timer-box { background: var(--navy); color: #fff; padding: 10px 20px; border-radius: 50px; font-weight: 800; font-size: 1.2rem; display: inline-block; margin-bottom: 20px; }
         .q-img { width: 100%; max-width: 400px; border-radius: 15px; margin: 15px 0; border: 1px solid #ddd; }
         .option-btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; background: #f9f9f9; text-align: right; font-family: 'Cairo'; font-weight: 600; cursor: pointer; }
@@ -154,6 +152,16 @@
     let currentCourseId, examData, timerInterval;
     let studentAnswers = {};
 
+    // 1. نظام البصمة: دالة توليد أو استرجاع البصمة الخاصة بالمتصفح
+    function getDeviceID() {
+        let did = localStorage.getItem('device_fingerprint');
+        if (!did) {
+            did = 'device_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+            localStorage.setItem('device_fingerprint', did);
+        }
+        return did;
+    }
+
     function getYouTubeId(url) {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
@@ -163,19 +171,63 @@
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value.trim();
         const pass = document.getElementById('l-pass').value.trim();
+        
         const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if (user) { localStorage.setItem('f_id', user.id); localStorage.setItem('f_p', user.student_phone); start(user); } 
+        
+        if (user) { 
+            const currentFingerprint = getDeviceID();
+
+            // التحقق من أن الحساب غير مربوط بجهاز آخر
+            if (user.device_id && user.device_id !== currentFingerprint) {
+                alert("عذراً، هذا الحساب مفتوح بالفعل على جهاز آخر. يرجى تسجيل الخروج من الجهاز الأول.");
+                return; // يمنعه من الدخول
+            }
+
+            // إذا كان الحساب حراً (مفيش بصمة) أو البصمة مطابقة للجهاز الحالي
+            if (!user.device_id) {
+                // نربط الحساب ببصمة الجهاز الحالي في الداتابيز
+                await sb.from('students').update({ device_id: currentFingerprint }).eq('id', user.id);
+            }
+
+            localStorage.setItem('f_id', user.id); 
+            localStorage.setItem('f_p', user.student_phone); 
+            start(user); 
+        } 
         else alert("بيانات خاطئة");
     }
 
     async function handleRegister() {
+        const currentFingerprint = getDeviceID();
+        
         const { data: user } = await sb.from('students').insert([{ 
             full_name: document.getElementById('r-name').value, 
             student_phone: document.getElementById('r-phone').value, 
             parent_phone: document.getElementById('r-parent').value,
-            password: document.getElementById('r-pass').value 
+            password: document.getElementById('r-pass').value,
+            device_id: currentFingerprint // تسجيل البصمة وقت إنشاء الحساب
         }]).select().single();
-        if (user) { localStorage.setItem('f_id', user.id); localStorage.setItem('f_p', user.student_phone); start(user); }
+
+        if (user) { 
+            localStorage.setItem('f_id', user.id); 
+            localStorage.setItem('f_p', user.student_phone); 
+            start(user); 
+        }
+    }
+
+    // التعديل الجوهري: تحرير الحساب عند تسجيل الخروج
+    async function handleLogout() {
+        const userId = localStorage.getItem('f_id');
+        if (userId) {
+            // نمسح البصمة من الداتابيز عشان الحساب يبقى متاح لأي جهاز تاني
+            await sb.from('students').update({ device_id: null }).eq('id', userId);
+        }
+        
+        // نمسح بيانات الدخول بس (نسيب بصمة المتصفح زي ما هي عشان لو دخل تاني)
+        localStorage.removeItem('f_id');
+        localStorage.removeItem('f_p');
+        
+        // ريفرش للصفحة للعودة لشاشة الدخول
+        location.reload(); 
     }
 
     function start(user) {
@@ -323,13 +375,20 @@
         if (id !== 'exam-page') clearInterval(timerInterval);
     }
 
-    function handleLogout() { localStorage.clear(); location.reload(); }
-
     window.onload = async () => {
         const id = localStorage.getItem('f_id');
         if (id) {
             const { data: u } = await sb.from('students').select('*').eq('id', id).single();
-            if (u) start(u);
+            if (u) {
+                // دبل تشيك: لو كان الحساب مربوط بجهاز آخر ومفتوح، يعمل تسجيل خروج إجباري
+                const currentFingerprint = getDeviceID();
+                if (u.device_id && u.device_id !== currentFingerprint) {
+                    alert("تم تسجيل الدخول من جهاز آخر. سيتم تسجيل خروجك لحماية الحساب.");
+                    handleLogout();
+                } else {
+                    start(u);
+                }
+            }
         }
     };
 </script>
