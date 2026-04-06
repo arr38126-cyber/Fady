@@ -10,56 +10,46 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --green: #2ecc71; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* منع النسخ والتحديد */
         body { 
             font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; 
-            direction: rtl; user-select: none; -webkit-user-select: none;
+            direction: rtl; user-select: none;
         }
 
-        /* العلامة المائية */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06; overflow: hidden; }
         #watermark.active { display: block; }
-        #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1rem; line-height: 6; width: 300%; text-align: center; color: var(--navy); }
+        #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1rem; line-height: 6; width: 300%; text-align: center; color: var(--navy); }
 
-        /* Navbar مصغر واحترافي */
+        /* Navbar */
         nav { display: none; background: var(--navy); padding: 8px 15px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         nav.visible { display: flex; }
         .nav-logo img { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--orange); }
-        .nav-btn { background: none; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-family: 'Cairo'; transition: 0.3s; }
-        .nav-btn:hover { background: var(--orange); border-color: var(--orange); }
+        .nav-btn { background: none; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-family: 'Cairo'; }
 
         .container { padding: 15px; max-width: 1100px; margin: 0 auto; }
-        .page { display: none; transition: opacity 0.3s; }
+        .page { display: none; }
         .page.active { display: block; }
 
-        /* الكورسات */
-        .course-card { background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.07); position: relative; transition: 0.3s; }
-        .course-card:hover { transform: translateY(-5px); }
-        .price-tag { position: absolute; top: 12px; right: 12px; background: var(--orange); color: #fff; padding: 3px 12px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; z-index: 5; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        /* Auth Cards */
+        .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
+        .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 30px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); position: relative; z-index: 100; }
+        .poetic-line { font-family: 'Amiri', serif; color: var(--orange); font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; line-height: 1.5; }
         
-        /* أزرار الاختيارات في الامتحان */
-        .option-btn { 
-            display: block; width: 100%; padding: 14px; margin: 10px 0; 
-            border: 2px solid #eee; border-radius: 12px; background: #fff; 
-            text-align: right; cursor: pointer; font-family: 'Cairo'; 
-            font-weight: 600; transition: 0.2s;
-        }
-        .option-btn.selected { 
-            border-color: var(--orange); background: #fff5f0; 
-            box-shadow: 0 4px 12px rgba(232, 88, 26, 0.15); color: var(--orange);
-        }
+        .input-group { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; display: block; }
 
-        .card { background: #fff; border-radius: 14px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-right: 5px solid var(--orange); cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.03); }
+        /* Courses */
+        .course-card { background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.07); position: relative; }
+        .price-tag { position: absolute; top: 12px; right: 12px; background: var(--orange); color: #fff; padding: 3px 12px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; z-index: 5; }
+        
+        .btn-main { background: var(--orange); color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-family: 'Cairo'; font-weight: 800; width: 100%; font-size: 1rem; display: block; }
+        
+        .option-btn { display: block; width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; background: #fff; text-align: right; cursor: pointer; font-family: 'Cairo'; font-weight: 600; }
+        .option-btn.selected { border-color: var(--orange); background: #fff5f0; color: var(--orange); }
+
+        .card { background: #fff; border-radius: 14px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-right: 5px solid var(--orange); cursor: pointer; }
         .exam-card { border-right-color: var(--green); }
-        .btn-main { background: var(--orange); color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-family: 'Cairo'; font-weight: 800; width: 100%; font-size: 1rem; box-shadow: 0 4px 10px rgba(232, 88, 26, 0.3); }
 
-        /* مشغل الفيديو */
-        .video-player-container { background: #000; border-radius: 18px; overflow: hidden; border: 2px solid var(--navy); }
-        .video-aspect { position: relative; padding-bottom: 56.25%; height: 0; }
-        #yt-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        
         .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25d366; color: #FFF; border-radius: 50px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; z-index: 10000; text-decoration: none; font-size: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
     </style>
 </head>
@@ -76,7 +66,7 @@
     <div style="display:flex; gap:6px;">
         <button class="nav-btn" onclick="showPage('home-page')">الرئيسية</button>
         <button class="nav-btn" style="background:var(--orange); border:none;" onclick="loadProfile()">حسابي</button>
-        <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; font-size: 1.1rem; padding: 5px; cursor:pointer;"><i class="fas fa-power-off"></i></button>
+        <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; font-size: 1.1rem; cursor:pointer;"><i class="fas fa-power-off"></i></button>
     </div>
 </nav>
 
@@ -86,8 +76,8 @@
             <div class="auth-card">
                 <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="border-radius:50%; margin-bottom:15px; border: 2px solid var(--navy);">
                 <div class="poetic-line">"وَمَن لايهوى صُعُودَ الجِبَالِ <br> يَعِش أَبَدَ الدَّهرِ بَيْنَ الحُفَرِ"</div>
-                <input type="tel" id="l-phone" placeholder="رقم الموبايل" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:12px; text-align:center;">
-                <input type="password" id="l-pass" placeholder="كلمة المرور" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:15px; text-align:center;">
+                <input type="tel" id="l-phone" placeholder="رقم الموبايل" class="input-group">
+                <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
                 <p style="margin-top:15px; font-size:0.85rem;">ليس لديك حساب؟ <span style="color:var(--orange); font-weight:bold; cursor:pointer;" onclick="showPage('register-page')">إنشاء حساب جديد</span></p>
             </div>
@@ -98,10 +88,10 @@
         <div class="auth-screen">
             <div class="auth-card">
                 <h3 style="margin-bottom:20px; color:var(--navy);">تسجيل طالب جديد</h3>
-                <input type="text" id="r-name" placeholder="الاسم ثلاثي" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
-                <input type="tel" id="r-phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
-                <input type="tel" id="r-parent" placeholder="رقم ولي الأمر" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
-                <input type="password" id="r-pass" placeholder="اختر كلمة مرور" style="width:100%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd;">
+                <input type="text" id="r-name" placeholder="الاسم ثلاثي" class="input-group">
+                <input type="tel" id="r-phone" placeholder="رقم الموبايل" class="input-group">
+                <input type="tel" id="r-parent" placeholder="رقم ولي الأمر" class="input-group">
+                <input type="password" id="r-pass" placeholder="اختر كلمة مرور" class="input-group">
                 <button class="btn-main" onclick="handleRegister()" style="background:var(--navy);">تأكيد وإنشاء الحساب</button>
                 <p onclick="showPage('login-page')" style="margin-top:15px; font-size:0.8rem; cursor:pointer; color:#666;">العودة لتسجيل الدخول</p>
             </div>
@@ -110,7 +100,7 @@
 
     <div id="home-page" class="page">
         <div class="container">
-            <h3 style="text-align:right; border-right:4px solid var(--orange); padding-right:10px; margin-bottom:20px; font-weight: 800;">المحاضرات المتوفرة</h3>
+            <h3 style="text-align:right; border-right:4px solid var(--orange); padding-right:10px; margin-bottom:20px;">المحاضرات المتوفرة</h3>
             <div id="courses-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:15px;"></div>
         </div>
     </div>
@@ -123,10 +113,8 @@
                     <div class="video-aspect"><div id="yt-player"></div><div id="video-overlay" onclick="togglePlay()" style="position:absolute; inset:0; z-index:10;"></div></div>
                     <div style="background:var(--navy); padding:12px; color:#fff; display:flex; justify-content:space-between; align-items:center;">
                         <button onclick="togglePlay()" style="background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer;"><i id="play-btn" class="fas fa-play"></i></button>
-                        <div style="height:5px; background:rgba(255,255,255,0.1); width:60%; border-radius:5px; position:relative;">
-                            <div id="p-fill" style="height:100%; background:var(--orange); width:0%; border-radius:5px;"></div>
-                        </div>
-                        <span id="cur" style="font-size:0.85rem; font-family:monospace;">00:00</span>
+                        <div style="height:5px; background:rgba(255,255,255,0.1); width:60%; border-radius:5px;"><div id="p-fill" style="height:100%; background:var(--orange); width:0%;"></div></div>
+                        <span id="cur" style="font-size:0.85rem;">00:00</span>
                     </div>
                 </div>
             </div>
@@ -136,19 +124,19 @@
 
     <div id="exam-page" class="page">
         <div class="container" style="text-align:center;">
-            <div id="exam-timer" style="background:var(--navy); color:white; padding:8px 25px; border-radius:50px; display:inline-block; font-weight:800; font-size:1.2rem; margin-bottom:20px; box-shadow:0 4px 10px rgba(0,0,0,0.2);">00:00</div>
+            <div id="exam-timer" style="background:var(--navy); color:white; padding:8px 25px; border-radius:50px; display:inline-block; font-weight:800; margin-bottom:20px;">00:00</div>
             <div id="exam-area"></div>
-            <button class="btn-main" onclick="finishExam()" style="background:var(--green); margin-top:20px; max-width:400px;">إرسال الإجابات والإنهاء</button>
+            <button class="btn-main" onclick="finishExam()" style="background:var(--green); margin-top:20px;">إنهاء الامتحان</button>
         </div>
     </div>
 
     <div id="profile-page" class="page">
         <div class="container">
-            <div style="background:var(--navy); color:white; padding:30px; border-radius:20px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.1);">
-                <h3 id="prof-name" style="margin:0; font-size:1.4rem;"></h3>
-                <p id="prof-phone" style="opacity:0.7; margin-top:5px;"></p>
+            <div style="background:var(--navy); color:white; padding:30px; border-radius:20px; text-align:center;">
+                <h3 id="prof-name" style="margin:0;"></h3>
+                <p id="prof-phone" style="opacity:0.7;"></p>
             </div>
-            <h4 style="margin-top:30px; border-right:4px solid var(--orange); padding-right:10px;">سجل نتائج اختباراتك</h4>
+            <h4 style="margin-top:25px; border-right:4px solid var(--orange); padding-right:10px;">نتائجك</h4>
             <div id="results-list"></div>
         </div>
     </div>
@@ -160,19 +148,13 @@
 
     let player, currentExam, examTimer, answers = {};
 
-    // --- منع الاختصارات للحماية ---
-    document.addEventListener('keydown', (e) => {
-        if (e.key === "F12" || (e.ctrlKey && (e.key === "u" || e.key === "i" || e.key === "j" || e.key === "s"))) {
-            e.preventDefault();
-        }
-    });
-
-    // --- نظام الدخول ---
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value;
         const pass = document.getElementById('l-pass').value;
-        const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if(user) { localStorage.setItem('sid', user.id); setupUser(user); } else alert("رقم الموبايل أو كلمة المرور غير صحيحة");
+        if(!phone || !pass) return alert("أدخل البيانات");
+        const { data: user, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+        if(user) { localStorage.setItem('sid', user.id); setupUser(user); } 
+        else alert("خطأ في الدخول");
     }
 
     async function handleRegister() {
@@ -180,110 +162,84 @@
         const phone = document.getElementById('r-phone').value;
         const parent = document.getElementById('r-parent').value;
         const pass = document.getElementById('r-pass').value;
-        if(!name || !phone || !pass) return alert("يرجى ملء كافة الخانات!");
+        if(!name || !phone || !pass) return alert("أكمل الخانات");
         const { error } = await sb.from('students').insert([{ full_name: name, student_phone: phone, parent_phone: parent, password: pass }]);
-        if(!error) { alert("تم إنشاء الحساب بنجاح!"); showPage('login-page'); } else alert("الرقم مسجل مسبقاً أو حدث خطأ");
+        if(!error) { alert("تم التسجيل"); showPage('login-page'); } else alert("الرقم مسجل مسبقاً");
     }
 
     function setupUser(user) {
         document.getElementById('nav-user-name').innerText = user.full_name;
-        document.getElementById('wm-text').innerText = Array(35).fill(user.full_name + " " + user.student_phone).join("   ");
+        document.getElementById('wm-text').innerText = Array(20).fill(user.full_name + " " + user.student_phone).join("  ");
         document.getElementById('watermark').classList.add('active');
         showPage('home-page');
         loadCourses();
     }
 
-    // --- عرض الكورسات مع السعر ---
     async function loadCourses() {
         const { data: cs } = await sb.from('courses').select('*');
         document.getElementById('courses-grid').innerHTML = cs.map(c => `
             <div class="course-card">
-                <div class="price-tag">${c.price > 0 ? c.price + ' ج.م' : 'مجاني'}</div>
-                <img src="${c.image_url}" style="width:100%; height:170px; object-fit:cover;">
+                <div class="price-tag">${c.price > 0 ? c.price + ' ج' : 'مجاني'}</div>
+                <img src="${c.image_url}" style="width:100%; height:160px; object-fit:cover;">
                 <div style="padding:15px;">
-                    <h4 style="margin:0 0 12px 0;">${c.title}</h4>
-                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول المحاضرة</button>
+                    <h4 style="margin:0 0 10px 0;">${c.title}</h4>
+                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول</button>
                 </div>
             </div>`).join('');
     }
 
-    // --- الدروس والامتحانات (الربط المزدوج) ---
     async function openCourse(id, title) {
         document.getElementById('course-title').innerText = title;
         showPage('content-page');
         const { data: ls } = await sb.from('lessons').select('*').eq('course_id', id).order('id');
         let html = '';
-        
         for (let l of ls) {
-            html += `<div class="card" onclick="playVideo('${l.video_id}')">
-                        <span><i class="fas fa-play-circle" style="color:var(--orange); margin-left:8px;"></i> ${l.title}</span>
-                        <small style="background:#f0f0f0; padding:2px 8px; border-radius:5px;">فيديو</small>
-                    </div>`;
+            html += `<div class="card" onclick="playVideo('${l.video_id}')"><span>${l.title}</span><small>فيديو</small></div>`;
             const { data: ex } = await sb.from('exams').select('*').eq('lesson_id', l.id);
             if(ex) ex.forEach(e => {
-                html += `<div class="card exam-card" onclick='startExam(${JSON.stringify(e)})'>
-                            <span><i class="fas fa-edit" style="color:var(--green); margin-left:8px;"></i> اختبار الدرس: ${e.title}</span>
-                            <small>${e.duration_minutes} د</small>
-                        </div>`;
+                html += `<div class="card exam-card" onclick='startExam(${JSON.stringify(e)})'><span>${e.title}</span><small>امتحان</small></div>`;
             });
         }
-
-        // جلب الامتحانات "العامة" للكورس
         const { data: genEx } = await sb.from('exams').select('*').eq('course_id', id).is('lesson_id', null);
-        if(genEx && genEx.length > 0) {
-            html += `<h4 style="margin-top:25px; border-right:4px solid var(--green); padding-right:10px;">امتحانات شاملة على المحاضرة</h4>`;
-            genEx.forEach(e => {
-                html += `<div class="card exam-card" onclick='startExam(${JSON.stringify(e)})'>
-                            <span><i class="fas fa-star" style="color:var(--green); margin-left:8px;"></i> ${e.title}</span>
-                            <small>${e.duration_minutes} د</small>
-                        </div>`;
-            });
-        }
+        if(genEx) genEx.forEach(e => {
+            html += `<div class="card exam-card" onclick='startExam(${JSON.stringify(e)})'><span>${e.title} (شامل)</span><small>امتحان</small></div>`;
+        });
         document.getElementById('lessons-list').innerHTML = html;
     }
 
-    // --- مشغل الفيديو ---
     function playVideo(vid) {
         document.getElementById('video-wrapper').style.display = 'block';
         const id = vid.includes('v=') ? vid.split('v=')[1].split('&')[0] : vid;
         if(player) player.loadVideoById(id);
         else {
-            player = new YT.Player('yt-player', { videoId: id, playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0 },
+            player = new YT.Player('yt-player', { videoId: id, playerVars: { 'controls': 0 },
                 events: { 'onReady': () => {
                     setInterval(() => {
                         const cur = player.getCurrentTime(), dur = player.getDuration();
                         document.getElementById('p-fill').style.width = (cur/dur*100) + '%';
                         document.getElementById('cur').innerText = formatTime(cur);
                     }, 1000);
-                }, 'onStateChange': (e) => {
-                    document.getElementById('play-btn').className = e.data == 1 ? 'fas fa-pause' : 'fas fa-play';
                 }}
             });
         }
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        window.scrollTo(0,0);
     }
 
-    function formatTime(s) {
-        let m = Math.floor(s/60); s = Math.floor(s%60);
-        return `${m}:${s < 10 ? '0'+s : s}`;
-    }
-    function togglePlay() { player.getPlayerState() == 1 ? player.pauseVideo() : player.playVideo(); }
+    function formatTime(s) { let m=Math.floor(s/60); s=Math.floor(s%60); return `${m}:${s<10?'0'+s:s}`; }
+    function togglePlay() { player.getPlayerState()==1?player.pauseVideo():player.playVideo(); }
 
-    // --- نظام الامتحان المطور ---
     function startExam(exam) {
-        if(!confirm("هل تود بدء الامتحان الآن؟")) return;
         currentExam = exam; answers = {};
         showPage('exam-page');
         const qs = typeof exam.questions === 'string' ? JSON.parse(exam.questions) : exam.questions;
         document.getElementById('exam-area').innerHTML = qs.map((q, i) => `
-            <div style="background:#fff; padding:20px; border-radius:15px; margin-bottom:15px; text-align:right; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
-                <p style="font-weight:800; font-size:1.05rem; margin-bottom:15px;">س ${i+1}: ${q.text}</p>
+            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; text-align:right;">
+                <p><b>س ${i+1}:</b> ${q.text}</p>
                 ${q.options.map((opt, oi) => `<button class="option-btn" id="q${i}_o${oi}" onclick="ans(${i},${oi+1})">${opt}</button>`).join('')}
             </div>`).join('');
-        
         let time = exam.duration_minutes * 60;
         examTimer = setInterval(() => {
-            let m = Math.floor(time/60), s = time%60;
+            let m=Math.floor(time/60), s=time%60;
             document.getElementById('exam-timer').innerText = `${m}:${s<10?'0'+s:s}`;
             if(time-- <= 0) finishExam();
         }, 1000);
@@ -298,10 +254,38 @@
     async function finishExam() {
         clearInterval(examTimer);
         const qs = typeof currentExam.questions === 'string' ? JSON.parse(currentExam.questions) : currentExam.questions;
-        let score = 0;
-        qs.forEach((q, i) => { if(answers[i] == q.correct) score++; });
+        let score = 0; qs.forEach((q, i) => { if(answers[i] == q.correct) score++; });
         const final = Math.round((score/qs.length)*100);
         const { data: u } = await sb.from('students').select('student_phone').eq('id', localStorage.getItem('sid')).single();
         await sb.from('exam_results').insert([{ student_phone: u.student_phone, exam_name: currentExam.title, score: final }]);
-        alert(`تم إنهاء الاختبار! درجتك: ${final}%`);
-        showPage
+        alert("الدرجة: " + final + "%");
+        showPage('home-page');
+    }
+
+    async function loadProfile() {
+        showPage('profile-page');
+        const { data: u } = await sb.from('students').select('*').eq('id', localStorage.getItem('sid')).single();
+        document.getElementById('prof-name').innerText = u.full_name;
+        document.getElementById('prof-phone').innerText = u.student_phone;
+        const { data: res } = await sb.from('exam_results').select('*').eq('student_phone', u.student_phone).order('created_at', {ascending:false});
+        document.getElementById('results-list').innerHTML = res.map(r => `<div class="card"><b>${r.exam_name}</b> <span>${r.score}%</span></div>`).join('');
+    }
+
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
+    }
+
+    function handleLogout() { localStorage.clear(); location.reload(); }
+
+    window.onload = async () => {
+        const id = localStorage.getItem('sid');
+        if(id) {
+            const { data: u } = await sb.from('students').select('*').eq('id', id).single();
+            if(u) setupUser(u);
+        }
+    }
+</script>
+</body>
+</html>
