@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم الشاملة | Dr. Fady Adel</title>
+    <title>لوحة تحكم Dr. Fady Adel | الإدارة</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --navy: #1B2347; --orange: #E8581A; --bg: #f0f2f5; --red: #e74c3c; --green: #2ecc71; --blue: #3498db; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--navy); }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--navy); direction: rtl; }
         
-        /* شاشة الدخول */
         #auth-overlay { position: fixed; inset: 0; background: var(--navy); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-card { background: white; padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         
@@ -22,15 +21,15 @@
         .section { background: white; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-right: 6px solid var(--orange); }
         h3 { margin-top: 0; color: var(--navy); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; font-family: 'Cairo'; font-size: 1rem; box-sizing: border-box; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; font-family: 'Cairo'; font-size: 1rem; box-sizing: border-box; outline: none; }
+        input:focus, select:focus { border-color: var(--orange); }
+        
         .btn { padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; }
         .btn-orange { background: var(--orange); color: white; width: 100%; }
         .btn-blue { background: var(--blue); color: white; }
         .btn-red { background: var(--red); color: white; }
         .btn-green { background: var(--green); color: white; }
-        .btn-danger { background: #000; color: #ff4d4d; border: 1px solid #ff4d4d; width: 100%; }
-
-        /* ستايل الامتحانات */
+        
         .question-box { background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; position: relative; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .log-item { background: #f1f3f5; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-right: 4px solid var(--blue); }
@@ -52,12 +51,12 @@
 
 <div class="container" id="main-content">
     <div class="admin-header">
-        <h2 style="margin:0"><i class="fas fa-chalkboard-teacher"></i> لوحة تحكم د. فادي عادل</h2>
+        <h2 style="margin:0"><i class="fas fa-user-shield"></i> لوحة تحكم د. فادي عادل</h2>
         <button class="btn btn-red" onclick="adminLogout()">خروج آمن</button>
     </div>
 
     <div class="section" style="border-right-color: var(--blue);">
-        <h3><i class="fas fa-file-invoice"></i> مراقبة النشاط واستخراج التقارير</h3>
+        <h3><i class="fas fa-file-invoice"></i> مراقبة نشاط الطلاب</h3>
         <div style="display: flex; gap: 10px;">
             <input type="tel" id="search-phone" placeholder="أدخل رقم الطالب للبحث...">
             <button class="btn btn-blue" onclick="getStudentReport()">عرض النشاط</button>
@@ -68,19 +67,24 @@
                 <p id="rep-phone-display" style="color:#666; margin-bottom:20px;"></p>
                 <div id="rep-details"></div>
             </div>
-            <button class="btn btn-red" onclick="downloadPDF()">📥 تحميل التقرير PDF</button>
+            <button class="btn btn-red" onclick="downloadPDF()" style="margin-top:15px;">📥 تحميل التقرير PDF</button>
         </div>
     </div>
 
     <div class="section" style="border-right-color: var(--green);">
-        <h3><i class="fas fa-stopwatch"></i> إنشاء امتحان إلكتروني (تايمر)</h3>
+        <h3><i class="fas fa-stopwatch"></i> إنشاء امتحان إلكتروني</h3>
         <div class="grid-2">
-            <select id="examCourse"></select>
-            <input type="number" id="examDuration" placeholder="المدة بالدقائق (مثلاً 30)">
+            <select id="examCourse" onchange="loadLessonsForExam(this.value)"></select>
+            <select id="examLesson">
+                <option value="">-- امتحان عام للكورس (بدون درس) --</option>
+            </select>
         </div>
-        <input type="text" id="examTitle" placeholder="اسم الامتحان">
+        <div class="grid-2">
+            <input type="text" id="examTitle" placeholder="اسم الامتحان (مثلاً: اختبار الفصل الأول)">
+            <input type="number" id="examDuration" placeholder="المدة بالدقائق (مثلاً: 30)">
+        </div>
         
-        <div id="questions-container"></div>
+        <div id="questions-container" style="margin-top:20px;"></div>
         
         <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn btn-blue" onclick="addNewQuestionField()">+ إضافة سؤال</button>
@@ -106,7 +110,7 @@
         <div class="section">
             <h3><i class="fas fa-plus-circle"></i> إضافة كورس جديد</h3>
             <input type="text" id="c-title" placeholder="اسم الكورس">
-            <input type="number" id="c-price" placeholder="السعر (0 للمجاني)">
+            <input type="number" id="c-price" placeholder="السعر">
             <input type="text" id="c-img" placeholder="رابط صورة الكورس">
             <button class="btn btn-orange" onclick="addCourse()">نشر الكورس</button>
         </div>
@@ -114,35 +118,32 @@
             <h3><i class="fas fa-video"></i> إضافة محاضرة</h3>
             <select id="l-course"></select>
             <input type="text" id="l-title" placeholder="عنوان المحاضرة">
-            <input type="text" id="l-url" placeholder="رابط اليوتيوب الكامل">
+            <input type="text" id="l-url" placeholder="رابط اليوتيوب">
             <button class="btn btn-orange" onclick="addLesson()">نشر المحاضرة</button>
         </div>
     </div>
 
     <div class="section">
-        <h3><i class="fas fa-edit"></i> إدارة وحذف المحتوى</h3>
+        <h3><i class="fas fa-tasks"></i> إدارة المحتوى الحالي</h3>
         <div id="manage-list" style="max-height: 400px; overflow-y: auto;"></div>
-    </div>
-
-    <div class="section" style="border-right-color: var(--red); background: #fff5f5;">
-        <h3 style="color:var(--red)"><i class="fas fa-bomb"></i> العمليات الشاملة</h3>
-        <div class="grid-2">
-            <button class="btn btn-danger" onclick="wipeStudents()"><i class="fas fa-user-slash"></i> مسح كافة الطلاب</button>
-            <button class="btn btn-danger" onclick="wipeContent()"><i class="fas fa-trash"></i> مسح كافة المحتويات</button>
-        </div>
     </div>
 </div>
 
 <script>
     const _sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    // --- الدخول والخروج ---
+    // --- نظام الدخول المستمر ---
     async function handleAdminLogin() {
         const phone = document.getElementById('admin-phone').value;
         const pass = document.getElementById('admin-pass').value;
-        const { data } = await _sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if(data && data.role === 'admin') { localStorage.setItem('f_admin', 'true'); showDash(); } 
-        else alert("بيانات غير صحيحة أو لا تملك صلاحية");
+        const { data, error } = await _sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+        
+        if(data && data.role === 'admin') { 
+            localStorage.setItem('f_admin_logged', 'true'); 
+            showDash(); 
+        } else {
+            alert("صلاحيات الأدمن مرفوضة أو البيانات خاطئة");
+        }
     }
 
     function showDash() {
@@ -150,6 +151,11 @@
         document.getElementById('main-content').style.display='block';
         loadAllData();
         if(qCount === 0) addNewQuestionField();
+    }
+
+    function adminLogout() {
+        localStorage.removeItem('f_admin_logged');
+        location.reload();
     }
 
     // --- إدارة الامتحانات ---
@@ -162,45 +168,137 @@
             <strong>سؤال ${qCount}:</strong>
             <button onclick="this.parentElement.remove()" style="position:absolute; left:10px; top:10px; border:none; background:none; color:red; cursor:pointer;"><i class="fas fa-trash"></i></button>
             <textarea class="q-txt" placeholder="نص السؤال..."></textarea>
-            <input type="text" class="q-img" placeholder="رابط صورة (اختياري)">
             <div class="grid-2">
                 <input type="text" class="q-o1" placeholder="الاختيار 1">
                 <input type="text" class="q-o2" placeholder="الاختيار 2">
                 <input type="text" class="q-o3" placeholder="الاختيار 3">
                 <input type="text" class="q-o4" placeholder="الاختيار 4">
             </div>
-            <select class="q-corr">
-                <option value="1">الاختيار 1 هو الصحيح</option>
-                <option value="2">الاختيار 2 هو الصحيح</option>
-                <option value="3">الاختيار 3 هو الصحيح</option>
-                <option value="4">الاختيار 4 هو الصحيح</option>
-            </select>
+            <div style="margin-top:10px;">
+                الرقم الصحيح (1-4): <input type="number" class="q-corr" min="1" max="4" style="width:60px;">
+            </div>
         `;
         document.getElementById('questions-container').appendChild(div);
+    }
+
+    async function loadLessonsForExam(courseId) {
+        const lessonSelect = document.getElementById('examLesson');
+        lessonSelect.innerHTML = '<option value="">-- جاري تحميل الدروس... --</option>';
+        const { data: ls } = await _sb.from('lessons').select('*').eq('course_id', courseId).order('id');
+        
+        let options = '<option value="">-- امتحان عام للكورس (بدون درس) --</option>';
+        if (ls) options += ls.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+        lessonSelect.innerHTML = options;
     }
 
     async function saveExam() {
         const title = document.getElementById('examTitle').value;
         const dur = document.getElementById('examDuration').value;
         const cId = document.getElementById('examCourse').value;
-        if(!title || !dur) return alert("أكمل بيانات الامتحان");
+        const lId = document.getElementById('examLesson').value;
+
+        if(!title || !dur || !cId) return alert("أكمل البيانات الأساسية");
 
         let questions = [];
         document.querySelectorAll('.question-box').forEach(box => {
-            questions.push({
-                text: box.querySelector('.q-txt').value,
-                image: box.querySelector('.q-img').value,
-                options: [box.querySelector('.q-o1').value, box.querySelector('.q-o2').value, box.querySelector('.q-o3').value, box.querySelector('.q-o4').value],
-                correct: box.querySelector('.q-corr').value
-            });
+            const txt = box.querySelector('.q-txt').value;
+            const corr = box.querySelector('.q-corr').value;
+            if(txt && corr) {
+                questions.push({
+                    text: txt,
+                    options: [
+                        box.querySelector('.q-o1').value, 
+                        box.querySelector('.q-o2').value, 
+                        box.querySelector('.q-o3').value, 
+                        box.querySelector('.q-o4').value
+                    ],
+                    correct: parseInt(corr)
+                });
+            }
         });
 
-        await _sb.from('exams').insert([{ course_id: cId, title, duration_minutes: parseInt(dur), questions }]);
-        alert("تم نشر الامتحان المؤقت");
-        location.reload();
+        const examData = {
+            course_id: cId,
+            lesson_id: lId || null,
+            title: title,
+            duration_minutes: parseInt(dur),
+            questions: questions
+        };
+
+        const { error } = await _sb.from('exams').insert([examData]);
+        if(!error) { alert("تم الحفظ بنجاح"); location.reload(); } else alert("خطأ: " + error.message);
     }
 
-    // --- التقارير ---
+    // --- وظائف البيانات الأساسية ---
+    async function loadAllData() {
+        const { data: cs } = await _sb.from('courses').select('*');
+        if(cs) {
+            const opts = cs.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+            document.getElementById('examCourse').innerHTML = opts;
+            document.getElementById('act-course').innerHTML = opts;
+            document.getElementById('l-course').innerHTML = opts;
+            loadLessonsForExam(cs[0].id); // تحميل دروس أول كورس تلقائياً
+
+            let manageHtml = '';
+            for(let c of cs) {
+                manageHtml += `<div style="background:#e3e7f1; padding:10px; margin-top:15px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <b>📦 كورس: ${c.title}</b>
+                    <button onclick="del('courses', '${c.id}')" style="color:red; border:none; background:none; cursor:pointer;"><i class="fas fa-trash-alt"></i></button>
+                </div>`;
+                const { data: ls } = await _sb.from('lessons').select('*').eq('course_id', c.id);
+                ls?.forEach(l => {
+                    manageHtml += `<div style="padding:8px 25px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; background:white;">
+                        <span>↳ 🎥 ${l.title}</span>
+                        <button onclick="del('lessons', '${l.id}')" style="color:#999; border:none; background:none; cursor:pointer;">حذف</button>
+                    </div>`;
+                });
+                const { data: ex } = await _sb.from('exams').select('*').eq('course_id', c.id);
+                ex?.forEach(e => {
+                    manageHtml += `<div style="padding:8px 25px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; background:#f9fff9;">
+                        <span style="color:var(--green)">↳ 📝 امتحان: ${e.title}</span>
+                        <button onclick="del('exams', '${e.id}')" style="color:#999; border:none; background:none; cursor:pointer;">حذف</button>
+                    </div>`;
+                });
+            }
+            document.getElementById('manage-list').innerHTML = manageHtml;
+        }
+    }
+
+    async function del(tbl, id) { if(confirm("حذف نهائي؟")) { await _sb.from(tbl).delete().eq('id', id); loadAllData(); } }
+
+    async function addCourse() {
+        await _sb.from('courses').insert([{ 
+            title: document.getElementById('c-title').value, 
+            price: Number(document.getElementById('c-price').value), 
+            image_url: document.getElementById('c-img').value 
+        }]);
+        loadAllData();
+    }
+
+    async function addLesson() {
+        const url = document.getElementById('l-url').value;
+        const vid = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url;
+        await _sb.from('lessons').insert([{ 
+            course_id: document.getElementById('l-course').value, 
+            title: document.getElementById('l-title').value, 
+            video_id: vid 
+        }]);
+        loadAllData();
+    }
+
+    async function activateCourse() {
+        await _sb.from('student_access').insert([{ 
+            student_phone: document.getElementById('act-phone').value, 
+            course_id: document.getElementById('act-course').value 
+        }]);
+        alert("تم تفعيل الكورس للطالب");
+    }
+
+    async function resetDevice() {
+        await _sb.from('students').update({ last_device_id: null }).eq('student_phone', document.getElementById('reset-phone').value);
+        alert("تم تصفير الجهاز بنجاح");
+    }
+
     async function getStudentReport() {
         const p = document.getElementById('search-phone').value;
         const { data: st } = await _sb.from('students').select('*').eq('student_phone', p).single();
@@ -210,79 +308,18 @@
         document.getElementById('rep-name').innerText = st.full_name;
         document.getElementById('rep-phone-display').innerText = "هاتف: " + st.student_phone;
 
-        const { data: views } = await _sb.from('lesson_views').select('*').eq('student_phone', p).order('created_at', {ascending: false});
         const { data: exams } = await _sb.from('exam_results').select('*').eq('student_phone', p);
-
-        let html = `<strong>🎥 المحاضرات المشاهدة:</strong><br>`;
-        html += views?.length ? views.map(v => `<div class="log-item">${v.lesson_title} - ${new Date(v.created_at).toLocaleDateString('ar-EG')}</div>`).join('') : "لا يوجد";
-        html += `<br><strong>📝 نتائج الامتحانات:</strong><br>`;
+        let html = `<strong>📝 نتائج الامتحانات:</strong><br>`;
         html += exams?.length ? exams.map(e => `<div class="log-item">${e.exam_name}: الدرجة ${e.score}%</div>`).join('') : "لم يمتحن بعد";
-        
         document.getElementById('rep-details').innerHTML = html;
     }
 
-    // --- الوظائف الأساسية ---
-    function extractVid(url) {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : url;
-    }
+    function downloadPDF() { html2pdf().from(document.getElementById('pdf-content')).save('تقرير_طالب.pdf'); }
 
-    async function addCourse() {
-        await _sb.from('courses').insert([{ title: document.getElementById('c-title').value, price: Number(document.getElementById('c-price').value), image_url: document.getElementById('c-img').value }]);
-        loadAllData();
-    }
-
-    async function addLesson() {
-        const vid = extractVid(document.getElementById('l-url').value);
-        await _sb.from('lessons').insert([{ course_id: document.getElementById('l-course').value, title: document.getElementById('l-title').value, video_id: vid }]);
-        loadAllData();
-    }
-
-    async function activateCourse() {
-        await _sb.from('student_access').insert([{ student_phone: document.getElementById('act-phone').value, course_id: document.getElementById('act-course').value }]);
-        alert("تم التفعيل");
-    }
-
-    async function resetDevice() {
-        await _sb.from('students').update({ last_device_id: null }).eq('student_phone', document.getElementById('reset-phone').value);
-        alert("تم التصفير");
-    }
-
-    async function loadAllData() {
-        const { data: cs } = await _sb.from('courses').select('*');
-        if(cs) {
-            const opts = cs.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
-            document.getElementById('examCourse').innerHTML = opts;
-            document.getElementById('act-course').innerHTML = opts;
-            document.getElementById('l-course').innerHTML = opts;
-
-            let manageHtml = '';
-            for(let c of cs) {
-                manageHtml += `<div style="background:#eee; padding:10px; margin-top:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <b>📦 كورس: ${c.title}</b>
-                    <button onclick="del('courses', '${c.id}')" style="color:red; border:none; background:none; cursor:pointer;">حذف الكورس</button>
-                </div>`;
-                const { data: ls } = await _sb.from('lessons').select('*').eq('course_id', c.id);
-                ls?.forEach(l => {
-                    manageHtml += `<div style="padding:8px 25px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between;">
-                        <span>↳ 🎥 ${l.title}</span>
-                        <button onclick="del('lessons', '${l.id}')" style="color:#999; border:none; background:none; cursor:pointer;">حذف</button>
-                    </div>`;
-                });
-            }
-            document.getElementById('manage-list').innerHTML = manageHtml;
-        }
-    }
-
-    async function del(tbl, id) { if(confirm("حذف؟")) { await _sb.from(tbl).delete().eq('id', id); loadAllData(); } }
-
-    async function wipeStudents() { if(confirm("مسح كافة الطلاب؟")) await _sb.from('students').delete().neq('role', 'admin'); }
-    async function wipeContent() { if(confirm("مسح كافة المحتويات؟")) { await _sb.from('lessons').delete().neq('id', 0); await _sb.from('courses').delete().neq('id', 0); loadAllData(); } }
-
-    function downloadPDF() { html2pdf().from(document.getElementById('pdf-content')).save('تقرير.pdf'); }
-    function adminLogout() { localStorage.clear(); location.reload(); }
-    window.onload = () => { if(localStorage.getItem('f_admin')) showDash(); };
+    // التحقق من الجلسة عند فتح الصفحة
+    window.onload = () => { 
+        if(localStorage.getItem('f_admin_logged')) showDash(); 
+    };
 </script>
 </body>
 </html>
