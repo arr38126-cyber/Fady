@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>منصة Dr. Fady Adel | الفيزياء</title>
+    <title>منصة Dr. Fady Adel | حماية الأجهزة</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -18,12 +18,10 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; direction: rtl; }
 
-        /* العلامة المائية */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06; overflow: hidden; }
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.1rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
 
-        /* الهيدر */
         nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         nav.visible { display: flex; }
         .nav-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
@@ -33,27 +31,22 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* بيت الشعر */
         .poetic-line { font-family: 'Amiri', serif; font-style: italic; color: var(--orange); margin: 20px 0; font-size: 1.25rem; font-weight: 700; text-align: center; line-height: 1.6; }
 
-        /* الأزرار العائمة */
         .floating-wa {
             position: fixed; bottom: 25px; right: 25px; background-color: #25D366; color: white;
             border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center;
             justify-content: center; font-size: 35px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); z-index: 10000; text-decoration: none;
         }
 
-        /* الكروت والمدخلات */
         .auth-card, .profile-card, .review-card { background: #fff; border-radius: 20px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 20px; }
         .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 15px; font-family: 'Cairo'; text-align: center; font-size: 1rem; outline: none; }
         .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1.1rem; }
         
-        /* الجداول */
         .grades-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         .grades-table th { background: var(--navy); color: #fff; padding: 12px; border-radius: 5px; }
         .grades-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-weight: 600; }
 
-        /* مراجعة الأسئلة */
         .q-box { border-right: 5px solid #ccc; padding: 15px; margin-bottom: 15px; background: #f9f9f9; border-radius: 10px; }
         .q-box.correct { border-right-color: var(--green); }
         .q-box.wrong { border-right-color: var(--red); }
@@ -64,16 +57,7 @@
 </head>
 <body oncontextmenu="return false;">
 
-
-    
-    
-    
-    
-    
-    
-    
-    <a href="https://wa.me/201055427975" target="_blank" class="floating-wa"><i class="fab fa-whatsapp"></i></a>
-
+<a href="https://wa.me/201055427975" target="_blank" class="floating-wa"><i class="fab fa-whatsapp"></i></a>
 <div id="watermark"><div id="wm-text"></div></div>
 
 <nav id="navbar">
@@ -98,14 +82,6 @@
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
                 <p onclick="showPage('register-page')" style="margin-top:15px; cursor:pointer; font-weight:bold; color:var(--navy);">إنشاء حساب جديد</p>
-         
-                
-                
-                
-                
-                
-                
-                
                 <a href="https://wa.me/201055427975" target="_blank" style="display:block; margin-top:15px; color:#25D366; text-decoration:none; font-weight:bold;">الدعم الفني <i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
@@ -177,6 +153,11 @@
     const sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
     let ytPlayer, currentCourseId;
 
+    // --- نظام بصمة الجهاز ---
+    function getDeviceFingerprint() {
+        return btoa(navigator.userAgent + screen.width + screen.height);
+    }
+
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -186,16 +167,58 @@
 
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value, pass = document.getElementById('l-pass').value;
-        const { data } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if (data) { localStorage.setItem('f_user', JSON.stringify(data)); startApp(data); } else alert("بيانات تسجيل الدخول غير صحيحة");
+        const currentFingerprint = getDeviceFingerprint();
+
+        const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+        
+        if (data) {
+            // التحقق من بصمة الجهاز
+            if (data.device_id && data.device_id !== currentFingerprint) {
+                alert("هذا الحساب يعمل بالفعل على جهاز آخر. يرجى تسجيل الخروج من الجهاز الأول أولاً.");
+                return;
+            }
+
+            // تحديث البصمة في قاعدة البيانات
+            await sb.from('students').update({ device_id: currentFingerprint }).eq('student_phone', phone);
+            
+            localStorage.setItem('f_user', JSON.stringify(data));
+            startApp(data);
+        } else {
+            alert("بيانات تسجيل الدخول غير صحيحة");
+        }
     }
 
     async function handleRegister() {
         const name = document.getElementById('r-name').value, phone = document.getElementById('r-phone').value;
         const parent = document.getElementById('r-parent').value, pass = document.getElementById('r-pass').value;
+        const currentFingerprint = getDeviceFingerprint();
+
         if(!name || !phone || !pass) return alert("أكمل البيانات");
-        const { data, error } = await sb.from('students').insert([{ full_name: name, student_phone: phone, parent_phone: parent, password: pass }]).select().single();
-        if (data) { localStorage.setItem('f_user', JSON.stringify(data)); startApp(data); } else alert("خطأ: ربما الرقم مسجل مسبقاً");
+        
+        const { data, error } = await sb.from('students').insert([{ 
+            full_name: name, 
+            student_phone: phone, 
+            parent_phone: parent, 
+            password: pass,
+            device_id: currentFingerprint 
+        }]).select().single();
+
+        if (data) { 
+            localStorage.setItem('f_user', JSON.stringify(data)); 
+            startApp(data); 
+        } else {
+            alert("خطأ: ربما الرقم مسجل مسبقاً");
+        }
+    }
+
+    async function handleLogout() {
+        const user = JSON.parse(localStorage.getItem('f_user'));
+        if (user) {
+            // إرسال إشارة لمسح البصمة من قاعدة البيانات لفتح الحساب لأي جهاز آخر
+            await sb.from('students').update({ device_id: null }).eq('student_phone', user.student_phone);
+        }
+        localStorage.clear();
+        location.reload();
     }
 
     function startApp(user) {
@@ -216,13 +239,7 @@
                     <p style="color:var(--green); font-weight:800; margin:10px 0;">${parseFloat(c.price) === 0 ? 'كورس مجاني' : 'السعر: ' + c.price + ' ج.م'}</p>
                     <div style="display:flex; gap:8px;">
                         <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول</button>
-          
-                        
-                                                                                     
-                                                                                     
-    
-    
-    <a href="https://wa.me/201055427975" target="_blank" style="background:#25D366; color:#fff; width:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; text-decoration:none;"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://wa.me/201055427975" target="_blank" style="background:#25D366; color:#fff; width:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; text-decoration:none;"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
             </div>`).join('');
@@ -279,8 +296,6 @@
                 <div class="opt ${q.user_answer === 'D' ? 'user' : ''} ${q.correct_answer === 'D' ? 'correct' : ''}">د) ${q.option_d}</div>
             </div>`).join('');
     }
-
-    function handleLogout() { localStorage.clear(); location.reload(); }
 
     window.onload = () => {
         const user = localStorage.getItem('f_user');
