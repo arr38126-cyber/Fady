@@ -34,266 +34,86 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* ========= VIDEO PLAYER SYSTEM ========= */
-        .video-player-wrapper {
-            position: relative;
-            background: #000;
-            border-radius: 20px;
-            overflow: hidden;
-            margin-bottom: 10px;
-            border: 2px solid var(--navy);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-        }
-
-        .video-aspect {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            background: #000;
-        }
-
-        #yt-player {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            border: none;
-            pointer-events: none;
-        }
-
-        #video-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 10;
-            background: transparent;
-            cursor: default;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        .custom-controls {
-            background: linear-gradient(135deg, var(--navy) 0%, #0f1628 100%);
-            padding: 10px 14px 12px;
-            border-radius: 0 0 18px 18px;
-            border: 2px solid var(--navy);
-            border-top: none;
-            position: relative;
-            z-index: 20;
-        }
-
-        .progress-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .time-display {
-            color: #fff;
-            font-size: 0.72rem;
-            font-weight: 700;
-            white-space: nowrap;
-            min-width: 85px;
-            text-align: center;
-            font-family: 'Cairo', sans-serif;
-            direction: ltr;
-        }
-
-        .seek-bar-track {
-            flex: 1;
-            height: 5px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            position: relative;
-            cursor: pointer;
-            transition: height 0.15s;
-        }
-        .seek-bar-track:hover { height: 7px; }
-
-        .seek-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--orange), #ff8c42);
-            border-radius: 10px;
-            position: relative;
-            min-width: 0;
-            transition: width 0.1s linear;
-        }
-
-        .seek-bar-thumb {
-            position: absolute;
-            right: -6px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 12px; height: 12px;
-            background: #fff;
+        /* ========= FLOATING WHATSAPP BUTTON ========= */
+        .floating-wa {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #25D366;
+            color: white;
             border-radius: 50%;
-            box-shadow: 0 0 6px rgba(232,88,26,0.8);
-            opacity: 0;
-            transition: opacity 0.2s;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            z-index: 10000;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
+        .floating-wa:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        }
+
+        /* ========= VIDEO PLAYER SYSTEM ========= */
+        .video-player-wrapper { position: relative; background: #000; border-radius: 20px; overflow: hidden; margin-bottom: 10px; border: 2px solid var(--navy); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+        .video-aspect { position: relative; padding-bottom: 56.25%; height: 0; background: #000; }
+        #yt-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; }
+        #video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; cursor: default; user-select: none; }
+        .custom-controls { background: linear-gradient(135deg, var(--navy) 0%, #0f1628 100%); padding: 10px 14px 12px; border-radius: 0 0 18px 18px; border: 2px solid var(--navy); border-top: none; position: relative; z-index: 20; }
+        .progress-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .time-display { color: #fff; font-size: 0.72rem; font-weight: 700; white-space: nowrap; min-width: 85px; text-align: center; font-family: 'Cairo', sans-serif; direction: ltr; }
+        .seek-bar-track { flex: 1; height: 5px; background: rgba(255,255,255,0.2); border-radius: 10px; position: relative; cursor: pointer; transition: height 0.15s; }
+        .seek-bar-track:hover { height: 7px; }
+        .seek-bar-fill { height: 100%; background: linear-gradient(90deg, var(--orange), #ff8c42); border-radius: 10px; position: relative; min-width: 0; transition: width 0.1s linear; }
+        .seek-bar-thumb { position: absolute; right: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; background: #fff; border-radius: 50%; box-shadow: 0 0 6px rgba(232,88,26,0.8); opacity: 0; transition: opacity 0.2s; }
         .seek-bar-track:hover .seek-bar-thumb { opacity: 1; }
-
-        .seek-bar-buffer {
-            position: absolute;
-            top: 0; left: 0;
-            height: 100%;
-            background: rgba(255,255,255,0.15);
-            border-radius: 10px;
-        }
-
-        .controls-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
-            flex-wrap: nowrap;
-        }
-
-        .controls-left, .controls-right {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .ctrl-btn {
-            background: rgba(255,255,255,0.08);
-            border: none;
-            color: #fff;
-            width: 36px; height: 36px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s, transform 0.1s;
-            flex-shrink: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
+        .seek-bar-buffer { position: absolute; top: 0; left: 0; height: 100%; background: rgba(255,255,255,0.15); border-radius: 10px; }
+        .controls-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: nowrap; }
+        .controls-left, .controls-right { display: flex; align-items: center; gap: 4px; }
+        .ctrl-btn { background: rgba(255,255,255,0.08); border: none; color: #fff; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.1s; flex-shrink: 0; }
         .ctrl-btn:hover { background: var(--orange); transform: scale(1.05); }
         .ctrl-btn:active { transform: scale(0.95); }
         .ctrl-btn.active { background: var(--orange); }
-
         #play-btn { width: 42px; height: 42px; font-size: 1.1rem; background: var(--orange); border-radius: 50%; }
         #play-btn:hover { background: #ff6b2b; }
-
-        .volume-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .volume-slider-wrap {
-            width: 0;
-            overflow: hidden;
-            transition: width 0.3s ease;
-        }
-        .volume-group:hover .volume-slider-wrap,
-        .volume-group:focus-within .volume-slider-wrap {
-            width: 65px;
-        }
-
-        .volume-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 4px;
-            background: rgba(255,255,255,0.25);
-            border-radius: 10px;
-            outline: none;
-            width: 60px;
-            cursor: pointer;
-            display: block;
-        }
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 12px; height: 12px;
-            border-radius: 50%;
-            background: var(--orange);
-            cursor: pointer;
-            box-shadow: 0 0 4px rgba(0,0,0,0.3);
-        }
-        .volume-slider::-moz-range-thumb {
-            width: 12px; height: 12px;
-            border-radius: 50%;
-            background: var(--orange);
-            cursor: pointer;
-            border: none;
-        }
-
-        .speed-select {
-            background: rgba(255,255,255,0.08);
-            border: none;
-            color: #fff;
-            padding: 4px 6px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.75rem;
-            font-weight: 700;
-            outline: none;
-            height: 36px;
-            -webkit-appearance: none;
-            appearance: none;
-            text-align: center;
-            min-width: 42px;
-        }
+        .volume-group { display: flex; align-items: center; gap: 6px; }
+        .volume-slider-wrap { width: 0; overflow: hidden; transition: width 0.3s ease; }
+        .volume-group:hover .volume-slider-wrap, .volume-group:focus-within .volume-slider-wrap { width: 65px; }
+        .volume-slider { -webkit-appearance: none; appearance: none; height: 4px; background: rgba(255,255,255,0.25); border-radius: 10px; outline: none; width: 60px; cursor: pointer; display: block; }
+        .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--orange); cursor: pointer; box-shadow: 0 0 4px rgba(0,0,0,0.3); }
+        .speed-select { background: rgba(255,255,255,0.08); border: none; color: #fff; padding: 4px 6px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.75rem; font-weight: 700; outline: none; height: 36px; text-align: center; min-width: 42px; }
         .speed-select option { background: var(--navy); color: #fff; }
         .speed-select:hover { background: rgba(232,88,26,0.6); }
-
-        .video-spinner {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 5;
-            display: none;
-        }
+        .video-spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 5; display: none; }
         .video-spinner.active { display: block; }
-        .spinner-ring {
-            width: 50px; height: 50px;
-            border: 4px solid rgba(255,255,255,0.2);
-            border-top-color: var(--orange);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
+        .spinner-ring { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        #play-overlay {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 11;
-            background: rgba(232,88,26,0.9);
-            width: 70px; height: 70px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            transition: opacity 0.3s, transform 0.2s;
-            box-shadow: 0 0 30px rgba(232,88,26,0.5);
-        }
+        #play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 11; background: rgba(232,88,26,0.9); width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 0.3s, transform 0.2s; box-shadow: 0 0 30px rgba(232,88,26,0.5); }
         #play-overlay:hover { transform: translate(-50%, -50%) scale(1.1); }
         #play-overlay.hidden { opacity: 0; pointer-events: none; }
         #play-overlay i { color: #fff; font-size: 1.6rem; margin-right: -3px; }
-
         .video-player-wrapper:-webkit-full-screen { border-radius: 0; }
         .video-player-wrapper:-webkit-full-screen .video-aspect { padding-bottom: 0; height: 100vh; }
         .video-player-wrapper:fullscreen { border-radius: 0; }
 
         /* ======================================= */
-        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1rem; }
-
+        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1rem; transition: 0.2s; }
+        .btn-main:hover { opacity: 0.9; }
         .timer-box { background: var(--navy); color: #fff; padding: 10px 20px; border-radius: 50px; font-weight: 800; font-size: 1.2rem; display: inline-block; margin-bottom: 20px; }
         .q-img { width: 100%; max-width: 400px; border-radius: 15px; margin: 15px 0; border: 1px solid #ddd; }
         .option-btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; background: #f9f9f9; text-align: right; font-family: 'Cairo'; font-weight: 600; cursor: pointer; }
         .option-btn.selected { border-color: var(--orange); background: #fff5f0; }
         .correct-ans { border: 2px solid var(--green) !important; background: #eafff2 !important; }
         .wrong-ans { border: 2px solid var(--red) !important; background: #fff0f0 !important; }
-
         #review-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:20000; overflow-y:auto; padding:20px; }
-
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
         .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 35px; text-align: center; }
         .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; outline: none; font-size: 1rem; }
-
         .course-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
-
         @media (max-width: 480px) {
             .controls-row { gap: 3px; }
             .ctrl-btn { width: 32px; height: 32px; font-size: 0.8rem; }
@@ -304,6 +124,10 @@
     </style>
 </head>
 <body oncontextmenu="return false;">
+
+<a href="https://wa.me/201014169548" target="_blank" class="floating-wa" title="تواصل مع الدعم الفني">
+    <i class="fab fa-whatsapp"></i>
+</a>
 
 <div id="watermark"><div id="wm-text"></div></div>
 
@@ -333,6 +157,12 @@
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
                 <p style="margin-top:20px; font-weight:700; color:var(--navy); cursor:pointer;" onclick="showPage('register-page')">إنشاء حساب جديد</p>
+                
+                <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
+                    <a href="https://wa.me/201014169548" target="_blank" style="display: flex; justify-content: center; align-items: center; gap: 10px; background: #25D366; color: #fff; padding: 12px; border-radius: 12px; text-decoration: none; font-weight: 800; font-family: 'Cairo';">
+                        <i class="fab fa-whatsapp" style="font-size: 1.5rem;"></i> الدعم الفني (واتساب)
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -346,14 +176,20 @@
                 <input type="tel" id="r-parent" placeholder="رقم ولي الأمر" class="input-group">
                 <input type="password" id="r-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleRegister()">تأكيد التسجيل</button>
-                <p style="margin-top:15px; cursor:pointer;" onclick="showPage('login-page')">رجوع</p>
+                <p style="margin-top:15px; font-weight:bold; cursor:pointer;" onclick="showPage('login-page')">الرجوع لتسجيل الدخول</p>
+
+                <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
+                    <a href="https://wa.me/201014169548" target="_blank" style="display: flex; justify-content: center; align-items: center; gap: 10px; background: #25D366; color: #fff; padding: 12px; border-radius: 12px; text-decoration: none; font-weight: 800; font-family: 'Cairo';">
+                        <i class="fab fa-whatsapp" style="font-size: 1.5rem;"></i> الدعم الفني (واتساب)
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="home-page" class="page">
         <div class="container">
-            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom: 25px;">محاضراتي المتاحة</h2>
+            <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom: 25px;">الكورسات المتاحة</h2>
             <div id="courses-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;"></div>
         </div>
     </div>
@@ -445,7 +281,7 @@
 
 <div id="review-modal">
     <div style="background:#fff; max-width:700px; margin:20px auto; border-radius:25px; padding:25px; position:relative;">
-        <button onclick="closeReview()" style="position:absolute; top:20px; left:20px; background:red; color:#fff; border:none; padding:8px 15px; border-radius:10px; cursor:pointer;">إغلاق</button>
+        <button onclick="closeReview()" style="position:absolute; top:20px; left:20px; background:var(--red); color:#fff; border:none; padding:8px 15px; border-radius:10px; cursor:pointer;">إغلاق</button>
         <h3 id="rev-title" style="margin-bottom:20px; text-align:right;"></h3>
         <div id="rev-body" style="text-align:right;"></div>
     </div>
@@ -454,17 +290,23 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
-    const { createClient } = supabase;
-    const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
+    // التأكد من تهيئة قاعدة البيانات بشكل سليم
+    let sb = null;
+    if (typeof supabase !== 'undefined') {
+        sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
+    }
 
     let currentCourseId, examData, timerInterval;
     let studentAnswers = {};
+    let cachedExams = [];
+    let cachedResults = [];
+
+    // مشغل الفيديو
     let ytPlayer = null;
     let playerReady = false;
     let isMuted = false;
     let progressTimer = null;
     let isSeeking = false;
-    let pendingVideoId = null;
 
     function onYouTubeIframeAPIReady() {}
 
@@ -489,21 +331,23 @@
     }
 
     function updateProgress() {
-        if (!playerReady || isSeeking) return;
-        const current = ytPlayer.getCurrentTime() || 0, duration = ytPlayer.getDuration() || 0;
-        if (duration > 0) {
-            document.getElementById('seek-fill').style.width = (current / duration * 100) + '%';
-            document.getElementById('time-display').textContent = formatTime(current) + ' / ' + formatTime(duration);
-        }
+        if (!playerReady || isSeeking || !ytPlayer) return;
+        try {
+            const current = ytPlayer.getCurrentTime() || 0, duration = ytPlayer.getDuration() || 0;
+            if (duration > 0) {
+                document.getElementById('seek-fill').style.width = (current / duration * 100) + '%';
+                document.getElementById('time-display').textContent = formatTime(current) + ' / ' + formatTime(duration);
+            }
+        } catch(e) {}
     }
 
     function formatTime(s) { s = Math.floor(s); return Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60); }
-    function togglePlay() { if (playerReady) ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
-    function toggleMute() { if (playerReady) { isMuted ? ytPlayer.unMute() : ytPlayer.mute(); isMuted = !isMuted; document.getElementById('mute-icon').className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'; } }
-    function setVolume(v) { if (playerReady) ytPlayer.setVolume(v); }
-    function setSpeed(v) { if (playerReady) ytPlayer.setPlaybackRate(parseFloat(v)); }
-    function seekTo(e) { if (playerReady) { const rect = document.getElementById('seek-track').getBoundingClientRect(); ytPlayer.seekTo((1 - ((e.clientX - rect.left) / rect.width)) * ytPlayer.getDuration(), true); } }
-    function toggleFullscreen() { const w = document.getElementById('player-wrapper'); if (!document.fullscreenElement) w.requestFullscreen(); else document.exitFullscreen(); }
+    function togglePlay() { if (playerReady && ytPlayer) { try { ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); } catch(e){} } }
+    function toggleMute() { if (playerReady && ytPlayer) { try { isMuted ? ytPlayer.unMute() : ytPlayer.mute(); isMuted = !isMuted; document.getElementById('mute-icon').className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'; } catch(e){} } }
+    function setVolume(v) { if (playerReady && ytPlayer) { try { ytPlayer.setVolume(v); } catch(e){} } }
+    function setSpeed(v) { if (playerReady && ytPlayer) { try { ytPlayer.setPlaybackRate(parseFloat(v)); } catch(e){} } }
+    function seekTo(e) { if (playerReady && ytPlayer) { try { const rect = document.getElementById('seek-track').getBoundingClientRect(); ytPlayer.seekTo((1 - ((e.clientX - rect.left) / rect.width)) * ytPlayer.getDuration(), true); } catch(e){} } }
+    function toggleFullscreen() { const w = document.getElementById('player-wrapper'); if (!document.fullscreenElement) { if(w.requestFullscreen) w.requestFullscreen(); } else { if(document.exitFullscreen) document.exitFullscreen(); } }
     function setPlayIcon(p) { document.getElementById('play-icon').className = p ? 'fas fa-pause' : 'fas fa-play'; }
     function showSpinner(s) { document.getElementById('video-spinner').classList.toggle('active', s); }
     function showPlayOverlay(s) { document.getElementById('play-overlay').classList.toggle('hidden', !s); }
@@ -515,69 +359,135 @@
         return did;
     }
 
+    // التنقل بين الصفحات
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
+        document.getElementById('back-btn').style.display = (id !== 'home-page' && id !== 'login-page' && id !== 'register-page') ? 'block' : 'none';
+        document.getElementById('profile-btn').style.display = (id === 'home-page') ? 'block' : 'none';
+    }
+
     async function handleLogin() {
-        const phone = document.getElementById('l-phone').value, pass = document.getElementById('l-pass').value;
-        const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if (user) {
+        if (!sb) return alert("حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة والتأكد من الإنترنت.");
+        const phone = document.getElementById('l-phone').value.trim();
+        const pass = document.getElementById('l-pass').value.trim();
+        
+        if (!phone || !pass) return alert("يرجى إدخال رقم الموبايل وكلمة المرور.");
+
+        try {
+            const { data: user, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+            if (error || !user) {
+                alert("البيانات غير صحيحة، أو الحساب غير مسجل.");
+                return;
+            }
+            
             const fp = getDeviceID();
-            if (user.device_id && user.device_id !== fp) return alert("الحساب مفتوح على جهاز آخر");
-            if (!user.device_id) await sb.from('students').update({ device_id: fp }).eq('id', user.id);
-            localStorage.setItem('f_id', user.id); localStorage.setItem('f_p', user.student_phone); start(user);
-        } else alert("خطأ في البيانات");
+            if (user.device_id && user.device_id !== fp) {
+                alert("عذراً، هذا الحساب مفتوح بالفعل على جهاز آخر.");
+                return;
+            }
+            if (!user.device_id) {
+                await sb.from('students').update({ device_id: fp }).eq('id', user.id);
+            }
+            
+            localStorage.setItem('f_id', user.id); 
+            localStorage.setItem('f_p', user.student_phone); 
+            start(user);
+        } catch (err) {
+            console.error(err);
+            alert("حدث خطأ في الاتصال بالخادم.");
+        }
     }
 
     async function handleRegister() {
-        const { data: user } = await sb.from('students').insert([{
-            full_name: document.getElementById('r-name').value, student_phone: document.getElementById('r-phone').value,
-            parent_phone: document.getElementById('r-parent').value, password: document.getElementById('r-pass').value, device_id: getDeviceID()
-        }]).select().single();
-        if (user) { localStorage.setItem('f_id', user.id); localStorage.setItem('f_p', user.student_phone); start(user); }
+        if (!sb) return alert("حدث خطأ في تحميل البيانات.");
+        const name = document.getElementById('r-name').value.trim();
+        const phone = document.getElementById('r-phone').value.trim();
+        const parent = document.getElementById('r-parent').value.trim();
+        const pass = document.getElementById('r-pass').value.trim();
+
+        if(!name || !phone || !pass) return alert("يرجى إكمال البيانات الأساسية");
+
+        try {
+            const { data: user, error } = await sb.from('students').insert([{
+                full_name: name, student_phone: phone, parent_phone: parent, password: pass, device_id: getDeviceID()
+            }]).select().single();
+            
+            if (error) {
+                if(error.code === '23505') alert("رقم الموبايل مسجل بالفعل!");
+                else alert("حدث خطأ أثناء التسجيل.");
+                return;
+            }
+            if (user) { 
+                localStorage.setItem('f_id', user.id); 
+                localStorage.setItem('f_p', user.student_phone); 
+                start(user); 
+            }
+        } catch(err) {
+            console.error(err);
+            alert("حدث خطأ في الاتصال.");
+        }
     }
 
     async function handleLogout() {
-        await sb.from('students').update({ device_id: null }).eq('id', localStorage.getItem('f_id'));
-        localStorage.clear(); location.reload();
+        if(sb && localStorage.getItem('f_id')) {
+            await sb.from('students').update({ device_id: null }).eq('id', localStorage.getItem('f_id'));
+        }
+        localStorage.clear(); 
+        location.reload();
     }
 
     function start(user) {
         document.getElementById('nav-user-name').innerText = user.full_name;
         document.getElementById('wm-text').innerText = Array(40).fill(`${user.full_name} | ${user.student_phone}`).join('   ');
         document.getElementById('watermark').classList.add('active');
-        showPage('home-page'); loadCourses();
+        showPage('home-page'); 
+        loadCourses();
     }
 
     async function loadCourses() {
-        const { data: cs } = await sb.from('courses').select('*');
-        document.getElementById('courses-container').innerHTML = cs.map(c => `
-            <div class="course-card">
-                <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" style="width:100%; height:170px; object-fit:cover;">
-                <div style="padding:15px; text-align:right;">
-                    <h3 style="margin-bottom:5px;">${c.title}</h3>
-                    <div style="color: var(--green); font-weight: 800; font-size: 1.1rem; margin-bottom: 15px;">
-                        ${parseFloat(c.price) === 0 ? 'مجاني' : 'السعر: ' + c.price + ' جنيه'}
+        try {
+            const { data: cs } = await sb.from('courses').select('*');
+            document.getElementById('courses-container').innerHTML = cs.map(c => `
+                <div class="course-card">
+                    <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" style="width:100%; height:170px; object-fit:cover;">
+                    <div style="padding:15px; text-align:right;">
+                        <h3 style="margin-bottom:5px;">${c.title}</h3>
+                        
+                        <div style="color: var(--green); font-weight: 800; font-size: 1.1rem; margin-bottom: 15px;">
+                            ${parseFloat(c.price) === 0 ? 'مجاني' : 'السعر: ' + (c.price || '0') + ' جنيه'}
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-main" onclick="checkAccess('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول للكورس</button>
+                            
+                            <a href="https://wa.me/201014169548" target="_blank" 
+                               style="background: #25D366; color: white; width: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.4rem;" title="تواصل معنا">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn-main" onclick="checkAccess('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول</button>
-                        <a href="https://wa.me/201014169548" target="_blank" 
-                           style="background: #25D366; color: white; width: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.4rem;">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>`).join('');
+                </div>`).join('');
+        } catch(e) {
+            console.error(e);
+        }
     }
 
     async function checkAccess(id, title, isFree) {
         if (!isFree) {
             const { data: a } = await sb.from('student_access').select('*').eq('student_phone', localStorage.getItem('f_p')).eq('course_id', id).single();
-            if (!a) return alert("يرجى تفعيل الكورس أولاً");
+            if (!a) return alert("يرجى تفعيل الكورس أولاً (تواصل مع السكرتارية عن طريق أيقونة الواتساب).");
         }
-        currentCourseId = id; document.getElementById('current-course-title').innerText = title;
-        showPage('content-page'); loadLessonsTab();
+        currentCourseId = id; 
+        document.getElementById('current-course-title').innerText = title;
+        showPage('content-page'); 
+        loadLessonsTab();
     }
 
     async function loadLessonsTab() {
         const { data: ls } = await sb.from('lessons').select('*').eq('course_id', currentCourseId).order('id');
+        if(!ls || ls.length === 0) { document.getElementById('tab-content').innerHTML = '<h3 style="text-align:center;">لا توجد محاضرات بعد</h3>'; return; }
         document.getElementById('tab-content').innerHTML = ls.map((l, i) => `
             <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--orange); cursor:pointer;" onclick="playVideo('${l.video_id}')">
                 <span><b>${i+1}.</b> ${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange); font-size:1.5rem;"></i>
@@ -585,22 +495,32 @@
     }
 
     function playVideo(url) {
-        const id = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
+        let id = url;
+        if(url.includes('v=')) id = url.split('v=')[1].split('&')[0];
+        else if(url.includes('/')) id = url.split('/').pop();
+        
         document.getElementById('video-section').style.display = 'block';
-        initPlayer(id); window.scrollTo({ top: 0, behavior: 'smooth' });
+        initPlayer(id); 
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function loadExamsTab() {
         const { data: ex } = await sb.from('exams').select('*').eq('course_id', currentCourseId).order('id');
-        document.getElementById('tab-content').innerHTML = ex.map((e, i) => `
-            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--green); cursor:pointer;" onclick='startExamFlow(${JSON.stringify(e)})'>
+        cachedExams = ex || [];
+        if(cachedExams.length === 0) { document.getElementById('tab-content').innerHTML = '<h3 style="text-align:center;">لا توجد امتحانات بعد</h3>'; return; }
+        
+        document.getElementById('tab-content').innerHTML = cachedExams.map((e, i) => `
+            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--green); cursor:pointer;" onclick="startExamFlow(${i})">
                 <span><b>${i+1}.</b> ${e.title}</span><i class="fas fa-edit" style="color:var(--green); font-size:1.5rem;"></i>
             </div>`).join('');
     }
 
-    function startExamFlow(exam) {
-        if (!confirm(`وقت الامتحان: ${exam.duration_minutes} دقيقة. هل تبدأ؟`)) return;
-        examData = exam; studentAnswers = {}; showPage('exam-page');
+    function startExamFlow(index) {
+        const exam = cachedExams[index];
+        if (!confirm(`وقت الامتحان: ${exam.duration_minutes} دقيقة. هل أنت مستعد للبدء؟`)) return;
+        examData = exam; 
+        studentAnswers = {}; 
+        showPage('exam-page');
         document.getElementById('active-exam-title').innerText = exam.title;
         document.getElementById('exam-body').innerHTML = exam.questions.map((q, i) => `
             <div style="margin-bottom:30px; text-align:right;">
@@ -611,7 +531,12 @@
         startTimer(exam.duration_minutes);
     }
 
-    function selectAnswer(qi, c) { studentAnswers[qi] = c; document.querySelectorAll(`[id^="q${qi}_"]`).forEach(b => b.classList.remove('selected')); document.getElementById(`q${qi}_o${c-1}`).classList.add('selected'); }
+    function selectAnswer(qi, c) { 
+        studentAnswers[qi] = c; 
+        document.querySelectorAll(`[id^="q${qi}_"]`).forEach(b => b.classList.remove('selected')); 
+        document.getElementById(`q${qi}_o${c-1}`).classList.add('selected'); 
+    }
+
     function startTimer(m) {
         let s = m * 60;
         timerInterval = setInterval(() => {
@@ -622,31 +547,74 @@
 
     async function submitExam() {
         clearInterval(timerInterval);
-        let score = 0; examData.questions.forEach((q, i) => { if (studentAnswers[i] == q.correct) score++; });
-        const final = Math.round(score / examData.questions.length * 100);
-        await sb.from('exam_results').insert([{ student_phone: localStorage.getItem('f_p'), exam_name: examData.title, score: final, student_answers: studentAnswers }]);
-        alert(`تم التسليم. درجتك: ${final}%`); showPage('home-page');
+        let score = 0; 
+        examData.questions.forEach((q, i) => { if (studentAnswers[i] == q.correct) score++; });
+        const finalScore = Math.round(score / examData.questions.length * 100);
+        
+        await sb.from('exam_results').insert([{ 
+            student_phone: localStorage.getItem('f_p'), 
+            exam_name: examData.title, 
+            score: finalScore, 
+            student_answers: studentAnswers 
+        }]);
+        
+        alert(`تم تسليم الامتحان. درجتك: ${finalScore}%`); 
+        showPage('home-page');
     }
 
     async function loadProfilePage() {
         showPage('profile-page');
         document.getElementById('p-name').innerText = document.getElementById('nav-user-name').innerText;
         document.getElementById('p-phone').innerText = localStorage.getItem('f_p');
+        
         const { data: res } = await sb.from('exam_results').select('*').eq('student_phone', localStorage.getItem('f_p')).order('created_at', { ascending: false });
-        document.getElementById('grades-list').innerHTML = res.map(r => `
+        cachedResults = res || [];
+        
+        document.getElementById('grades-list').innerHTML = cachedResults.map((r, i) => `
             <div style="background:#fff; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                 <div style="text-align:right;"><b>${r.exam_name}</b><br><small>${new Date(r.created_at).toLocaleDateString('ar-EG')}</small></div>
                 <div style="font-weight:bold; color:var(--orange)">${r.score}%</div>
-                <button onclick='showReview(${JSON.stringify(r)})' style="background:var(--navy); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer;">مراجعة</button>
+                <button onclick="showReview(${i})" style="background:var(--navy); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer;">مراجعة</button>
             </div>`).join('');
     }
 
-    async function showReview(res) {
+    async function showReview(index) {
+        const res = cachedResults[index];
         const { data: exam } = await sb.from('exams').select('*').eq('title', res.exam_name).single();
+        if(!exam) return;
+        
         document.getElementById('review-modal').style.display = 'block';
         document.getElementById('rev-title').innerText = "مراجعة: " + res.exam_name;
         document.getElementById('rev-body').innerHTML = exam.questions.map((q, i) => `
-            <div style="margin-bottom:20px; text-align:right;">
+            <div style="margin-bottom:20px; text-align:right; border-bottom: 1px solid #eee; padding-bottom: 15px;">
                 <p><b>س ${i+1}:</b> ${q.text}</p>
                 ${q.options.map((o, oi) => {
-                    let cls = ''; if (oi+1 == q.correct) cls = 'correct-ans
+                    let cls = ''; 
+                    if (oi+1 == q.correct) cls = 'correct-ans'; 
+                    else if (res.student_answers && res.student_answers[i] == oi+1) cls = 'wrong-ans';
+                    return `<div class="option-btn ${cls}" style="cursor:default">${o}</div>`;
+                }).join('')}
+            </div>`).join('');
+    }
+
+    function closeReview() { document.getElementById('review-modal').style.display = 'none'; }
+
+    // بدء التشغيل التلقائي إذا كان مسجل دخول
+    window.addEventListener('DOMContentLoaded', async () => {
+        const id = localStorage.getItem('f_id');
+        if (id && sb) {
+            try {
+                const { data: u } = await sb.from('students').select('*').eq('id', id).single();
+                if (u && (u.device_id === getDeviceID())) {
+                    start(u); 
+                } else {
+                    localStorage.clear();
+                }
+            } catch(e) {
+                console.error("Auto login error:", e);
+            }
+        }
+    });
+</script>
+</body>
+</html>
