@@ -27,6 +27,18 @@
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.2rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
 
+        /* ستايل بيت الشعر */
+        .poetic-line { 
+            font-family: 'Amiri', serif; 
+            font-style: italic; 
+            color: var(--orange); 
+            margin: 15px 0; 
+            font-size: 1.15rem; 
+            font-weight: 700; 
+            line-height: 1.6;
+            text-align: center;
+        }
+
         nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         nav.visible { display: flex; }
         .nav-logo { display: flex; align-items: center; gap: 10px; }
@@ -36,7 +48,6 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* زر واتساب العائم */
         .floating-wa {
             position: fixed; bottom: 25px; right: 25px; background-color: #25D366; color: white;
             border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center;
@@ -44,16 +55,15 @@
             z-index: 10000; text-decoration: none; transition: 0.3s;
         }
 
-        /* نظام مشغل الفيديو */
+        /* Video Player Styles */
         .video-player-wrapper { position: relative; background: #000; border-radius: 20px; overflow: hidden; margin-bottom: 10px; border: 2px solid var(--navy); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
         .video-aspect { position: relative; padding-bottom: 56.25%; height: 0; background: #000; }
         #yt-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; }
         #video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; }
-        
-        .custom-controls { background: var(--navy); padding: 10px; border-radius: 0 0 18px 18px; position: relative; z-index: 20; }
+        .custom-controls { background: var(--navy); padding: 10px; border-radius: 0 0 18px 18px; }
         .progress-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .time-display { color: #fff; font-size: 0.75rem; min-width: 80px; text-align: center; font-family: monospace; }
-        .seek-bar-track { flex: 1; height: 5px; background: rgba(255,255,255,0.2); border-radius: 5px; position: relative; cursor: pointer; }
+        .seek-bar-track { flex: 1; height: 5px; background: rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; }
         .seek-bar-fill { height: 100%; background: var(--orange); border-radius: 5px; width: 0%; }
         
         .controls-row { display: flex; align-items: center; justify-content: space-between; }
@@ -68,12 +78,13 @@
         #play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 12; background: rgba(232,88,26,0.9); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         #play-overlay.hidden { display: none; }
 
-        /* باقي التنسيقات */
         .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; }
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
         .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 30px; text-align: center; }
         .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 10px; font-family: 'Cairo'; text-align: center; }
-        .course-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
+        
+        .course-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); transition: 0.3s; }
+        .course-price { font-weight: 800; color: var(--green); margin: 10px 0; font-size: 1.1rem; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -97,6 +108,7 @@
         <div class="auth-screen">
             <div class="auth-card">
                 <img src="https://i.ibb.co/zT82jk68/image.png" width="70" style="border-radius:50%; margin-bottom:10px;">
+                <div class="poetic-line">"وَمَن لايهوى صُعُودَ الجِبَالِ <br> يَعِش أَبَدَ الدَّهرِ بَيْنَ الحُفَرِ"</div>
                 <h3>تسجيل الدخول</h3>
                 <input type="tel" id="l-phone" placeholder="رقم الموبايل" class="input-group">
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
@@ -110,11 +122,12 @@
     <div id="register-page" class="page">
         <div class="auth-screen">
             <div class="auth-card">
-                <h3>حساب جديد</h3>
+                <h3>حساب طالب جديد</h3>
                 <input type="text" id="r-name" placeholder="الاسم ثلاثي" class="input-group">
                 <input type="tel" id="r-phone" placeholder="رقم موبايلك" class="input-group">
+                <input type="tel" id="r-parent" placeholder="رقم ولي الأمر" class="input-group">
                 <input type="password" id="r-pass" placeholder="كلمة المرور" class="input-group">
-                <button class="btn-main" onclick="handleRegister()">تسجيل</button>
+                <button class="btn-main" onclick="handleRegister()">تأكيد التسجيل</button>
                 <p onclick="showPage('login-page')" style="margin-top:15px; cursor:pointer;">رجوع</p>
             </div>
         </div>
@@ -122,6 +135,7 @@
 
     <div id="home-page" class="page">
         <div class="container">
+            <div class="poetic-line" style="margin-bottom: 30px; font-size: 1.3rem;">"تَعَلَّم فَلَيسَ المَرءُ يولَدُ عالِماً <br> وَلَيسَ أَخو عِلمٍ كَمَن هُوَ جاهِلُ"</div>
             <h2 style="text-align:right; border-right:4px solid var(--orange); padding-right:10px;">الكورسات المتاحة</h2>
             <div id="courses-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;"></div>
         </div>
@@ -130,7 +144,6 @@
     <div id="content-page" class="page">
         <div class="container">
             <h3 id="current-course-title" style="text-align:right;"></h3>
-            
             <div id="video-section" style="display:none;">
                 <div class="video-player-wrapper" id="player-wrapper">
                     <div class="video-aspect">
@@ -146,15 +159,11 @@
                         </div>
                         <div class="controls-row">
                             <button class="ctrl-btn" id="play-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
-                            <select onchange="setSpeed(this.value)" style="background:rgba(255,255,255,0.1); color:#fff; border:none; border-radius:5px; padding:5px;">
-                                <option value="1">1x</option><option value="1.5">1.5x</option><option value="2">2x</option>
-                            </select>
                             <button class="ctrl-btn" onclick="toggleFullscreen()"><i class="fas fa-expand"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div style="display:flex; gap:10px; margin:20px 0;">
                 <button class="btn-main" style="background:var(--navy)" onclick="loadLessonsTab()">المحاضرات</button>
                 <button class="btn-main" style="background:var(--green)" onclick="loadExamsTab()">الامتحانات</button>
@@ -166,43 +175,27 @@
 
 <script>
     const sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
-    let ytPlayer, playerReady = false, progressTimer;
+    let ytPlayer, playerReady = false;
 
-    // دالة استخراج ID الفيديو بشكل احترافي
     function getYoutubeID(url) {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : url;
     }
 
-    function onYouTubeIframeAPIReady() { console.log("YouTube API Ready"); }
-
     function initPlayer(videoId) {
-        if (ytPlayer) { ytPlayer.destroy(); }
+        if (ytPlayer) ytPlayer.destroy();
         playerReady = false;
         document.getElementById('video-spinner').classList.add('active');
-        document.getElementById('play-overlay').classList.remove('hidden');
-
         ytPlayer = new YT.Player('yt-player', {
             videoId: videoId,
-            playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'showinfo': 0, 'iv_load_policy': 3, 'playsinline': 1 },
+            playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'playsinline': 1 },
             events: {
-                'onReady': (e) => { 
-                    playerReady = true; 
-                    document.getElementById('video-spinner').classList.remove('active');
-                    progressTimer = setInterval(updateProgress, 500);
-                },
+                'onReady': () => { playerReady = true; document.getElementById('video-spinner').classList.remove('active'); setInterval(updateProgress, 500); },
                 'onStateChange': (e) => {
                     const icon = document.getElementById('play-icon');
-                    if (e.data === YT.PlayerState.PLAYING) {
-                        icon.className = 'fas fa-pause';
-                        document.getElementById('play-overlay').classList.add('hidden');
-                        document.getElementById('video-spinner').classList.remove('active');
-                    } else {
-                        icon.className = 'fas fa-play';
-                        document.getElementById('play-overlay').classList.remove('hidden');
-                        if (e.data === YT.PlayerState.BUFFERING) document.getElementById('video-spinner').classList.add('active');
-                    }
+                    if (e.data === 1) { icon.className = 'fas fa-pause'; document.getElementById('play-overlay').classList.add('hidden'); }
+                    else { icon.className = 'fas fa-play'; document.getElementById('play-overlay').classList.remove('hidden'); }
                 }
             }
         });
@@ -210,8 +203,7 @@
 
     function updateProgress() {
         if (!playerReady) return;
-        const curr = ytPlayer.getCurrentTime();
-        const dur = ytPlayer.getDuration();
+        const curr = ytPlayer.getCurrentTime(), dur = ytPlayer.getDuration();
         if (dur > 0) {
             document.getElementById('seek-fill').style.width = (curr / dur * 100) + '%';
             document.getElementById('time-display').innerText = formatTime(curr) + ' / ' + formatTime(dur);
@@ -219,22 +211,10 @@
     }
 
     function formatTime(s) { s = Math.floor(s); return Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60); }
-    function togglePlay() { if(playerReady) { ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); } }
-    function setSpeed(v) { if(playerReady) ytPlayer.setPlaybackRate(parseFloat(v)); }
-    function seekTo(e) { 
-        if(playerReady) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            ytPlayer.seekTo(pos * ytPlayer.getDuration());
-        }
-    }
-    function toggleFullscreen() {
-        const el = document.getElementById('player-wrapper');
-        if (!document.fullscreenElement) el.requestFullscreen().catch(err => {});
-        else document.exitFullscreen();
-    }
+    function togglePlay() { if(playerReady) ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
+    function seekTo(e) { if(playerReady) { const rect = e.currentTarget.getBoundingClientRect(); ytPlayer.seekTo(((e.clientX - rect.left) / rect.width) * ytPlayer.getDuration()); } }
+    function toggleFullscreen() { const el = document.getElementById('player-wrapper'); if (!document.fullscreenElement) el.requestFullscreen(); else document.exitFullscreen(); }
 
-    // نظام الصفحات والبيانات
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -243,13 +223,17 @@
     }
 
     async function handleLogin() {
-        const phone = document.getElementById('l-phone').value;
-        const pass = document.getElementById('l-pass').value;
-        const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if (data) {
-            localStorage.setItem('f_user', JSON.stringify(data));
-            startApp(data);
-        } else alert("بيانات خطأ");
+        const phone = document.getElementById('l-phone').value, pass = document.getElementById('l-pass').value;
+        const { data } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+        if (data) { localStorage.setItem('f_user', JSON.stringify(data)); startApp(data); } else alert("خطأ في البيانات");
+    }
+
+    async function handleRegister() {
+        const name = document.getElementById('r-name').value, phone = document.getElementById('r-phone').value;
+        const parent = document.getElementById('r-parent').value, pass = document.getElementById('r-pass').value;
+        if(!name || !phone || !pass) return alert("أكمل البيانات");
+        const { data, error } = await sb.from('students').insert([{ full_name: name, student_phone: phone, parent_phone: parent, password: pass }]).select().single();
+        if (data) { localStorage.setItem('f_user', JSON.stringify(data)); startApp(data); } else alert("خطأ في التسجيل");
     }
 
     function startApp(user) {
@@ -266,17 +250,16 @@
             <div class="course-card">
                 <img src="${c.image_url}" style="width:100%; height:160px; object-fit:cover;">
                 <div style="padding:15px; text-align:right;">
-                    <h4>${c.title}</h4>
-                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول</button>
+                    <h4 style="margin:0;">${c.title}</h4>
+                    <div class="course-price">${parseFloat(c.price) === 0 ? 'كورس مجاني' : 'السعر: ' + c.price + ' ج.م'}</div>
+                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول المحاضرات</button>
                 </div>
             </div>`).join('');
     }
 
     async function openCourse(id, title) {
-        currentCourseId = id;
-        document.getElementById('current-course-title').innerText = title;
-        showPage('content-page');
-        loadLessonsTab();
+        currentCourseId = id; document.getElementById('current-course-title').innerText = title;
+        showPage('content-page'); loadLessonsTab();
     }
 
     async function loadLessonsTab() {
@@ -289,8 +272,7 @@
 
     function playVideo(url) {
         document.getElementById('video-section').style.display = 'block';
-        initPlayer(getYoutubeID(url));
-        window.scrollTo(0,0);
+        initPlayer(getYoutubeID(url)); window.scrollTo(0,0);
     }
 
     function handleLogout() { localStorage.clear(); location.reload(); }
