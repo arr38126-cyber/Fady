@@ -4,61 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>منصة Dr. Fady Adel | فيزياء</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --green: #2ecc71; --red: #e74c3c; --gray: #95a5a6; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; direction: rtl; user-select: none; }
-        
-        /* العلامة المائية المتحركة لحماية المحتوى */
-        #watermark { position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06; display: none; overflow: hidden; }
-        #watermark.active { display: block; }
-        #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-size: 1.2rem; line-height: 6; width: 300%; text-align: center; color: var(--navy); font-weight: 900; }
 
-        /* شريط التنقل */
+        /* العلامة المائية */
+        #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06; overflow: hidden; }
+        #watermark.active { display: block; }
+        #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.2rem; line-height: 6; width: 300%; text-align: center; color: var(--navy); }
+
+        /* Navbar */
         nav { display: none; background: var(--navy); padding: 10px 15px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         nav.visible { display: flex; }
-        
+        .nav-logo img { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--orange); }
+        .nav-btn { background: none; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-size: 0.85rem; }
+
         .container { padding: 15px; max-width: 1100px; margin: 0 auto; }
         .page { display: none; }
         .page.active { display: block; }
 
-        /* كروت الكورسات ونظام الأسعار */
+        /* شاشات الدخول (التصميم الأصلي) */
+        .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
+        .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 30px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        .poetic-line { font-family: 'Amiri', serif; color: var(--orange); font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; line-height: 1.5; }
+        .input-group { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; font-size: 1rem; }
+        .btn-main { background: var(--orange); color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-family: 'Cairo'; font-weight: 800; width: 100%; font-size: 1.1rem; }
+
+        /* كروت الكورسات */
         .course-card-new { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: 0.3s; cursor: pointer; border: 1px solid #eee; position: relative; }
         .course-card-new:hover { transform: translateY(-5px); }
-        .course-card-locked { filter: grayscale(0.8); opacity: 0.8; }
+        .course-card-locked { filter: grayscale(0.6); opacity: 0.8; }
         .course-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
         .course-info { padding: 15px; text-align: right; }
-        
         .price-badge { position: absolute; top: 10px; left: 10px; background: var(--orange); color: white; padding: 5px 12px; border-radius: 50px; font-weight: bold; font-size: 0.85rem; z-index: 5; }
 
-        /* الأزرار والعناصر العامة */
-        .btn-main { background: var(--orange); color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-family: 'Cairo'; font-weight: 800; width: 100%; font-size: 1.1rem; }
+        /* دروس وفيديو */
         .card { background: #fff; border-radius: 14px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-right: 5px solid var(--orange); cursor: pointer; }
-        
-        /* مشغل الفيديو والامتحانات */
-        .video-container { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 15px; background: #000; overflow: hidden; }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 15px; background: #000; overflow: hidden; margin-bottom: 20px; }
         .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-        .review-q { background: #fff; padding: 18px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #eee; }
+
+        /* مراجعة الأسئلة */
+        .review-q { background: #fff; padding: 18px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #eee; text-align: right; }
         .opt-review { display: block; width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 2px solid #f0f0f0; text-align: right; font-weight: 600; background: none; cursor: pointer; }
         .opt-correct { border-color: var(--green) !important; background: #eafff2 !important; color: #155724; }
         .opt-wrong { border-color: var(--red) !important; background: #fff1f0 !important; color: #721c24; }
+
+        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25d366; color: #FFF; border-radius: 50px; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; z-index: 10000; font-size: 28px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); text-decoration: none; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
+<a href="https://wa.me/201234567890" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
 <div id="watermark"><div id="wm-text"></div></div>
 
 <nav id="navbar">
     <div style="display:flex; align-items:center; gap:10px;">
-        <img src="https://i.ibb.co/zT82jk68/image.png" width="35" style="border-radius:50%">
+        <div class="nav-logo"><img src="https://i.ibb.co/zT82jk68/image.png"></div>
         <span id="nav-user-name" style="font-weight: 700;"></span>
     </div>
     <div style="display:flex; gap:8px;">
-        <button class="btn-main" style="padding: 5px 12px; font-size: 0.8rem; width: auto;" onclick="showPage('home-page')">الرئيسية</button>
-        <button class="btn-main" style="padding: 5px 12px; font-size: 0.8rem; width: auto; background: #3498db;" onclick="loadProfile()">نتائجي</button>
+        <button class="nav-btn" onclick="showPage('home-page')">الرئيسية</button>
+        <button class="nav-btn" style="background:var(--orange); border:none;" onclick="loadProfile()">نتائجي</button>
         <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer;"><i class="fas fa-power-off"></i></button>
     </div>
 </nav>
@@ -68,25 +78,40 @@
         <div class="auth-screen">
             <div class="auth-card">
                 <img src="https://i.ibb.co/zT82jk68/image.png" width="90" style="border-radius:50%; margin-bottom:15px;">
-                <h3 style="margin-bottom:20px;">تسجيل دخول الطلاب</h3>
+                <div class="poetic-line">"وَمَن لايهوى صُعُودَ الجِبَالِ <br> يَعِش أَبَدَ الدَّهرِ بَيْنَ الحُفَرِ"</div>
                 <input type="tel" id="l-phone" placeholder="رقم الموبايل" class="input-group">
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
+                <p style="margin-top:15px; font-size:0.9rem;">ليس لديك حساب؟ <span style="color:var(--orange); font-weight:bold; cursor:pointer;" onclick="showPage('register-page')">إنشاء حساب جديد</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="register-page" class="page">
+        <div class="auth-screen">
+            <div class="auth-card">
+                <h3 style="margin-bottom:20px;">تسجيل طالب جديد</h3>
+                <input type="text" id="r-name" placeholder="الاسم ثلاثي" class="input-group">
+                <input type="tel" id="r-phone" placeholder="رقم الموبايل" class="input-group">
+                <input type="tel" id="r-parent" placeholder="رقم ولي الأمر" class="input-group">
+                <input type="password" id="r-pass" placeholder="كلمة مرور" class="input-group">
+                <button class="btn-main" onclick="handleRegister()" style="background:var(--navy);">تأكيد التسجيل</button>
+                <p onclick="showPage('login-page')" style="margin-top:15px; cursor:pointer; color:var(--orange)">العودة للدخول</p>
             </div>
         </div>
     </div>
 
     <div id="home-page" class="page">
         <div class="container">
-            <h3 style="text-align:right; border-right:5px solid var(--orange); padding-right:12px; margin-bottom:20px;">المحاضرات المتوفرة</h3>
+            <h3 style="text-align:right; border-right:5px solid var(--orange); padding-right:12px; margin-bottom:25px;">المحاضرات المتوفرة</h3>
             <div id="courses-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;"></div>
         </div>
     </div>
 
     <div id="content-page" class="page">
         <div class="container">
-            <button onclick="showPage('home-page')" style="margin-bottom:15px; border:none; background:none; color:var(--navy); font-weight:bold; cursor:pointer;"><i class="fas fa-arrow-right"></i> عودة للكورسات</button>
-            <h3 id="c-title-display" style="color:var(--navy)"></h3>
+            <button onclick="showPage('home-page')" style="margin-bottom:15px; border:none; background:none; color:var(--navy); font-weight:bold; cursor:pointer;"><i class="fas fa-arrow-right"></i> عودة</button>
+            <h3 id="c-title-display"></h3>
             <div id="lessons-list"></div>
         </div>
     </div>
@@ -101,7 +126,7 @@
 
     <div id="exam-page" class="page">
         <div class="container">
-            <div style="position: sticky; top: 70px; background: var(--orange); color: white; padding: 12px; border-radius: 10px; z-index: 10; margin-bottom: 20px; text-align: center; font-weight: bold;">
+            <div style="position: sticky; top: 60px; background: var(--orange); color: white; padding: 12px; border-radius: 12px; z-index: 10; margin-bottom: 20px; text-align: center; font-weight: bold;">
                 الزمن المتبقي: <span id="exam-timer">00:00</span>
             </div>
             <div id="exam-area"></div>
@@ -109,7 +134,7 @@
         </div>
     </div>
 
-    <div id="profile-page" class="page"><div class="container"><div id="prof-name" style="background:var(--navy); color:white; padding:20px; border-radius:15px; text-align:center;"></div><h4 style="margin-top:20px;">نتائجك السابقة</h4><div id="results-list"></div></div></div>
+    <div id="profile-page" class="page"><div class="container"><div id="prof-name-area" style="background:var(--navy); color:white; padding:20px; border-radius:15px; text-align:center;"></div><h4>سجل اختباراتك</h4><div id="results-list"></div></div></div>
     <div id="review-page" class="page"><div class="container"><button onclick="loadProfile()" class="btn-main" style="background:var(--navy); margin-bottom:15px; width:auto;">عودة</button><div id="review-area"></div></div></div>
 </div>
 
@@ -117,14 +142,24 @@
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    let userData, currentExam, examTimer, answers = {}, timerSecs;
+    let userData, currentExam, examTimer, answers = {}, timerSecs, myCourseIds = [];
 
-    // --- تسجيل الدخول ---
+    // دخول وتسجيل
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value;
         const pass = document.getElementById('l-pass').value;
         const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        if(user) { localStorage.setItem('sid', user.id); setupUser(user); } else alert("بيانات غير صحيحة");
+        if(user) { localStorage.setItem('sid', user.id); setupUser(user); } else alert("خطأ في البيانات");
+    }
+
+    async function handleRegister() {
+        const name = document.getElementById('r-name').value;
+        const phone = document.getElementById('r-phone').value;
+        const parent = document.getElementById('r-parent').value;
+        const pass = document.getElementById('r-pass').value;
+        if(!name || !phone || !pass) return alert("برجاء ملء البيانات");
+        const { error } = await sb.from('students').insert([{ full_name: name, student_phone: phone, parent_phone: parent, password: pass }]);
+        if(!error) { alert("تم التسجيل بنجاح!"); showPage('login-page'); } else alert("الرقم مسجل مسبقاً");
     }
 
     function setupUser(user) {
@@ -136,17 +171,19 @@
         loadCourses();
     }
 
-    // --- عرض كل الكورسات والاشتراكات ---
+    // جلب الكورسات مع منطق المجاني
     async function loadCourses() {
         const { data: access } = await sb.from('student_access').select('course_id').eq('student_phone', userData.student_phone);
-        const myIds = access ? access.map(a => a.course_id) : [];
+        myCourseIds = access ? access.map(a => a.course_id) : [];
         const { data: all } = await sb.from('courses').select('*');
         
         document.getElementById('courses-grid').innerHTML = all.map(c => {
-            const isOwned = myIds.includes(c.id);
+            const isFree = (c.price == 0 || !c.price);
+            const isOwned = myCourseIds.includes(c.id) || isFree;
+            
             return `
             <div class="course-card-new ${isOwned ? '' : 'course-card-locked'}" onclick="handleCourseClick('${c.id}', '${c.title}', ${isOwned})">
-                ${!isOwned ? `<div class="price-badge">${c.price || 0} ج.م</div>` : ''}
+                ${!isOwned ? `<div class="price-badge">${c.price} ج.م</div>` : (isFree ? `<div class="price-badge" style="background:var(--green)">مجاني</div>` : '')}
                 <img src="${c.image_url || 'https://via.placeholder.com/300x160'}" class="course-img">
                 <div class="course-info">
                     <b>${c.title}</b><br>
@@ -158,20 +195,19 @@
 
     function handleCourseClick(id, title, isOwned) {
         if (isOwned) openCourse(id, title);
-        else alert("برجاء التواصل مع السكرتارية لتفعيل هذا الكورس لحسابك.");
+        else alert("برجاء التواصل لتفعيل الكورس.\nكود الكورس: " + id);
     }
 
-    // --- المحتوى والتشغيل ---
     async function openCourse(id, title) {
         document.getElementById('c-title-display').innerText = title;
         showPage('content-page');
         const { data:ls } = await sb.from('lessons').select('*').eq('course_id', id);
         const { data:ex } = await sb.from('exams').select('*').eq('course_id', id);
-        let h = '<h4>🎥 الفيديوهات</h4>';
+        let h = '<h4>🎥 المحاضرات</h4>';
         ls?.forEach(l => { h += `<div class="card" onclick="playVideo('${l.title}', '${l.video_id}')"><span>${l.title}</span><i class="fas fa-play"></i></div>`; });
         h += '<h4>📝 الامتحانات</h4>';
         ex?.forEach(e => { h += `<div class="card" style="border-right-color:var(--green)" onclick='startExam(${JSON.stringify(e)})'><span>${e.title}</span><i class="fas fa-edit"></i></div>`; });
-        document.getElementById('lessons-list').innerHTML = h;
+        document.getElementById('lessons-list').innerHTML = h || '<p>قريباً</p>';
     }
 
     function playVideo(t, id) {
@@ -180,7 +216,6 @@
         showPage('video-page');
     }
 
-    // --- نظام الامتحان ---
     function startExam(e) {
         currentExam = e; answers = {}; showPage('exam-page');
         const qs = typeof e.questions === 'string' ? JSON.parse(e.questions) : e.questions;
@@ -201,15 +236,14 @@
         let score = 0; qs.forEach((q, i) => { if(answers[i] == q.correct) score++; });
         const final = Math.round((score/qs.length)*100);
         await sb.from('exam_results').insert([{ student_phone: userData.student_phone, exam_name: currentExam.title, score: final, student_answers: JSON.stringify(answers), exam_data: JSON.stringify(currentExam) }]);
-        alert("تم التسليم! درجتك: " + final + "%"); loadProfile();
+        alert("تم الحفظ! درجتك: " + final + "%"); loadProfile();
     }
 
-    // --- البروفايل والمراجعة ---
     async function loadProfile() {
         showPage('profile-page');
-        document.getElementById('prof-name').innerHTML = `<h3>${userData.full_name}</h3><small>${userData.student_phone}</small>`;
+        document.getElementById('prof-name-area').innerHTML = `<h3>${userData.full_name}</h3><p>${userData.student_phone}</p>`;
         const { data: res } = await sb.from('exam_results').select('*').eq('student_phone', userData.student_phone).order('created_at', {ascending:false});
-        document.getElementById('results-list').innerHTML = res?.map(r => `<div class="card" style="flex-direction:column; align-items:flex-start;"><b>${r.exam_name} - ${r.score}%</b><button class="btn-main" style="padding:5px; font-size:0.7rem; margin-top:10px; background:var(--navy)" onclick='reviewExam(${JSON.stringify(r)})'>مراجعة الإجابات</button></div>`).join('') || "لا توجد نتائج";
+        document.getElementById('results-list').innerHTML = res?.map(r => `<div class="card" style="flex-direction:column; align-items:flex-start;"><b>${r.exam_name} - ${r.score}%</b><button class="btn-main" style="padding:5px; font-size:0.75rem; margin-top:10px; background:var(--navy); width:auto;" onclick='reviewExam(${JSON.stringify(r)})'>مراجعة</button></div>`).join('') || "لا يوجد";
     }
 
     function reviewExam(res) {
@@ -220,7 +254,7 @@
         document.getElementById('review-area').innerHTML = qs.map((q, i) => `<div class="review-q"><p>س${i+1}: ${q.text}</p>${q.options.map((opt, oi) => `<div class="opt-review ${oi+1==q.correct?'opt-correct':(oi+1==stAns[i]?'opt-wrong':'')}">${opt}</div>`).join('')}</div>`).join('');
     }
 
-    function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById('navbar').classList.toggle('visible', id !== 'login-page'); }
+    function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page'); }
     function handleLogout() { localStorage.clear(); location.reload(); }
     window.onload = async () => { const sid = localStorage.getItem('sid'); if(sid) { const { data: u } = await sb.from('students').select('*').eq('id', sid).single(); if(u) setupUser(u); } };
 </script>
