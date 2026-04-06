@@ -126,8 +126,7 @@
                 <div class="timer-box"><i class="fas fa-clock"></i> <span id="timer-display">00:00</span></div>
                 <h3 id="active-exam-title"></h3>
             </div>
-            <div id="exam-body" style="text-align:right;">
-                </div>
+            <div id="exam-body" style="text-align:right;"></div>
             <button class="btn-main" id="submit-exam-btn" style="margin-top:30px;" onclick="submitExam()">تسليم الامتحان</button>
         </div>
     </div>
@@ -141,6 +140,13 @@
     let examData = null;
     let timerInterval = null;
     let studentAnswers = {};
+
+    // دالة استخراج الـ ID من الرابط الكامل (مهمة جداً)
+    function getYouTubeId(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : url;
+    }
 
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value.trim();
@@ -200,10 +206,23 @@
             </div>`).join('');
     }
 
+    function playVideo(rawUrl) {
+        const videoId = getYouTubeId(rawUrl);
+        document.getElementById('video-section').style.display = 'block';
+        document.getElementById('player-container').innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        
+        // تسجيل النشاط في الداتابيز (التقارير)
+        sb.from('lesson_views').insert([{ 
+            student_phone: localStorage.getItem('f_p'), 
+            lesson_title: document.getElementById('current-course-title').innerText 
+        }]).then(() => {});
+    }
+
     async function loadExamsTab() {
         const { data: ex } = await sb.from('exams').select('*').eq('course_id', currentCourseId).order('id');
         document.getElementById('tab-content').innerHTML = ex.map((e, i) => `
-            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--green); cursor:pointer;" onclick="startExamFlow(${JSON.stringify(e)})">
+            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--green); cursor:pointer;" onclick='startExamFlow(${JSON.stringify(e)})'>
                 <span><b>${i+1}.</b> ${e.title} (${e.duration_minutes} دقيقة)</span> <i class="fas fa-edit" style="color:var(--green); font-size:1.5rem;"></i>
             </div>`).join('');
     }
@@ -270,12 +289,6 @@
 
         alert(`تم التسليم بنجاح! درجتك هي: ${finalScore}%`);
         showPage('home-page');
-    }
-
-    function playVideo(vid) {
-        document.getElementById('video-section').style.display = 'block';
-        document.getElementById('player-container').innerHTML = `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-        window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
     function showPage(id) {
