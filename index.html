@@ -13,9 +13,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
-        /* WhatsApp */
         .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background-color: #25d366; color: #FFF; border-radius: 50px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 10000; text-decoration: none; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
-
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.07; overflow: hidden; }
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.2rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
@@ -31,25 +29,28 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* Video Security System */
+        /* Video Security */
         .video-player-container { position: relative; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid var(--navy); }
         .video-aspect { position: relative; padding-bottom: 56.25%; height: 0; }
         #yt-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        #video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; cursor: pointer; background: transparent; }
+        #video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; cursor: pointer; }
 
         .custom-controls { background: var(--navy); padding: 12px 15px; color: white; display: flex; flex-direction: column; gap: 10px; }
         .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; position: relative; }
         .progress-fill { height: 100%; background: var(--orange); width: 0%; border-radius: 5px; }
-        
         .controls-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
         .ctrl-btn { background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; }
         .speed-select { background: rgba(255,255,255,0.1); color: white; border: 1px solid #444; border-radius: 5px; padding: 2px 8px; font-family: 'Cairo'; outline: none; }
 
         .course-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); position: relative; }
         .price-tag { position: absolute; top: 10px; left: 10px; background: var(--orange); color: white; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; z-index: 5; }
-
         .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; }
-        
+
+        /* Exam Styles */
+        .timer-box { background: var(--navy); color: #fff; padding: 10px 20px; border-radius: 50px; font-weight: 800; font-size: 1.2rem; display: inline-block; margin-bottom: 20px; }
+        .option-btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; background: #f9f9f9; text-align: right; font-family: 'Cairo'; font-weight: 600; cursor: pointer; }
+        .option-btn.selected { border-color: var(--orange); background: #fff5f0; }
+
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
         .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 35px; text-align: center; }
         .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; outline: none; }
@@ -81,7 +82,6 @@
             <div class="auth-card">
                 <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="margin-bottom: 15px; border-radius: 50%;">
                 <div class="poetic-line">"وَمَن لايهوى صُعُودَ الجِبَالِ <br> يَعِش أَبَدَ الدَّهرِ بَيْنَ الحُفَرِ"</div>
-                <h3 style="margin-bottom: 20px;">تسجيل الدخول</h3>
                 <input type="tel" id="l-phone" placeholder="رقم الموبايل" class="input-group">
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
@@ -156,7 +156,20 @@
                 </div>
             </div>
 
-            <div id="tab-content" style="margin-top:20px;"></div>
+            <div id="tabs" style="display:flex; gap:10px; margin:20px 0;">
+                <button class="btn-main" style="background:var(--navy)" onclick="loadLessonsTab()">📺 المحاضرات</button>
+                <button class="btn-main" style="background:var(--green)" onclick="loadExamsTab()">📝 الامتحانات</button>
+            </div>
+            <div id="tab-content" style="margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <div id="exam-page" class="page">
+        <div class="container" style="text-align:center;">
+            <div class="timer-box"><i class="fas fa-clock"></i> <span id="timer-display">00:00</span></div>
+            <h3 id="active-exam-title"></h3>
+            <div id="exam-body" style="text-align:right; margin-top:20px;"></div>
+            <button class="btn-main" id="submit-exam-btn" style="margin-top:30px;" onclick="submitExam()">تسليم الامتحان</button>
         </div>
     </div>
 </div>
@@ -165,7 +178,7 @@
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    let player;
+    let player, currentCourseId, examData, timerInterval, studentAnswers = {};
 
     function getYouTubeId(url) {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -196,19 +209,70 @@
                 <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" style="width:100%; height:170px; object-fit:cover;">
                 <div style="padding:15px; text-align:right;">
                     <h3>${c.title}</h3>
-                    <button class="btn-main" onclick="checkAccess('${c.id}', '${c.title}')">دخول</button>
+                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول</button>
                 </div>
             </div>`).join('');
     }
 
-    async function checkAccess(id, title) {
+    async function openCourse(id, title) {
+        currentCourseId = id;
         document.getElementById('current-course-title').innerText = title;
         showPage('content-page');
-        const { data: ls } = await sb.from('lessons').select('*').eq('course_id', id).order('id');
+        loadLessonsTab();
+    }
+
+    async function loadLessonsTab() {
+        const { data: ls } = await sb.from('lessons').select('*').eq('course_id', currentCourseId).order('id');
         document.getElementById('tab-content').innerHTML = ls.map((l, i) => `
             <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--orange); cursor:pointer;" onclick="playVideo('${l.video_id}')">
                 <span><b>${i+1}.</b> ${l.title}</span> <i class="fas fa-play-circle" style="color:var(--orange)"></i>
             </div>`).join('');
+    }
+
+    async function loadExamsTab() {
+        const { data: ex } = await sb.from('exams').select('*').eq('course_id', currentCourseId).order('id');
+        document.getElementById('tab-content').innerHTML = ex.map((e, i) => `
+            <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--green); cursor:pointer;" onclick='startExamFlow(${JSON.stringify(e)})'>
+                <span><b>${i+1}.</b> ${e.title}</span> <i class="fas fa-edit" style="color:var(--green)"></i>
+            </div>`).join('');
+    }
+
+    function startExamFlow(exam) {
+        if(!confirm(`هل أنت مستعد؟ الوقت: ${exam.duration_minutes} دقيقة.`)) return;
+        examData = exam; studentAnswers = {};
+        showPage('exam-page');
+        document.getElementById('active-exam-title').innerText = exam.title;
+        document.getElementById('exam-body').innerHTML = exam.questions.map((q, i) => `
+            <div style="margin-bottom:30px; border-bottom:1px solid #eee; padding-bottom:15px;">
+                <p><b>س ${i+1}:</b> ${q.text}</p>
+                ${q.options.map((opt, oi) => `<button class="option-btn" id="q${i}_o${oi}" onclick="selectAnswer(${i}, ${oi+1})">${opt}</button>`).join('')}
+            </div>`).join('');
+        startTimer(exam.duration_minutes);
+    }
+
+    function selectAnswer(qi, choice) {
+        studentAnswers[qi] = choice;
+        document.querySelectorAll(`[id^="q${qi}_"]`).forEach(b => b.classList.remove('selected'));
+        document.getElementById(`q${qi}_o${choice-1}`).classList.add('selected');
+    }
+
+    function startTimer(m) {
+        let s = m * 60;
+        timerInterval = setInterval(() => {
+            let min = Math.floor(s/60), sec = s%60;
+            document.getElementById('timer-display').innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
+            if(s-- <= 0) { clearInterval(timerInterval); submitExam(); }
+        }, 1000);
+    }
+
+    async function submitExam() {
+        clearInterval(timerInterval);
+        let scoreCount = 0;
+        examData.questions.forEach((q, i) => { if(studentAnswers[i] == q.correct) scoreCount++; });
+        const finalScore = Math.round((scoreCount / examData.questions.length) * 100);
+        await sb.from('exam_results').insert([{ student_phone: localStorage.getItem('f_p'), exam_name: examData.title, score: finalScore, student_answers: studentAnswers }]);
+        alert(`تم التسليم! درجتك هي: ${finalScore}%`);
+        showPage('home-page');
     }
 
     function playVideo(rawUrl) {
@@ -280,6 +344,7 @@
         document.getElementById('back-btn').style.display = (id !== 'home-page' && id !== 'login-page') ? 'block' : 'none';
         document.getElementById('profile-btn').style.display = (id === 'home-page') ? 'block' : 'none';
         if (id !== 'content-page' && player) player.pauseVideo();
+        if (id !== 'exam-page') clearInterval(timerInterval);
     }
 
     function handleLogout() { localStorage.clear(); location.reload(); }
