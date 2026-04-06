@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم Dr. Fady Adel | الإدارة</title>
+    <title>لوحة تحكم Dr. Fady Adel | الإدارة الشاملة</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -63,6 +63,23 @@
         </div>
     </div>
 
+    <div class="grid-2">
+        <div class="section">
+            <h3><i class="fas fa-plus-circle"></i> إضافة كورس جديد</h3>
+            <input type="text" id="c-title" placeholder="اسم الكورس">
+            <input type="number" id="c-price" placeholder="السعر">
+            <input type="text" id="c-img" placeholder="رابط صورة الكورس">
+            <button class="btn btn-orange" onclick="addCourse()">نشر الكورس</button>
+        </div>
+        <div class="section">
+            <h3><i class="fas fa-video"></i> إضافة محاضرة</h3>
+            <select id="l-course"></select>
+            <input type="text" id="l-title" placeholder="عنوان المحاضرة">
+            <input type="text" id="l-url" placeholder="رابط اليوتيوب">
+            <button class="btn btn-orange" onclick="addLesson()">نشر المحاضرة</button>
+        </div>
+    </div>
+
     <div class="section" style="border-right-color: var(--green);">
         <h3><i class="fas fa-stopwatch"></i> إنشاء امتحان إلكتروني</h3>
         <div class="grid-2">
@@ -94,6 +111,11 @@
         </div>
     </div>
 
+    <div class="section" style="border-right-color: var(--red);">
+        <h3><i class="fas fa-users-slash"></i> منطقة الخطر</h3>
+        <button class="btn btn-red" onclick="deleteAllStudents()" style="width:100%">حذف كافة بيانات الطلاب (خطر جداً)</button>
+    </div>
+
     <div class="section">
         <h3><i class="fas fa-tasks"></i> إدارة المحتوى الحالي</h3>
         <div id="manage-list" style="max-height: 500px; overflow-y: auto;"></div>
@@ -119,7 +141,7 @@
 
     function adminLogout() { localStorage.removeItem('f_admin_logged'); location.reload(); }
 
-    // --- التقرير (أول تجربة فقط لكل امتحان) ---
+    // --- التقرير المطور ---
     async function getStudentReport() {
         const p = document.getElementById('search-phone').value.trim();
         if(!p) return alert("أدخل رقم الطالب");
@@ -131,7 +153,7 @@
         document.getElementById('rep-name').innerText = st.full_name;
         document.getElementById('rep-phone-display').innerText = "رقم الطالب: " + st.student_phone;
 
-        // جلب النتائج مرتبة من الأقدم للأحدث لضمان أخذ أول محاولة
+        // محاولة جلب النتائج بأكثر من طريقة لضمان الدقة
         const { data: results } = await _sb.from('exam_results').select('*').eq('student_phone', p).order('created_at', { ascending: true });
 
         const firstAttempts = [];
@@ -144,7 +166,7 @@
         });
 
         let html = `<strong>📝 نتائج أول تجربة لكل امتحان:</strong><br><br>`;
-        if (firstAttempts.length > 0) {
+        if (firstAttempts && firstAttempts.length > 0) {
             html += firstAttempts.map(r => `
                 <div class="log-item">
                     <span>${r.exam_name}</span>
@@ -152,35 +174,57 @@
                     <small style="color:#999">${new Date(r.created_at).toLocaleDateString('ar-EG')}</small>
                 </div>`).join('');
         } else {
-            html += "لا توجد امتحانات مسجلة لهذا الطالب.";
+            html += "<p style='color:red; text-align:center;'>لم يتم العثور على امتحانات مسجلة. تأكد أن الطالب ضغط على 'إنهاء الامتحان' بنجاح.</p>";
         }
         document.getElementById('rep-details').innerHTML = html;
     }
 
-    // --- تصفير الجهاز ---
-    async function resetDevice() {
-        const p = document.getElementById('reset-phone').value;
-        if(!p) return alert("أدخل رقم الطالب");
-        const { error } = await _sb.from('students').update({ device_id: null }).eq('student_phone', p);
-        if(!error) { alert("تم تصفير الجهاز بنجاح"); document.getElementById('reset-phone').value=""; }
+    // --- الوظائف الإدارية ---
+    async function addCourse() {
+        const t = document.getElementById('c-title').value;
+        const p = document.getElementById('c-price').value;
+        const i = document.getElementById('c-img').value;
+        await _sb.from('courses').insert([{ title: t, price: Number(p), image_url: i }]);
+        alert("تم إضافة الكورس"); loadAllData();
     }
 
-    // --- إدارة المحتوى (إظهار الفيديوهات والامتحانات) ---
+    async function addLesson() {
+        const c = document.getElementById('l-course').value;
+        const t = document.getElementById('l-title').value;
+        const u = document.getElementById('l-url').value;
+        const vid = u.includes('v=') ? u.split('v=')[1].split('&')[0] : u;
+        await _sb.from('lessons').insert([{ course_id: c, title: t, video_id: vid }]);
+        alert("تم إضافة المحاضرة"); loadAllData();
+    }
+
+    async function resetDevice() {
+        const p = document.getElementById('reset-phone').value;
+        const { error } = await _sb.from('students').update({ device_id: null }).eq('student_phone', p);
+        if(!error) alert("تم تصفير الجهاز");
+    }
+
+    async function deleteAllStudents() {
+        if(confirm("هل أنت متأكد تماماً؟ سيتم حذف جميع الطلاب ونتائجهم نهائياً!")) {
+            const { error } = await _sb.from('students').delete().neq('role', 'admin');
+            if(!error) alert("تم مسح كافة الطلاب بنجاح");
+        }
+    }
+
     async function loadAllData() {
         const { data: cs } = await _sb.from('courses').select('*');
         if(cs) {
             const opts = cs.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
             document.getElementById('examCourse').innerHTML = opts;
             document.getElementById('act-course').innerHTML = opts;
+            document.getElementById('l-course').innerHTML = opts;
             loadLessonsForExam(cs[0].id);
 
             let manageHtml = '';
             for(let c of cs) {
                 manageHtml += `<div style="background:#e3e7f1; padding:12px; margin-top:15px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
                     <b>📦 كورس: ${c.title}</b>
-                    <button onclick="del('courses', '${c.id}')" style="color:red; border:none; background:none; cursor:pointer;"><i class="fas fa-trash-alt"></i></button>
+                    <button onclick="del('courses', '${c.id}')" style="color:red; border:none; background:none;"><i class="fas fa-trash-alt"></i></button>
                 </div>`;
-                
                 const { data: ls } = await _sb.from('lessons').select('*').eq('course_id', c.id);
                 ls?.forEach(l => {
                     manageHtml += `<div style="padding:8px 25px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; background:white;">
@@ -188,7 +232,6 @@
                         <button onclick="del('lessons', '${l.id}')" style="color:#999; border:none; background:none;">حذف</button>
                     </div>`;
                 });
-
                 const { data: ex } = await _sb.from('exams').select('*').eq('course_id', c.id);
                 ex?.forEach(e => {
                     manageHtml += `<div style="padding:8px 25px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; background:#fff9f2;">
@@ -201,14 +244,14 @@
         }
     }
 
-    async function del(tbl, id) { if(confirm("حذف نهائي؟")) { await _sb.from(tbl).delete().eq('id', id); loadAllData(); } }
+    async function del(tbl, id) { if(confirm("حذف؟")) { await _sb.from(tbl).delete().eq('id', id); loadAllData(); } }
     
     let qCount = 0;
     function addNewQuestionField() {
         qCount++;
         const div = document.createElement('div');
         div.className = 'question-box';
-        div.innerHTML = `<strong>سؤال ${qCount}:</strong><textarea class="q-txt" placeholder="نص السؤال"></textarea><div class="grid-2"><input type="text" class="q-o1" placeholder="1"><input type="text" class="q-o2" placeholder="2"><input type="text" class="q-o3" placeholder="3"><input type="text" class="q-o4" placeholder="4"></div>الإجابة الصحيحة (1-4): <input type="number" class="q-corr" min="1" max="4">`;
+        div.innerHTML = `<strong>سؤال ${qCount}:</strong><textarea class="q-txt" placeholder="نص السؤال"></textarea><div class="grid-2"><input type="text" class="q-o1" placeholder="1"><input type="text" class="q-o2" placeholder="2"><input type="text" class="q-o3" placeholder="3"><input type="text" class="q-o4" placeholder="4"></div>رقم الإجابة: <input type="number" class="q-corr" min="1" max="4">`;
         document.getElementById('questions-container').appendChild(div);
     }
 
@@ -216,17 +259,18 @@
         const title = document.getElementById('examTitle').value;
         const dur = document.getElementById('examDuration').value;
         const cId = document.getElementById('examCourse').value;
+        const lId = document.getElementById('examLesson').value;
         let questions = [];
         document.querySelectorAll('.question-box').forEach(box => {
             questions.push({ text: box.querySelector('.q-txt').value, options: [box.querySelector('.q-o1').value, box.querySelector('.q-o2').value, box.querySelector('.q-o3').value, box.querySelector('.q-o4').value], correct: parseInt(box.querySelector('.q-corr').value)});
         });
-        await _sb.from('exams').insert([{ course_id: cId, title: title, duration_minutes: parseInt(dur), questions: questions }]);
-        alert("تم حفظ الامتحان"); location.reload();
+        await _sb.from('exams').insert([{ course_id: cId, lesson_id: lId || null, title: title, duration_minutes: parseInt(dur), questions: questions }]);
+        alert("تم النشر"); location.reload();
     }
 
     async function loadLessonsForExam(cId) {
         const { data: ls } = await _sb.from('lessons').select('*').eq('course_id', cId);
-        document.getElementById('examLesson').innerHTML = '<option value="">-- امتحان عام للكورس (بدون درس) --</option>' + ls?.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+        document.getElementById('examLesson').innerHTML = '<option value="">-- امتحان عام للكورس --</option>' + ls?.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
     }
 
     async function activateCourse() {
@@ -234,7 +278,7 @@
         alert("تم التفعيل");
     }
 
-    function downloadPDF() { html2pdf().from(document.getElementById('pdf-content')).save('تقرير_طالب.pdf'); }
+    function downloadPDF() { html2pdf().from(document.getElementById('pdf-content')).save('تقرير.pdf'); }
     window.onload = () => { if(localStorage.getItem('f_admin_logged')) showDash(); };
 </script>
 </body>
