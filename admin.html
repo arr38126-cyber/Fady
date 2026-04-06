@@ -132,7 +132,7 @@
 <script>
     const _sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    // --- نظام الدخول المستمر ---
+    // --- نظام الدخول ---
     async function handleAdminLogin() {
         const phone = document.getElementById('admin-phone').value;
         const pass = document.getElementById('admin-pass').value;
@@ -156,6 +156,26 @@
     function adminLogout() {
         localStorage.removeItem('f_admin_logged');
         location.reload();
+    }
+
+    // --- نظام تصفير الأجهزة (المحدث) ---
+    async function resetDevice() {
+        const phone = document.getElementById('reset-phone').value;
+        if(!phone) return alert("يرجى إدخال رقم الطالب");
+
+        if(confirm("هل أنت متأكد من طرد كافة الأجهزة لهذا الطالب؟")) {
+            const { error } = await _sb
+                .from('students')
+                .update({ device_id: null }) // مسح بصمة الجهاز
+                .eq('student_phone', phone);
+
+            if(!error) {
+                alert("تم تصفير الجهاز بنجاح. يمكن للطالب الدخول من جهاز جديد.");
+                document.getElementById('reset-phone').value = "";
+            } else {
+                alert("خطأ: " + error.message);
+            }
+        }
     }
 
     // --- إدارة الامتحانات ---
@@ -183,9 +203,7 @@
 
     async function loadLessonsForExam(courseId) {
         const lessonSelect = document.getElementById('examLesson');
-        lessonSelect.innerHTML = '<option value="">-- جاري تحميل الدروس... --</option>';
         const { data: ls } = await _sb.from('lessons').select('*').eq('course_id', courseId).order('id');
-        
         let options = '<option value="">-- امتحان عام للكورس (بدون درس) --</option>';
         if (ls) options += ls.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
         lessonSelect.innerHTML = options;
@@ -217,19 +235,18 @@
             }
         });
 
-        const examData = {
+        const { error } = await _sb.from('exams').insert([{
             course_id: cId,
             lesson_id: lId || null,
             title: title,
             duration_minutes: parseInt(dur),
             questions: questions
-        };
+        }]);
 
-        const { error } = await _sb.from('exams').insert([examData]);
-        if(!error) { alert("تم الحفظ بنجاح"); location.reload(); } else alert("خطأ: " + error.message);
+        if(!error) { alert("تم نشر الامتحان!"); location.reload(); } else alert("خطأ: " + error.message);
     }
 
-    // --- وظائف البيانات الأساسية ---
+    // --- إدارة المحتوى والبيانات ---
     async function loadAllData() {
         const { data: cs } = await _sb.from('courses').select('*');
         if(cs) {
@@ -237,7 +254,7 @@
             document.getElementById('examCourse').innerHTML = opts;
             document.getElementById('act-course').innerHTML = opts;
             document.getElementById('l-course').innerHTML = opts;
-            loadLessonsForExam(cs[0].id); // تحميل دروس أول كورس تلقائياً
+            loadLessonsForExam(cs[0].id);
 
             let manageHtml = '';
             for(let c of cs) {
@@ -250,13 +267,6 @@
                     manageHtml += `<div style="padding:8px 25px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; background:white;">
                         <span>↳ 🎥 ${l.title}</span>
                         <button onclick="del('lessons', '${l.id}')" style="color:#999; border:none; background:none; cursor:pointer;">حذف</button>
-                    </div>`;
-                });
-                const { data: ex } = await _sb.from('exams').select('*').eq('course_id', c.id);
-                ex?.forEach(e => {
-                    manageHtml += `<div style="padding:8px 25px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; background:#f9fff9;">
-                        <span style="color:var(--green)">↳ 📝 امتحان: ${e.title}</span>
-                        <button onclick="del('exams', '${e.id}')" style="color:#999; border:none; background:none; cursor:pointer;">حذف</button>
                     </div>`;
                 });
             }
@@ -291,12 +301,7 @@
             student_phone: document.getElementById('act-phone').value, 
             course_id: document.getElementById('act-course').value 
         }]);
-        alert("تم تفعيل الكورس للطالب");
-    }
-
-    async function resetDevice() {
-        await _sb.from('students').update({ last_device_id: null }).eq('student_phone', document.getElementById('reset-phone').value);
-        alert("تم تصفير الجهاز بنجاح");
+        alert("تم التفعيل بنجاح");
     }
 
     async function getStudentReport() {
@@ -316,10 +321,7 @@
 
     function downloadPDF() { html2pdf().from(document.getElementById('pdf-content')).save('تقرير_طالب.pdf'); }
 
-    // التحقق من الجلسة عند فتح الصفحة
-    window.onload = () => { 
-        if(localStorage.getItem('f_admin_logged')) showDash(); 
-    };
+    window.onload = () => { if(localStorage.getItem('f_admin_logged')) showDash(); };
 </script>
 </body>
 </html>
