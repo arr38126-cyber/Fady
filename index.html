@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --card-shadow: 0 10px 25px rgba(0,0,0,0.1); --green: #2ecc71; }
+        :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --card-shadow: 0 10px 25px rgba(0,0,0,0.1); --green: #2ecc71; --red: #e74c3c; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; }
 
@@ -24,8 +24,6 @@
         .nav-logo { display: flex; align-items: center; gap: 10px; }
         .nav-logo img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--orange); }
 
-        .whatsapp-btn { position: fixed; bottom: 25px; left: 25px; background: #25D366; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 10000; text-decoration: none; transition: 0.3s; }
-
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .page { display: none; }
         .page.active { display: block; }
@@ -33,25 +31,26 @@
         .video-wrap { background: #000; border-radius: 20px; overflow: hidden; margin-bottom: 25px; position: relative; padding-bottom: 56.25%; height: 0; border: 2px solid var(--navy); }
         .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .course-card { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: var(--card-shadow); transition: 0.3s; }
         .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; }
+        
+        /* ستايل الامتحان والمراجعة */
+        .timer-box { background: var(--navy); color: #fff; padding: 10px 20px; border-radius: 50px; font-weight: 800; font-size: 1.2rem; display: inline-block; margin-bottom: 20px; }
+        .q-img { width: 100%; max-width: 400px; border-radius: 15px; margin: 15px 0; border: 1px solid #ddd; }
+        .option-btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; background: #f9f9f9; text-align: right; font-family: 'Cairo'; font-weight: 600; cursor: pointer; }
+        .option-btn.selected { border-color: var(--orange); background: #fff5f0; }
+        
+        .correct-ans { border: 2px solid var(--green) !important; background: #eafff2 !important; }
+        .wrong-ans { border: 2px solid var(--red) !important; background: #fff0f0 !important; }
+
+        #review-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:20000; overflow-y:auto; padding:20px; }
         
         .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); padding: 20px; }
         .auth-card { background: #fff; width: 100%; max-width: 400px; border-radius: 25px; padding: 35px; text-align: center; }
         .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 12px; text-align: center; font-family: 'Cairo'; outline: none; }
-
-        /* ستايل الامتحان */
-        #exam-container { background: #fff; border-radius: 20px; padding: 20px; box-shadow: var(--card-shadow); }
-        .timer-box { background: var(--navy); color: #fff; padding: 10px 20px; border-radius: 50px; font-weight: 800; font-size: 1.2rem; display: inline-block; margin-bottom: 20px; }
-        .q-img { width: 100%; max-width: 400px; border-radius: 15px; margin: 15px 0; border: 1px solid #ddd; }
-        .option-btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; background: #f9f9f9; text-align: right; font-family: 'Cairo'; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .option-btn.selected { border-color: var(--orange); background: #fff5f0; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<a href="https://wa.me/201000000000" class="whatsapp-btn" target="_blank"><i class="fab fa-whatsapp"></i></a>
 <div id="watermark"><div id="wm-text"></div></div>
 
 <nav id="navbar">
@@ -63,6 +62,7 @@
         </div>
     </div>
     <div style="display:flex; gap:10px;">
+        <button id="profile-btn" style="background:var(--orange); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="loadProfilePage()">حسابي</button>
         <button id="back-btn" style="display:none; background:rgba(255,255,255,0.2); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="showPage('home-page')">الرئيسية</button>
         <button onclick="handleLogout()" style="background:none; border:1px solid #fff; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;">خروج</button>
     </div>
@@ -100,7 +100,18 @@
     <div id="home-page" class="page">
         <div class="container">
             <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom: 25px;">محاضراتي المتاحة</h2>
-            <div id="courses-container" class="course-grid"></div>
+            <div id="courses-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;"></div>
+        </div>
+    </div>
+
+    <div id="profile-page" class="page">
+        <div class="container">
+            <div style="background:var(--navy); color:#fff; padding:30px; border-radius:25px; text-align:center; margin-bottom:20px;">
+                <h2 id="p-name"></h2>
+                <p id="p-phone" style="opacity:0.8;"></p>
+            </div>
+            <h3 style="text-align:right;"><i class="fas fa-chart-bar" style="color:var(--orange)"></i> سجل نتائجك</h3>
+            <div id="grades-list"></div>
         </div>
     </div>
 
@@ -110,25 +121,29 @@
             <div id="video-section" class="video-wrap" style="display:none; margin-top:20px;">
                 <div id="player-container" style="width:100%; height:100%;"></div>
             </div>
-            
             <div id="tabs" style="display:flex; gap:10px; margin:20px 0;">
                 <button class="btn-main" style="background:var(--navy)" onclick="loadLessonsTab()">📺 المحاضرات</button>
                 <button class="btn-main" style="background:var(--green)" onclick="loadExamsTab()">📝 الامتحانات</button>
             </div>
-            
             <div id="tab-content" style="margin-top:10px;"></div>
         </div>
     </div>
 
     <div id="exam-page" class="page">
         <div class="container" style="text-align:center;">
-            <div id="exam-header" style="margin-bottom:20px;">
-                <div class="timer-box"><i class="fas fa-clock"></i> <span id="timer-display">00:00</span></div>
-                <h3 id="active-exam-title"></h3>
-            </div>
-            <div id="exam-body" style="text-align:right;"></div>
+            <div class="timer-box"><i class="fas fa-clock"></i> <span id="timer-display">00:00</span></div>
+            <h3 id="active-exam-title"></h3>
+            <div id="exam-body" style="text-align:right; margin-top:20px;"></div>
             <button class="btn-main" id="submit-exam-btn" style="margin-top:30px;" onclick="submitExam()">تسليم الامتحان</button>
         </div>
+    </div>
+</div>
+
+<div id="review-modal">
+    <div style="background:#fff; max-width:700px; margin:20px auto; border-radius:25px; padding:25px; position:relative;">
+        <button onclick="closeReview()" style="position:absolute; top:20px; left:20px; background:red; color:#fff; border:none; padding:8px 15px; border-radius:10px; cursor:pointer;">إغلاق</button>
+        <h3 id="rev-title" style="margin-bottom:20px; text-align:right;"></h3>
+        <div id="rev-body" style="text-align:right;"></div>
     </div>
 </div>
 
@@ -136,12 +151,9 @@
     const { createClient } = supabase;
     const sb = createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
 
-    let currentCourseId = null;
-    let examData = null;
-    let timerInterval = null;
+    let currentCourseId, examData, timerInterval;
     let studentAnswers = {};
 
-    // دالة استخراج الـ ID من الرابط الكامل (مهمة جداً)
     function getYouTubeId(url) {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
@@ -163,13 +175,12 @@
             parent_phone: document.getElementById('r-parent').value,
             password: document.getElementById('r-pass').value 
         }]).select().single();
-        if (user) { localStorage.setItem('f_id', user.id); localStorage.setItem('f_p', user.student_phone); start(user); } 
-        else alert("خطأ في التسجيل");
+        if (user) { localStorage.setItem('f_id', user.id); localStorage.setItem('f_p', user.student_phone); start(user); }
     }
 
     function start(user) {
         document.getElementById('nav-user-name').innerText = user.full_name;
-        document.getElementById('wm-text').innerText = Array(50).fill(`${user.full_name} | ${user.student_phone}`).join('   ');
+        document.getElementById('wm-text').innerText = Array(40).fill(`${user.full_name} | ${user.student_phone}`).join('   ');
         document.getElementById('watermark').classList.add('active');
         showPage('home-page'); loadCourses();
     }
@@ -180,7 +191,7 @@
             <div class="course-card">
                 <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" style="width:100%; height:170px; object-fit:cover;">
                 <div style="padding:15px; text-align:right;">
-                    <h3 style="margin:0 0 15px 0;">${c.title}</h3>
+                    <h3>${c.title}</h3>
                     <button class="btn-main" onclick="checkAccess('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول</button>
                 </div>
             </div>`).join('');
@@ -193,9 +204,7 @@
         }
         currentCourseId = id;
         document.getElementById('current-course-title').innerText = title;
-        showPage('content-page');
-        document.getElementById('back-btn').style.display = 'block';
-        loadLessonsTab();
+        showPage('content-page'); loadLessonsTab();
     }
 
     async function loadLessonsTab() {
@@ -207,95 +216,110 @@
     }
 
     function playVideo(rawUrl) {
-        const videoId = getYouTubeId(rawUrl);
+        const id = getYouTubeId(rawUrl);
         document.getElementById('video-section').style.display = 'block';
-        document.getElementById('player-container').innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        document.getElementById('player-container').innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allowfullscreen></iframe>`;
         window.scrollTo({top: 0, behavior: 'smooth'});
-        
-        // تسجيل النشاط في الداتابيز (التقارير)
-        sb.from('lesson_views').insert([{ 
-            student_phone: localStorage.getItem('f_p'), 
-            lesson_title: document.getElementById('current-course-title').innerText 
-        }]).then(() => {});
     }
 
     async function loadExamsTab() {
         const { data: ex } = await sb.from('exams').select('*').eq('course_id', currentCourseId).order('id');
         document.getElementById('tab-content').innerHTML = ex.map((e, i) => `
             <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--green); cursor:pointer;" onclick='startExamFlow(${JSON.stringify(e)})'>
-                <span><b>${i+1}.</b> ${e.title} (${e.duration_minutes} دقيقة)</span> <i class="fas fa-edit" style="color:var(--green); font-size:1.5rem;"></i>
+                <span><b>${i+1}.</b> ${e.title}</span> <i class="fas fa-edit" style="color:var(--green); font-size:1.5rem;"></i>
             </div>`).join('');
     }
 
     function startExamFlow(exam) {
-        if(!confirm(`هل أنت مستعد لبدء الامتحان؟ الوقت المتاح: ${exam.duration_minutes} دقيقة.`)) return;
-        examData = exam;
-        studentAnswers = {};
+        if(!confirm(`هل أنت مستعد؟ الوقت: ${exam.duration_minutes} دقيقة.`)) return;
+        examData = exam; studentAnswers = {};
         showPage('exam-page');
         document.getElementById('active-exam-title').innerText = exam.title;
-        renderQuestions();
+        document.getElementById('exam-body').innerHTML = exam.questions.map((q, i) => `
+            <div style="margin-bottom:30px; border-bottom:1px solid #eee; padding-bottom:15px;">
+                <p><b>س ${i+1}:</b> ${q.text}</p>
+                ${q.image ? `<img src="${q.image}" class="q-img">` : ''}
+                ${q.options.map((opt, oi) => `<button class="option-btn" id="q${i}_o${oi}" onclick="selectAnswer(${i}, ${oi+1})">${opt}</button>`).join('')}
+            </div>`).join('');
         startTimer(exam.duration_minutes);
     }
 
-    function renderQuestions() {
-        const html = examData.questions.map((q, i) => `
-            <div style="margin-bottom:30px; border-bottom:1px solid #eee; padding-bottom:15px;">
-                <p><b>السؤال ${i+1}:</b> ${q.text}</p>
-                ${q.image ? `<img src="${q.image}" class="q-img">` : ''}
-                <div>
-                    ${q.options.map((opt, optIdx) => `
-                        <button class="option-btn" id="q${i}_o${optIdx}" onclick="selectAnswer(${i}, ${optIdx+1})">${opt}</button>
-                    `).join('')}
-                </div>
-            </div>
-        `).join('');
-        document.getElementById('exam-body').innerHTML = html;
+    function selectAnswer(qi, choice) {
+        studentAnswers[qi] = choice;
+        document.querySelectorAll(`[id^="q${qi}_"]`).forEach(b => b.classList.remove('selected'));
+        document.getElementById(`q${qi}_o${choice-1}`).classList.add('selected');
     }
 
-    function selectAnswer(qIdx, choice) {
-        studentAnswers[qIdx] = choice;
-        document.querySelectorAll(`[id^="q${qIdx}_"]`).forEach(btn => btn.classList.remove('selected'));
-        document.getElementById(`q${qIdx}_o${choice-1}`).classList.add('selected');
-    }
-
-    function startTimer(minutes) {
-        let seconds = minutes * 60;
+    function startTimer(m) {
+        let s = m * 60;
         timerInterval = setInterval(() => {
-            let m = Math.floor(seconds / 60);
-            let s = seconds % 60;
-            document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-            if (seconds <= 0) {
-                clearInterval(timerInterval);
-                alert("انتهى الوقت! سيتم تسليم الامتحان تلقائياً.");
-                submitExam();
-            }
-            seconds--;
+            let min = Math.floor(s/60), sec = s%60;
+            document.getElementById('timer-display').innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
+            if(s-- <= 0) { clearInterval(timerInterval); submitExam(); }
         }, 1000);
     }
 
     async function submitExam() {
         clearInterval(timerInterval);
         let scoreCount = 0;
-        examData.questions.forEach((q, i) => {
-            if(studentAnswers[i] == q.correct) scoreCount++;
-        });
+        examData.questions.forEach((q, i) => { if(studentAnswers[i] == q.correct) scoreCount++; });
         const finalScore = Math.round((scoreCount / examData.questions.length) * 100);
         
         await sb.from('exam_results').insert([{
             student_phone: localStorage.getItem('f_p'),
             exam_name: examData.title,
-            score: finalScore
+            score: finalScore,
+            student_answers: studentAnswers
         }]);
 
-        alert(`تم التسليم بنجاح! درجتك هي: ${finalScore}%`);
+        alert(`تم التسليم! درجتك هي: ${finalScore}%`);
         showPage('home-page');
     }
+
+    async function loadProfilePage() {
+        showPage('profile-page');
+        const phone = localStorage.getItem('f_p');
+        document.getElementById('p-name').innerText = document.getElementById('nav-user-name').innerText;
+        document.getElementById('p-phone').innerText = phone;
+
+        const { data: results } = await sb.from('exam_results').select('*').eq('student_phone', phone).order('created_at', {ascending:false});
+        document.getElementById('grades-list').innerHTML = results.map(res => `
+            <div style="background:#fff; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="text-align:right;"><b>${res.exam_name}</b><br><small>${new Date(res.created_at).toLocaleDateString('ar-EG')}</small></div>
+                <div style="font-weight:bold; color:var(--orange)">${res.score}%</div>
+                <button onclick='showReview(${JSON.stringify(res)})' style="background:var(--navy); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer;">مراجعة</button>
+            </div>`).join('');
+    }
+
+    async function showReview(res) {
+        const { data: exam } = await sb.from('exams').select('*').eq('title', res.exam_name).single();
+        if(!exam) return;
+        document.getElementById('review-modal').style.display = 'block';
+        document.getElementById('rev-title').innerText = "مراجعة: " + res.exam_name;
+        
+        document.getElementById('rev-body').innerHTML = exam.questions.map((q, i) => {
+            const studentChoice = res.student_answers ? res.student_answers[i] : null;
+            return `
+                <div style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:15px;">
+                    <p><b>س ${i+1}:</b> ${q.text}</p>
+                    ${q.options.map((opt, oi) => {
+                        let cls = "";
+                        if (oi + 1 == q.correct) cls = "correct-ans"; 
+                        if (studentChoice == oi + 1 && studentChoice != q.correct) cls = "wrong-ans"; 
+                        return `<div class="option-btn ${cls}" style="cursor:default">${opt} ${oi+1 == q.correct ? '✅' : (studentChoice == oi+1 ? '❌' : '')}</div>`;
+                    }).join('')}
+                </div>`;
+        }).join('');
+    }
+
+    function closeReview() { document.getElementById('review-modal').style.display = 'none'; }
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
-        if (id === 'home-page') document.getElementById('back-btn').style.display = 'none';
+        document.getElementById('back-btn').style.display = (id !== 'home-page' && id !== 'login-page') ? 'block' : 'none';
+        document.getElementById('profile-btn').style.display = (id === 'home-page') ? 'block' : 'none';
         if (id !== 'exam-page') clearInterval(timerInterval);
     }
 
