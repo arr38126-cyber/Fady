@@ -52,16 +52,14 @@
             background: #000;
         }
 
-        /* The actual YouTube iframe */
         #yt-player {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
             border: none;
-            pointer-events: none; /* Let overlay handle all clicks */
+            pointer-events: none;
         }
 
-        /* Transparent protective overlay - blocks all direct YouTube interaction */
         #video-overlay {
             position: absolute;
             top: 0; left: 0;
@@ -73,7 +71,6 @@
             user-select: none;
         }
 
-        /* ========= CUSTOM CONTROL BAR ========= */
         .custom-controls {
             background: linear-gradient(135deg, var(--navy) 0%, #0f1628 100%);
             padding: 10px 14px 12px;
@@ -84,7 +81,6 @@
             z-index: 20;
         }
 
-        /* Progress / Seek Bar */
         .progress-container {
             display: flex;
             align-items: center;
@@ -137,7 +133,6 @@
         }
         .seek-bar-track:hover .seek-bar-thumb { opacity: 1; }
 
-        /* Buffered bar */
         .seek-bar-buffer {
             position: absolute;
             top: 0; left: 0;
@@ -146,7 +141,6 @@
             border-radius: 10px;
         }
 
-        /* Buttons Row */
         .controls-row {
             display: flex;
             align-items: center;
@@ -178,11 +172,9 @@
         .ctrl-btn:active { transform: scale(0.95); }
         .ctrl-btn.active { background: var(--orange); }
 
-        /* Play button - slightly larger */
         #play-btn { width: 42px; height: 42px; font-size: 1.1rem; background: var(--orange); border-radius: 50%; }
         #play-btn:hover { background: #ff6b2b; }
 
-        /* Volume control */
         .volume-group {
             display: flex;
             align-items: center;
@@ -226,7 +218,6 @@
             border: none;
         }
 
-        /* Speed control dropdown */
         .speed-select {
             background: rgba(255,255,255,0.08);
             border: none;
@@ -247,7 +238,6 @@
         .speed-select option { background: var(--navy); color: #fff; }
         .speed-select:hover { background: rgba(232,88,26,0.6); }
 
-        /* Loading spinner */
         .video-spinner {
             position: absolute;
             top: 50%; left: 50%;
@@ -265,7 +255,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Play overlay (click-to-play big button) */
         #play-overlay {
             position: absolute;
             top: 50%; left: 50%;
@@ -283,7 +272,6 @@
         #play-overlay.hidden { opacity: 0; pointer-events: none; }
         #play-overlay i { color: #fff; font-size: 1.6rem; margin-right: -3px; }
 
-        /* Fullscreen styles */
         .video-player-wrapper:-webkit-full-screen { border-radius: 0; }
         .video-player-wrapper:-webkit-full-screen .video-aspect { padding-bottom: 0; height: 100vh; }
         .video-player-wrapper:fullscreen { border-radius: 0; }
@@ -306,7 +294,6 @@
 
         .course-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
 
-        /* Mobile adjustments */
         @media (max-width: 480px) {
             .controls-row { gap: 3px; }
             .ctrl-btn { width: 32px; height: 32px; font-size: 0.8rem; }
@@ -336,7 +323,6 @@
 </nav>
 
 <div id="app">
-    <!-- Login -->
     <div id="login-page" class="page active">
         <div class="auth-screen">
             <div class="auth-card">
@@ -351,7 +337,6 @@
         </div>
     </div>
 
-    <!-- Register -->
     <div id="register-page" class="page">
         <div class="auth-screen">
             <div class="auth-card">
@@ -366,7 +351,6 @@
         </div>
     </div>
 
-    <!-- Home -->
     <div id="home-page" class="page">
         <div class="container">
             <h2 style="text-align: right; border-right: 5px solid var(--orange); padding-right: 15px; margin-bottom: 25px;">محاضراتي المتاحة</h2>
@@ -374,7 +358,6 @@
         </div>
     </div>
 
-    <!-- Profile -->
     <div id="profile-page" class="page">
         <div class="container">
             <div style="background:var(--navy); color:#fff; padding:30px; border-radius:25px; text-align:center; margin-bottom:20px;">
@@ -386,79 +369,45 @@
         </div>
     </div>
 
-    <!-- Content / Video -->
     <div id="content-page" class="page">
         <div class="container">
             <h2 id="current-course-title" style="text-align: right; color: var(--navy);"></h2>
-
-            <!-- Protected Video Player -->
             <div id="video-section" style="display:none; margin-top:20px;">
                 <div class="video-player-wrapper" id="player-wrapper">
                     <div class="video-aspect" id="video-aspect">
-                        <!-- YouTube iframe injected here by API -->
                         <div id="yt-player"></div>
-
-                        <!-- Transparent Protection Overlay -->
-                        <div id="video-overlay"
-                             oncontextmenu="return false;"
-                             ondragstart="return false;"
-                             onclick="handleOverlayClick()"
-                             ontouchstart="handleOverlayTouch(event)"
-                             ontouchend="return false;">
-                        </div>
-
-                        <!-- Loading Spinner -->
+                        <div id="video-overlay" oncontextmenu="return false;" onclick="handleOverlayClick()"></div>
                         <div class="video-spinner active" id="video-spinner">
                             <div class="spinner-ring"></div>
                         </div>
-
-                        <!-- Big play button overlay (shown when paused) -->
                         <div id="play-overlay" onclick="togglePlay()">
                             <i class="fas fa-play"></i>
                         </div>
                     </div>
-
-                    <!-- ===== CUSTOM CONTROL BAR ===== -->
                     <div class="custom-controls" id="custom-controls">
-                        <!-- Seek / Progress Bar -->
                         <div class="progress-container">
                             <span class="time-display" id="time-display">0:00 / 0:00</span>
-                            <div class="seek-bar-track" id="seek-track"
-                                 onclick="seekTo(event)"
-                                 ontouchstart="seekTouchStart(event)"
-                                 ontouchmove="seekTouchMove(event)"
-                                 ontouchend="seekTouchEnd(event)">
+                            <div class="seek-bar-track" id="seek-track" onclick="seekTo(event)">
                                 <div class="seek-bar-buffer" id="seek-buffer" style="width:0%"></div>
                                 <div class="seek-bar-fill" id="seek-fill" style="width:0%">
                                     <div class="seek-bar-thumb"></div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Buttons Row -->
                         <div class="controls-row">
                             <div class="controls-left">
-                                <!-- Play/Pause -->
-                                <button class="ctrl-btn active" id="play-btn" onclick="togglePlay()" title="تشغيل / إيقاف">
+                                <button class="ctrl-btn active" id="play-btn" onclick="togglePlay()">
                                     <i class="fas fa-play" id="play-icon"></i>
                                 </button>
-
-                                <!-- Volume -->
                                 <div class="volume-group">
-                                    <button class="ctrl-btn" id="mute-btn" onclick="toggleMute()" title="كتم الصوت">
+                                    <button class="ctrl-btn" id="mute-btn" onclick="toggleMute()">
                                         <i class="fas fa-volume-up" id="mute-icon"></i>
                                     </button>
                                     <div class="volume-slider-wrap">
-                                        <input type="range" class="volume-slider" id="vol-slider"
-                                               min="0" max="100" value="100"
-                                               oninput="setVolume(this.value)"
-                                               ontouchstart="event.stopPropagation()"
-                                               ontouchmove="event.stopPropagation()">
+                                        <input type="range" class="volume-slider" id="vol-slider" min="0" max="100" value="100" oninput="setVolume(this.value)">
                                     </div>
                                 </div>
-
-                                <!-- Speed -->
-                                <select class="speed-select" id="speed-select" onchange="setSpeed(this.value)" title="سرعة التشغيل">
+                                <select class="speed-select" id="speed-select" onchange="setSpeed(this.value)">
                                     <option value="0.5">0.5x</option>
                                     <option value="0.75">0.75x</option>
                                     <option value="1" selected>1x</option>
@@ -467,10 +416,8 @@
                                     <option value="2">2x</option>
                                 </select>
                             </div>
-
                             <div class="controls-right">
-                                <!-- Fullscreen -->
-                                <button class="ctrl-btn" id="fs-btn" onclick="toggleFullscreen()" title="ملء الشاشة">
+                                <button class="ctrl-btn" id="fs-btn" onclick="toggleFullscreen()">
                                     <i class="fas fa-expand" id="fs-icon"></i>
                                 </button>
                             </div>
@@ -478,8 +425,6 @@
                     </div>
                 </div>
             </div>
-            <!-- End Video Player -->
-
             <div id="tabs" style="display:flex; gap:10px; margin:20px 0;">
                 <button class="btn-main" style="background:var(--navy)" onclick="loadLessonsTab()">📺 المحاضرات</button>
                 <button class="btn-main" style="background:var(--green)" onclick="loadExamsTab()">📝 الامتحانات</button>
@@ -488,7 +433,6 @@
         </div>
     </div>
 
-    <!-- Exam -->
     <div id="exam-page" class="page">
         <div class="container" style="text-align:center;">
             <div class="timer-box"><i class="fas fa-clock"></i> <span id="timer-display">00:00</span></div>
@@ -499,7 +443,6 @@
     </div>
 </div>
 
-<!-- Review Modal -->
 <div id="review-modal">
     <div style="background:#fff; max-width:700px; margin:20px auto; border-radius:25px; padding:25px; position:relative;">
         <button onclick="closeReview()" style="position:absolute; top:20px; left:20px; background:red; color:#fff; border:none; padding:8px 15px; border-radius:10px; cursor:pointer;">إغلاق</button>
@@ -508,7 +451,6 @@
     </div>
 </div>
 
-<!-- YouTube IFrame API -->
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
@@ -517,10 +459,6 @@
 
     let currentCourseId, examData, timerInterval;
     let studentAnswers = {};
-
-    // ==========================================
-    //   YOUTUBE PLAYER (IFrame API)
-    // ==========================================
     let ytPlayer = null;
     let playerReady = false;
     let isMuted = false;
@@ -528,349 +466,103 @@
     let isSeeking = false;
     let pendingVideoId = null;
 
-    // Called automatically by YouTube API when script loads
-    function onYouTubeIframeAPIReady() {
-        console.log('YouTube API ready');
-    }
+    function onYouTubeIframeAPIReady() {}
 
     function initPlayer(videoId) {
-        // Destroy old player if exists
-        if (ytPlayer) {
-            try { ytPlayer.destroy(); } catch(e) {}
-            ytPlayer = null;
-            playerReady = false;
-        }
-
-        // Reset UI
+        if (ytPlayer) { try { ytPlayer.destroy(); } catch(e) {} ytPlayer = null; playerReady = false; }
         document.getElementById('seek-fill').style.width = '0%';
         document.getElementById('seek-buffer').style.width = '0%';
         document.getElementById('time-display').textContent = '0:00 / 0:00';
-        setPlayIcon(false);
-        showSpinner(true);
-        showPlayOverlay(true);
+        setPlayIcon(false); showSpinner(true); showPlayOverlay(true);
 
         ytPlayer = new YT.Player('yt-player', {
             videoId: videoId,
-            playerVars: {
-                controls: 0,          // Hide native YouTube controls
-                disablekb: 1,         // Disable keyboard shortcuts
-                rel: 0,               // No related videos
-                modestbranding: 1,    // Minimal YouTube branding
-                iv_load_policy: 3,    // No video annotations
-                fs: 0,                // Disable native fullscreen button
-                playsinline: 1,       // iOS inline playback
-                cc_load_policy: 0,    // No captions auto
-                origin: window.location.origin || 'https://dr-fady.com',
-                enablejsapi: 1,
-                autohide: 1,
-                showinfo: 0
-            },
-            events: {
-                onReady: onPlayerReady,
-                onStateChange: onPlayerStateChange,
-                onError: onPlayerError
-            }
+            playerVars: { controls: 0, disablekb: 1, rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 0, playsinline: 1, enablejsapi: 1 },
+            events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange }
         });
     }
 
-    function onPlayerReady(event) {
-        playerReady = true;
-        showSpinner(false);
-        // Start progress tracking
-        clearInterval(progressTimer);
-        progressTimer = setInterval(updateProgress, 500);
-    }
-
+    function onPlayerReady() { playerReady = true; showSpinner(false); clearInterval(progressTimer); progressTimer = setInterval(updateProgress, 500); }
     function onPlayerStateChange(event) {
-        const state = event.data;
-        // YT.PlayerState: UNSTARTED=-1, ENDED=0, PLAYING=1, PAUSED=2, BUFFERING=3, CUED=5
-        if (state === YT.PlayerState.PLAYING) {
-            setPlayIcon(true);
-            showPlayOverlay(false);
-            showSpinner(false);
-        } else if (state === YT.PlayerState.PAUSED) {
-            setPlayIcon(false);
-            showPlayOverlay(true);
-        } else if (state === YT.PlayerState.ENDED) {
-            setPlayIcon(false);
-            showPlayOverlay(true);
-        } else if (state === YT.PlayerState.BUFFERING) {
-            showSpinner(true);
-            showPlayOverlay(false);
-        } else if (state === YT.PlayerState.CUED) {
-            showSpinner(false);
-        }
-    }
-
-    function onPlayerError(event) {
-        showSpinner(false);
-        console.error('YouTube Player Error:', event.data);
+        if (event.data === 1) { setPlayIcon(true); showPlayOverlay(false); showSpinner(false); }
+        else { setPlayIcon(false); showPlayOverlay(true); }
     }
 
     function updateProgress() {
-        if (!playerReady || !ytPlayer || isSeeking) return;
-        try {
-            const current = ytPlayer.getCurrentTime() || 0;
-            const duration = ytPlayer.getDuration() || 0;
-            const buffered = ytPlayer.getVideoLoadedFraction() || 0;
-
-            if (duration > 0) {
-                const pct = (current / duration) * 100;
-                document.getElementById('seek-fill').style.width = pct + '%';
-                document.getElementById('seek-buffer').style.width = (buffered * 100) + '%';
-                document.getElementById('time-display').textContent = formatTime(current) + ' / ' + formatTime(duration);
-            }
-        } catch(e) {}
-    }
-
-    function formatTime(s) {
-        s = Math.floor(s);
-        const m = Math.floor(s / 60);
-        const sec = s % 60;
-        return m + ':' + (sec < 10 ? '0' : '') + sec;
-    }
-
-    // ==========================================
-    //   CONTROL ACTIONS
-    // ==========================================
-    function togglePlay() {
-        if (!playerReady || !ytPlayer) return;
-        try {
-            const state = ytPlayer.getPlayerState();
-            if (state === YT.PlayerState.PLAYING) {
-                ytPlayer.pauseVideo();
-            } else {
-                ytPlayer.playVideo();
-            }
-        } catch(e) {}
-    }
-
-    function handleOverlayClick() {
-        // Single click on overlay = toggle play
-        togglePlay();
-    }
-
-    // Touch on overlay: allow seek-bar touches to pass, toggle play for taps
-    let touchStartTime = 0;
-    function handleOverlayTouch(e) {
-        touchStartTime = Date.now();
-    }
-
-    function toggleMute() {
-        if (!playerReady || !ytPlayer) return;
-        try {
-            if (isMuted) {
-                ytPlayer.unMute();
-                isMuted = false;
-                document.getElementById('mute-icon').className = 'fas fa-volume-up';
-                const vol = parseInt(document.getElementById('vol-slider').value) || 100;
-                ytPlayer.setVolume(vol);
-            } else {
-                ytPlayer.mute();
-                isMuted = true;
-                document.getElementById('mute-icon').className = 'fas fa-volume-mute';
-            }
-        } catch(e) {}
-    }
-
-    function setVolume(val) {
-        if (!playerReady || !ytPlayer) return;
-        try {
-            ytPlayer.setVolume(parseInt(val));
-            if (parseInt(val) === 0) {
-                ytPlayer.mute();
-                isMuted = true;
-                document.getElementById('mute-icon').className = 'fas fa-volume-mute';
-            } else if (isMuted) {
-                ytPlayer.unMute();
-                isMuted = false;
-                document.getElementById('mute-icon').className = 'fas fa-volume-up';
-            }
-        } catch(e) {}
-    }
-
-    function setSpeed(val) {
-        if (!playerReady || !ytPlayer) return;
-        try {
-            ytPlayer.setPlaybackRate(parseFloat(val));
-        } catch(e) {}
-    }
-
-    // Seek bar - mouse click
-    function seekTo(e) {
-        if (!playerReady || !ytPlayer) return;
-        try {
-            const track = document.getElementById('seek-track');
-            const rect = track.getBoundingClientRect();
-            // RTL: invert the ratio
-            const ratio = 1 - ((e.clientX - rect.left) / rect.width);
-            const duration = ytPlayer.getDuration() || 0;
-            if (duration > 0) {
-                ytPlayer.seekTo(ratio * duration, true);
-            }
-        } catch(e) {}
-    }
-
-    // Seek bar - touch support
-    let seekTouching = false;
-    function seekTouchStart(e) {
-        seekTouching = true;
-        isSeeking = true;
-        e.preventDefault();
-        seekTouchMove(e);
-    }
-    function seekTouchMove(e) {
-        if (!seekTouching || !playerReady || !ytPlayer) return;
-        e.preventDefault();
-        try {
-            const touch = e.touches[0];
-            const track = document.getElementById('seek-track');
-            const rect = track.getBoundingClientRect();
-            const ratio = Math.min(1, Math.max(0, 1 - ((touch.clientX - rect.left) / rect.width)));
-            const duration = ytPlayer.getDuration() || 0;
-            if (duration > 0) {
-                const pct = ratio * 100;
-                document.getElementById('seek-fill').style.width = pct + '%';
-                document.getElementById('time-display').textContent = formatTime(ratio * duration) + ' / ' + formatTime(duration);
-            }
-        } catch(e) {}
-    }
-    function seekTouchEnd(e) {
-        if (!seekTouching) return;
-        seekTouching = false;
-        try {
-            const track = document.getElementById('seek-track');
-            const fill = document.getElementById('seek-fill');
-            const pct = parseFloat(fill.style.width) / 100;
-            const duration = ytPlayer.getDuration() || 0;
-            if (duration > 0) ytPlayer.seekTo(pct * duration, true);
-        } catch(e) {}
-        setTimeout(() => { isSeeking = false; }, 300);
-    }
-
-    // Fullscreen
-    function toggleFullscreen() {
-        const wrapper = document.getElementById('player-wrapper');
-        const icon = document.getElementById('fs-icon');
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-            const req = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen || wrapper.mozRequestFullScreen;
-            if (req) {
-                req.call(wrapper);
-                icon.className = 'fas fa-compress';
-            }
-        } else {
-            const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
-            if (exit) {
-                exit.call(document);
-                icon.className = 'fas fa-expand';
-            }
+        if (!playerReady || isSeeking) return;
+        const current = ytPlayer.getCurrentTime() || 0, duration = ytPlayer.getDuration() || 0;
+        if (duration > 0) {
+            document.getElementById('seek-fill').style.width = (current / duration * 100) + '%';
+            document.getElementById('time-display').textContent = formatTime(current) + ' / ' + formatTime(duration);
         }
     }
 
-    // UI helpers
-    function setPlayIcon(playing) {
-        document.getElementById('play-icon').className = playing ? 'fas fa-pause' : 'fas fa-play';
-    }
-    function showSpinner(show) {
-        document.getElementById('video-spinner').classList.toggle('active', show);
-    }
-    function showPlayOverlay(show) {
-        document.getElementById('play-overlay').classList.toggle('hidden', !show);
-    }
+    function formatTime(s) { s = Math.floor(s); return Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60); }
+    function togglePlay() { if (playerReady) ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
+    function toggleMute() { if (playerReady) { isMuted ? ytPlayer.unMute() : ytPlayer.mute(); isMuted = !isMuted; document.getElementById('mute-icon').className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'; } }
+    function setVolume(v) { if (playerReady) ytPlayer.setVolume(v); }
+    function setSpeed(v) { if (playerReady) ytPlayer.setPlaybackRate(parseFloat(v)); }
+    function seekTo(e) { if (playerReady) { const rect = document.getElementById('seek-track').getBoundingClientRect(); ytPlayer.seekTo((1 - ((e.clientX - rect.left) / rect.width)) * ytPlayer.getDuration(), true); } }
+    function toggleFullscreen() { const w = document.getElementById('player-wrapper'); if (!document.fullscreenElement) w.requestFullscreen(); else document.exitFullscreen(); }
+    function setPlayIcon(p) { document.getElementById('play-icon').className = p ? 'fas fa-pause' : 'fas fa-play'; }
+    function showSpinner(s) { document.getElementById('video-spinner').classList.toggle('active', s); }
+    function showPlayOverlay(s) { document.getElementById('play-overlay').classList.toggle('hidden', !s); }
+    function handleOverlayClick() { togglePlay(); }
 
-    // Prevent keyboard shortcuts on video area
-    document.addEventListener('keydown', function(e) {
-        if (['Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyF', 'KeyK', 'KeyM'].includes(e.code)) {
-            e.preventDefault();
-        }
-    });
-
-    // Prevent right-click and context menu everywhere
-    document.addEventListener('contextmenu', e => e.preventDefault());
-
-    // ==========================================
-    //   AUTH & PLATFORM LOGIC
-    // ==========================================
     function getDeviceID() {
         let did = localStorage.getItem('device_fingerprint');
-        if (!did) {
-            did = 'device_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-            localStorage.setItem('device_fingerprint', did);
-        }
+        if (!did) { did = 'device_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('device_fingerprint', did); }
         return did;
     }
 
-    function getYouTubeId(url) {
-        if (!url) return url;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : url;
-    }
-
     async function handleLogin() {
-        const phone = document.getElementById('l-phone').value.trim();
-        const pass = document.getElementById('l-pass').value.trim();
+        const phone = document.getElementById('l-phone').value, pass = document.getElementById('l-pass').value;
         const { data: user } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
         if (user) {
             const fp = getDeviceID();
-            if (user.device_id && user.device_id !== fp) {
-                alert("عذراً، هذا الحساب مفتوح بالفعل على جهاز آخر. يرجى تسجيل الخروج من الجهاز الأول.");
-                return;
-            }
-            if (!user.device_id) {
-                await sb.from('students').update({ device_id: fp }).eq('id', user.id);
-            }
-            localStorage.setItem('f_id', user.id);
-            localStorage.setItem('f_p', user.student_phone);
-            start(user);
-        } else alert("بيانات خاطئة");
+            if (user.device_id && user.device_id !== fp) return alert("الحساب مفتوح على جهاز آخر");
+            if (!user.device_id) await sb.from('students').update({ device_id: fp }).eq('id', user.id);
+            localStorage.setItem('f_id', user.id); localStorage.setItem('f_p', user.student_phone); start(user);
+        } else alert("خطأ في البيانات");
     }
 
     async function handleRegister() {
-        const fp = getDeviceID();
         const { data: user } = await sb.from('students').insert([{
-            full_name: document.getElementById('r-name').value,
-            student_phone: document.getElementById('r-phone').value,
-            parent_phone: document.getElementById('r-parent').value,
-            password: document.getElementById('r-pass').value,
-            device_id: fp
+            full_name: document.getElementById('r-name').value, student_phone: document.getElementById('r-phone').value,
+            parent_phone: document.getElementById('r-parent').value, password: document.getElementById('r-pass').value, device_id: getDeviceID()
         }]).select().single();
-        if (user) {
-            localStorage.setItem('f_id', user.id);
-            localStorage.setItem('f_p', user.student_phone);
-            start(user);
-        }
+        if (user) { localStorage.setItem('f_id', user.id); localStorage.setItem('f_p', user.student_phone); start(user); }
     }
 
     async function handleLogout() {
-        const userId = localStorage.getItem('f_id');
-        if (userId) {
-            await sb.from('students').update({ device_id: null }).eq('id', userId);
-        }
-        // Destroy player
-        if (ytPlayer) { try { ytPlayer.destroy(); } catch(e) {} ytPlayer = null; }
-        clearInterval(progressTimer);
-        localStorage.removeItem('f_id');
-        localStorage.removeItem('f_p');
-        location.reload();
+        await sb.from('students').update({ device_id: null }).eq('id', localStorage.getItem('f_id'));
+        localStorage.clear(); location.reload();
     }
 
     function start(user) {
         document.getElementById('nav-user-name').innerText = user.full_name;
         document.getElementById('wm-text').innerText = Array(40).fill(`${user.full_name} | ${user.student_phone}`).join('   ');
         document.getElementById('watermark').classList.add('active');
-        showPage('home-page');
-        loadCourses();
+        showPage('home-page'); loadCourses();
     }
 
     async function loadCourses() {
         const { data: cs } = await sb.from('courses').select('*');
         document.getElementById('courses-container').innerHTML = cs.map(c => `
             <div class="course-card">
-                <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" style="width:100%; height:170px; object-fit:cover;" alt="${c.title}">
+                <img src="${c.image_url || 'https://via.placeholder.com/300x170'}" style="width:100%; height:170px; object-fit:cover;">
                 <div style="padding:15px; text-align:right;">
-                    <h3>${c.title}</h3>
-                    <button class="btn-main" onclick="checkAccess('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول</button>
+                    <h3 style="margin-bottom:5px;">${c.title}</h3>
+                    <div style="color: var(--green); font-weight: 800; font-size: 1.1rem; margin-bottom: 15px;">
+                        ${parseFloat(c.price) === 0 ? 'مجاني' : 'السعر: ' + c.price + ' جنيه'}
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-main" onclick="checkAccess('${c.id}', '${c.title}', ${parseFloat(c.price) === 0})">دخول</button>
+                        <a href="https://wa.me/201014169548" target="_blank" 
+                           style="background: #25D366; color: white; width: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.4rem;">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
                 </div>
             </div>`).join('');
     }
@@ -880,158 +572,81 @@
             const { data: a } = await sb.from('student_access').select('*').eq('student_phone', localStorage.getItem('f_p')).eq('course_id', id).single();
             if (!a) return alert("يرجى تفعيل الكورس أولاً");
         }
-        currentCourseId = id;
-        document.getElementById('current-course-title').innerText = title;
-        showPage('content-page');
-        loadLessonsTab();
+        currentCourseId = id; document.getElementById('current-course-title').innerText = title;
+        showPage('content-page'); loadLessonsTab();
     }
 
     async function loadLessonsTab() {
         const { data: ls } = await sb.from('lessons').select('*').eq('course_id', currentCourseId).order('id');
         document.getElementById('tab-content').innerHTML = ls.map((l, i) => `
             <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--orange); cursor:pointer;" onclick="playVideo('${l.video_id}')">
-                <span><b>${i+1}.</b> ${l.title}</span>
-                <i class="fas fa-play-circle" style="color:var(--orange); font-size:1.5rem;"></i>
+                <span><b>${i+1}.</b> ${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange); font-size:1.5rem;"></i>
             </div>`).join('');
     }
 
-    function playVideo(rawUrl) {
-        const id = getYouTubeId(rawUrl);
+    function playVideo(url) {
+        const id = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
         document.getElementById('video-section').style.display = 'block';
-
-        // Reset speed
-        document.getElementById('speed-select').value = '1';
-
-        // Check if YouTube API is ready
-        if (typeof YT !== 'undefined' && YT.Player) {
-            initPlayer(id);
-        } else {
-            // Queue it until API is ready
-            pendingVideoId = id;
-            window.onYouTubeIframeAPIReady = function() {
-                initPlayer(pendingVideoId);
-            };
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        initPlayer(id); window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function loadExamsTab() {
         const { data: ex } = await sb.from('exams').select('*').eq('course_id', currentCourseId).order('id');
         document.getElementById('tab-content').innerHTML = ex.map((e, i) => `
             <div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-right:5px solid var(--green); cursor:pointer;" onclick='startExamFlow(${JSON.stringify(e)})'>
-                <span><b>${i+1}.</b> ${e.title}</span>
-                <i class="fas fa-edit" style="color:var(--green); font-size:1.5rem;"></i>
+                <span><b>${i+1}.</b> ${e.title}</span><i class="fas fa-edit" style="color:var(--green); font-size:1.5rem;"></i>
             </div>`).join('');
     }
 
     function startExamFlow(exam) {
-        if (!confirm(`هل أنت مستعد؟ الوقت: ${exam.duration_minutes} دقيقة.`)) return;
-        examData = exam; studentAnswers = {};
-        showPage('exam-page');
+        if (!confirm(`وقت الامتحان: ${exam.duration_minutes} دقيقة. هل تبدأ؟`)) return;
+        examData = exam; studentAnswers = {}; showPage('exam-page');
         document.getElementById('active-exam-title').innerText = exam.title;
         document.getElementById('exam-body').innerHTML = exam.questions.map((q, i) => `
-            <div style="margin-bottom:30px; border-bottom:1px solid #eee; padding-bottom:15px;">
+            <div style="margin-bottom:30px; text-align:right;">
                 <p><b>س ${i+1}:</b> ${q.text}</p>
                 ${q.image ? `<img src="${q.image}" class="q-img">` : ''}
-                ${q.options.map((opt, oi) => `<button class="option-btn" id="q${i}_o${oi}" onclick="selectAnswer(${i}, ${oi+1})">${opt}</button>`).join('')}
+                ${q.options.map((o, oi) => `<button class="option-btn" id="q${i}_o${oi}" onclick="selectAnswer(${i}, ${oi+1})">${o}</button>`).join('')}
             </div>`).join('');
         startTimer(exam.duration_minutes);
     }
 
-    function selectAnswer(qi, choice) {
-        studentAnswers[qi] = choice;
-        document.querySelectorAll(`[id^="q${qi}_"]`).forEach(b => b.classList.remove('selected'));
-        document.getElementById(`q${qi}_o${choice-1}`).classList.add('selected');
-    }
-
+    function selectAnswer(qi, c) { studentAnswers[qi] = c; document.querySelectorAll(`[id^="q${qi}_"]`).forEach(b => b.classList.remove('selected')); document.getElementById(`q${qi}_o${c-1}`).classList.add('selected'); }
     function startTimer(m) {
         let s = m * 60;
         timerInterval = setInterval(() => {
-            let min = Math.floor(s / 60), sec = s % 60;
-            document.getElementById('timer-display').innerText = `${min}:${sec < 10 ? '0' + sec : sec}`;
-            if (s-- <= 0) { clearInterval(timerInterval); submitExam(); }
+            document.getElementById('timer-display').innerText = Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60);
+            if (s-- <= 0) submitExam();
         }, 1000);
     }
 
     async function submitExam() {
         clearInterval(timerInterval);
-        let scoreCount = 0;
-        examData.questions.forEach((q, i) => { if (studentAnswers[i] == q.correct) scoreCount++; });
-        const finalScore = Math.round((scoreCount / examData.questions.length) * 100);
-        await sb.from('exam_results').insert([{
-            student_phone: localStorage.getItem('f_p'),
-            exam_name: examData.title,
-            score: finalScore,
-            student_answers: studentAnswers
-        }]);
-        alert(`تم التسليم! درجتك هي: ${finalScore}%`);
-        showPage('home-page');
+        let score = 0; examData.questions.forEach((q, i) => { if (studentAnswers[i] == q.correct) score++; });
+        const final = Math.round(score / examData.questions.length * 100);
+        await sb.from('exam_results').insert([{ student_phone: localStorage.getItem('f_p'), exam_name: examData.title, score: final, student_answers: studentAnswers }]);
+        alert(`تم التسليم. درجتك: ${final}%`); showPage('home-page');
     }
 
     async function loadProfilePage() {
         showPage('profile-page');
-        const phone = localStorage.getItem('f_p');
         document.getElementById('p-name').innerText = document.getElementById('nav-user-name').innerText;
-        document.getElementById('p-phone').innerText = phone;
-        const { data: results } = await sb.from('exam_results').select('*').eq('student_phone', phone).order('created_at', { ascending: false });
-        document.getElementById('grades-list').innerHTML = results.map(res => `
+        document.getElementById('p-phone').innerText = localStorage.getItem('f_p');
+        const { data: res } = await sb.from('exam_results').select('*').eq('student_phone', localStorage.getItem('f_p')).order('created_at', { ascending: false });
+        document.getElementById('grades-list').innerHTML = res.map(r => `
             <div style="background:#fff; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                <div style="text-align:right;"><b>${res.exam_name}</b><br><small>${new Date(res.created_at).toLocaleDateString('ar-EG')}</small></div>
-                <div style="font-weight:bold; color:var(--orange)">${res.score}%</div>
-                <button onclick='showReview(${JSON.stringify(res)})' style="background:var(--navy); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer;">مراجعة</button>
+                <div style="text-align:right;"><b>${r.exam_name}</b><br><small>${new Date(r.created_at).toLocaleDateString('ar-EG')}</small></div>
+                <div style="font-weight:bold; color:var(--orange)">${r.score}%</div>
+                <button onclick='showReview(${JSON.stringify(r)})' style="background:var(--navy); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer;">مراجعة</button>
             </div>`).join('');
     }
 
     async function showReview(res) {
         const { data: exam } = await sb.from('exams').select('*').eq('title', res.exam_name).single();
-        if (!exam) return;
         document.getElementById('review-modal').style.display = 'block';
         document.getElementById('rev-title').innerText = "مراجعة: " + res.exam_name;
-        document.getElementById('rev-body').innerHTML = exam.questions.map((q, i) => {
-            const studentChoice = res.student_answers ? res.student_answers[i] : null;
-            return `
-                <div style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:15px;">
-                    <p><b>س ${i+1}:</b> ${q.text}</p>
-                    ${q.options.map((opt, oi) => {
-                        let cls = '';
-                        if (oi + 1 == q.correct) cls = 'correct-ans';
-                        if (studentChoice == oi + 1 && studentChoice != q.correct) cls = 'wrong-ans';
-                        return `<div class="option-btn ${cls}" style="cursor:default">${opt} ${oi + 1 == q.correct ? '✅' : (studentChoice == oi + 1 ? '❌' : '')}</div>`;
-                    }).join('')}
-                </div>`;
-        }).join('');
-    }
-
-    function closeReview() { document.getElementById('review-modal').style.display = 'none'; }
-
-    function showPage(id) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('navbar').classList.toggle('visible', id !== 'login-page' && id !== 'register-page');
-        document.getElementById('back-btn').style.display = (id !== 'home-page' && id !== 'login-page') ? 'block' : 'none';
-        document.getElementById('profile-btn').style.display = (id === 'home-page') ? 'block' : 'none';
-        if (id !== 'exam-page') clearInterval(timerInterval);
-        // Pause video when navigating away
-        if (id !== 'content-page' && ytPlayer && playerReady) {
-            try { ytPlayer.pauseVideo(); } catch(e) {}
-        }
-    }
-
-    window.onload = async () => {
-        const id = localStorage.getItem('f_id');
-        if (id) {
-            const { data: u } = await sb.from('students').select('*').eq('id', id).single();
-            if (u) {
-                const fp = getDeviceID();
-                if (u.device_id && u.device_id !== fp) {
-                    alert("تم تسجيل الدخول من جهاز آخر. سيتم تسجيل خروجك لحماية الحساب.");
-                    handleLogout();
-                } else {
-                    start(u);
-                }
-            }
-        }
-    };
-</script>
-</body>
-</html>
+        document.getElementById('rev-body').innerHTML = exam.questions.map((q, i) => `
+            <div style="margin-bottom:20px; text-align:right;">
+                <p><b>س ${i+1}:</b> ${q.text}</p>
+                ${q.options.map((o, oi) => {
+                    let cls = ''; if (oi+1 == q.correct) cls = 'correct-ans
