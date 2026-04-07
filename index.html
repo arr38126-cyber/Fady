@@ -131,7 +131,10 @@
     const sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
     let ytPlayer, apiReady = false;
 
-    function onYouTubeIframeAPIReady() { apiReady = true; }
+    // تم تعديل هذا الجزء لضمان تحميل المكتبة
+    function onYouTubeIframeAPIReady() { 
+        apiReady = true; 
+    }
 
     function generateFingerprint() { return btoa(navigator.userAgent + screen.width + navigator.vendor); }
 
@@ -139,7 +142,7 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', !['login-page', 'register-page'].includes(id));
-        if (id !== 'content-page' && ytPlayer) ytPlayer.pauseVideo();
+        if (id !== 'content-page' && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
         if (id === 'profile-page') loadProfile();
         checkSecurity();
     }
@@ -209,29 +212,52 @@
             </div>`).join('');
     }
 
+    // تم إصلاح دالة التشغيل هنا لضمان الاستجابة
     function playVideo(vId) {
-        if (!apiReady) return;
         document.getElementById('video-section').style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
-        if (ytPlayer) ytPlayer.destroy();
+        if (ytPlayer && ytPlayer.destroy) {
+            ytPlayer.destroy();
+        }
+
         ytPlayer = new YT.Player('yt-player', {
             videoId: vId,
-            playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0, 'modestbranding': 1, 'origin': window.location.origin },
+            playerVars: { 
+                'autoplay': 1, 
+                'controls': 0, 
+                'rel': 0, 
+                'modestbranding': 1, 
+                'showinfo': 0,
+                'ecver': 2,
+                'origin': window.location.origin 
+            },
             events: {
-                'onReady': (e) => { e.target.playVideo(); setInterval(updateUI, 1000); },
-                'onStateChange': (e) => { document.getElementById('play-icon').className = (e.data === 1) ? 'fas fa-pause' : 'fas fa-play'; }
+                'onReady': (e) => { 
+                    e.target.playVideo(); 
+                    setInterval(updateUI, 1000); 
+                },
+                'onStateChange': (e) => { 
+                    document.getElementById('play-icon').className = (e.data === 1) ? 'fas fa-pause' : 'fas fa-play'; 
+                }
             }
         });
     }
 
-    function togglePlay() { if (ytPlayer) (ytPlayer.getPlayerState() === 1) ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
+    function togglePlay() { 
+        if (ytPlayer && ytPlayer.getPlayerState) {
+            const state = ytPlayer.getPlayerState();
+            (state === 1) ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); 
+        }
+    }
 
     function updateUI() {
         if (ytPlayer && ytPlayer.getCurrentTime) {
             const cur = ytPlayer.getCurrentTime(), dur = ytPlayer.getDuration();
-            document.getElementById('seek-fill').style.width = (cur/dur * 100) + '%';
-            document.getElementById('video-timer').innerText = Math.floor(cur/60) + ":" + ("0"+Math.floor(cur%60)).slice(-2);
+            if (dur > 0) {
+                document.getElementById('seek-fill').style.width = (cur/dur * 100) + '%';
+                document.getElementById('video-timer').innerText = Math.floor(cur/60) + ":" + ("0"+Math.floor(cur%60)).slice(-2);
+            }
         }
     }
 
