@@ -20,7 +20,7 @@
 
         nav { display: none; background: var(--navy); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: #fff; }
         nav.visible { display: flex; }
-        .nav-logo { display: flex; align-items: center; gap: 10px; }
+        .nav-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .nav-logo img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--orange); }
 
         .container { padding: 20px; max-width: 1000px; margin: 0 auto; }
@@ -29,19 +29,18 @@
 
         .video-wrapper { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
         #yt-player { width: 100%; height: 100%; position: absolute; top:0; left:0; pointer-events: none; }
-        .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; cursor: default; }
+        .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; }
         
         .custom-controls { background: #111; padding: 12px; display: flex; align-items: center; gap: 15px; border-radius: 0 0 15px 15px; color: #fff; }
         .play-btn { background: var(--orange); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
         .seek-bar { flex-grow: 1; height: 6px; background: #444; border-radius: 3px; position: relative; cursor: pointer; }
         .seek-fill { height: 100%; background: var(--orange); width: 0%; border-radius: 3px; }
 
-        .poetic-line { font-family: 'Amiri', serif; color: var(--orange); text-align: center; font-size: 1.3rem; margin: 20px 0; font-weight: bold; }
+        .price-tag { color: var(--orange); font-weight: 800; font-size: 1.1rem; margin-bottom: 10px; display: block; }
         .auth-card { background: #fff; padding: 30px; border-radius: 20px; box-shadow: var(--card-shadow); text-align: center; max-width: 400px; margin: auto; }
         .input-group { width: 100%; padding: 12px; margin-bottom: 15px; border: 1.5px solid #ddd; border-radius: 10px; font-family: 'Cairo'; text-align: center; outline: none; }
         .btn-main { width: 100%; padding: 12px; background: var(--orange); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
         
-        .price-tag { color: var(--orange); font-weight: 800; font-size: 1.1rem; margin: 10px 0; }
         .floating-wa { position: fixed; bottom: 20px; right: 20px; background: #25D366; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; z-index: 1000; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
     </style>
 </head>
@@ -51,7 +50,7 @@
 <div id="watermark"><div id="wm-text"></div></div>
 
 <nav id="navbar">
-    <div class="nav-logo">
+    <div class="nav-logo" onclick="showPage('home-page')">
         <img src="https://i.ibb.co/zT82jk68/image.png">
         <div><div id="nav-user-name" style="font-weight: 800;">تحميل...</div><div style="color: var(--orange); font-size: 0.8rem;">د. فادي عادل</div></div>
     </div>
@@ -65,8 +64,8 @@
     <div id="login-page" class="page active">
         <div style="height:100vh; display:flex; align-items:center; background:var(--navy);">
             <div class="auth-card">
-                <img src="https://i.ibb.co/zT82jk68/image.png" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; border: 2px solid var(--orange);">
-                <div class="poetic-line">"وَمَن لا يَهوى صُعُودَ الجِبالِ <br> يَعِش أَبَدَ الدَّهرِ بَيْنَ الحُفَرِ"</div>
+                <img src="https://i.ibb.co/zT82jk68/image.png" style="width: 80px; margin-bottom: 10px; border-radius: 50%;">
+                <div class="poetic-line">"تَعَلَّمْ فَلَيْسَ المَرْءُ يُولَدُ عَالِمًا <br> وَلَيْسَ أَخُو عِلْمٍ كَمَنْ هُوَ جَاهِلُ"</div>
                 <input type="tel" id="l-phone" placeholder="رقم الموبايل" class="input-group">
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول</button>
@@ -90,7 +89,7 @@
 
     <div id="home-page" class="page">
         <div class="container">
-            <h2 style="text-align:right; border-right:4px solid var(--orange); padding-right:10px;">محاضراتي</h2>
+            <h2 style="text-align:right; border-right:4px solid var(--orange); padding-right:10px;">الكورسات المتاحة</h2>
             <div id="courses-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;"></div>
         </div>
     </div>
@@ -132,15 +131,15 @@
     const sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
     let ytPlayer, apiReady = false;
 
-    function generateFingerprint() { return btoa(navigator.userAgent + screen.width + navigator.vendor); }
-
     function onYouTubeIframeAPIReady() { apiReady = true; }
+
+    function generateFingerprint() { return btoa(navigator.userAgent + screen.width + navigator.vendor); }
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', !['login-page', 'register-page'].includes(id));
-        if (id !== 'content-page' && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+        if (id !== 'content-page' && ytPlayer) ytPlayer.pauseVideo();
         if (id === 'profile-page') loadProfile();
         checkSecurity();
     }
@@ -150,16 +149,16 @@
         if (!user) return;
         const { data } = await sb.from('students').select('device_id').eq('student_phone', user.student_phone).single();
         if (data && data.device_id !== generateFingerprint()) {
-            alert("⚠️ الحساب تم فتحه من جهاز آخر.");
+            alert("⚠️ الحساب مفتوح من جهاز آخر.");
             handleLogout(false);
         }
     }
 
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value, pass = document.getElementById('l-pass').value;
-        const currentFP = generateFingerprint();
         const { data } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
         if (data) {
+            const currentFP = generateFingerprint();
             if (data.device_id && data.device_id !== currentFP) { alert("الحساب نشط على جهاز آخر."); return; }
             await sb.from('students').update({ device_id: currentFP }).eq('student_phone', phone);
             localStorage.setItem('f_user', JSON.stringify(data));
@@ -192,11 +191,11 @@
         const { data } = await sb.from('courses').select('*').order('created_at', { ascending: false });
         document.getElementById('courses-container').innerHTML = (data || []).map(c => `
             <div class="auth-card" style="padding:0; overflow:hidden;">
-                <img src="${c.image_url}" style="width:100%; height:150px; object-fit:cover;">
+                <img src="${c.image_url}" style="width:100%; height:160px; object-fit:cover;">
                 <div style="padding:15px;">
                     <h4>${c.title}</h4>
-                    <div class="price-tag">${c.price || 0} ج.م</div>
-                    <button class="btn-main" onclick="openCourse('${c.id}')">فتح المحتوى</button>
+                    <span class="price-tag">السعر: ${c.price || 0} ج.م</span>
+                    <button class="btn-main" onclick="openCourse('${c.id}')">دخول المحاضرات</button>
                 </div>
             </div>`).join('');
     }
@@ -206,28 +205,19 @@
         const { data } = await sb.from('lessons').select('*').eq('course_id', id);
         document.getElementById('lessons-list').innerHTML = (data || []).map(l => `
             <div style="background:#fff; padding:15px; margin-bottom:10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="playVideo('${l.video_id}')">
-                <span>${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange); font-size:1.5rem;"></i>
+                <span>${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange); font-size: 1.4rem;"></i>
             </div>`).join('');
     }
 
     function playVideo(vId) {
-        if (!apiReady) { alert("يتم تحميل مشغل الفيديو..."); return; }
+        if (!apiReady) return;
         document.getElementById('video-section').style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
-        if (ytPlayer && ytPlayer.destroy) ytPlayer.destroy();
-        
+        if (ytPlayer) ytPlayer.destroy();
         ytPlayer = new YT.Player('yt-player', {
             videoId: vId,
-            playerVars: { 
-                'autoplay': 1, 
-                'controls': 0, 
-                'rel': 0, 
-                'modestbranding': 1, 
-                'disablekb': 1, 
-                'origin': window.location.origin,
-                'widget_referrer': window.location.href 
-            },
+            playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0, 'modestbranding': 1, 'origin': window.location.origin },
             events: {
                 'onReady': (e) => { e.target.playVideo(); setInterval(updateUI, 1000); },
                 'onStateChange': (e) => { document.getElementById('play-icon').className = (e.data === 1) ? 'fas fa-pause' : 'fas fa-play'; }
@@ -235,7 +225,7 @@
         });
     }
 
-    function togglePlay() { if (ytPlayer && ytPlayer.getPlayerState) (ytPlayer.getPlayerState() === 1) ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
+    function togglePlay() { if (ytPlayer) (ytPlayer.getPlayerState() === 1) ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
 
     function updateUI() {
         if (ytPlayer && ytPlayer.getCurrentTime) {
