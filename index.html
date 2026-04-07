@@ -131,10 +131,7 @@
     const sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
     let ytPlayer, apiReady = false;
 
-    // تم تعديل هذا الجزء لضمان تحميل المكتبة
-    function onYouTubeIframeAPIReady() { 
-        apiReady = true; 
-    }
+    function onYouTubeIframeAPIReady() { apiReady = true; }
 
     function generateFingerprint() { return btoa(navigator.userAgent + screen.width + navigator.vendor); }
 
@@ -142,7 +139,7 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', !['login-page', 'register-page'].includes(id));
-        if (id !== 'content-page' && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+        if (id !== 'content-page' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
         if (id === 'profile-page') loadProfile();
         checkSecurity();
     }
@@ -212,47 +209,50 @@
             </div>`).join('');
     }
 
-    // تم إصلاح دالة التشغيل هنا لضمان الاستجابة
+    // -- تم التعديل على هذه الدالة فقط لحل مشكلة التحميل المستمر --
     function playVideo(vId) {
+        if (!apiReady) {
+            alert("برجاء الانتظار ثوانٍ حتى يكتمل تحميل المشغل، ثم اضغط مرة أخرى.");
+            return;
+        }
         document.getElementById('video-section').style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
-        if (ytPlayer && ytPlayer.destroy) {
-            ytPlayer.destroy();
-        }
-
-        ytPlayer = new YT.Player('yt-player', {
-            videoId: vId,
-            playerVars: { 
-                'autoplay': 1, 
-                'controls': 0, 
-                'rel': 0, 
-                'modestbranding': 1, 
-                'showinfo': 0,
-                'ecver': 2,
-                'origin': window.location.origin 
-            },
-            events: {
-                'onReady': (e) => { 
-                    e.target.playVideo(); 
-                    setInterval(updateUI, 1000); 
+        // إذا كان المشغل موجوداً بالفعل، قم بتغيير الفيديو بدلاً من تدمير المشغل
+        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+            ytPlayer.loadVideoById(vId);
+        } else {
+            // إنشاء المشغل لأول مرة
+            ytPlayer = new YT.Player('yt-player', {
+                videoId: vId,
+                playerVars: { 
+                    'autoplay': 1, 
+                    'controls': 0, 
+                    'rel': 0, 
+                    'modestbranding': 1, 
+                    'playsinline': 1, // لحل مشكلة التعليق على الموبايل
+                    'origin': window.location.origin 
                 },
-                'onStateChange': (e) => { 
-                    document.getElementById('play-icon').className = (e.data === 1) ? 'fas fa-pause' : 'fas fa-play'; 
+                events: {
+                    'onReady': (e) => { 
+                        e.target.playVideo(); 
+                        if (!window.uiTimer) {
+                            window.uiTimer = setInterval(updateUI, 1000); 
+                        }
+                    },
+                    'onStateChange': (e) => { 
+                        document.getElementById('play-icon').className = (e.data === 1) ? 'fas fa-pause' : 'fas fa-play'; 
+                    }
                 }
-            }
-        });
-    }
-
-    function togglePlay() { 
-        if (ytPlayer && ytPlayer.getPlayerState) {
-            const state = ytPlayer.getPlayerState();
-            (state === 1) ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); 
+            });
         }
     }
+    // -------------------------------------------------------------
+
+    function togglePlay() { if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') (ytPlayer.getPlayerState() === 1) ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
 
     function updateUI() {
-        if (ytPlayer && ytPlayer.getCurrentTime) {
+        if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
             const cur = ytPlayer.getCurrentTime(), dur = ytPlayer.getDuration();
             if (dur > 0) {
                 document.getElementById('seek-fill').style.width = (cur/dur * 100) + '%';
@@ -262,7 +262,7 @@
     }
 
     function manualSeek(e) {
-        if (ytPlayer && ytPlayer.getDuration) {
+        if (ytPlayer && typeof ytPlayer.getDuration === 'function') {
             const pct = (e.pageX - e.currentTarget.offsetLeft) / e.currentTarget.offsetWidth;
             ytPlayer.seekTo(pct * ytPlayer.getDuration());
         }
