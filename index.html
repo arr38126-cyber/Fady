@@ -18,7 +18,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; overflow-x: hidden; color: #333; direction: rtl; }
 
-        /* العلامة المائية */
+        /* العلامة المائية المتقدمة */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06; overflow: hidden; }
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; font-size: 1.1rem; line-height: 5; width: 300%; text-align: center; color: var(--navy); }
@@ -35,26 +35,28 @@
 
         .poetic-line { font-family: 'Amiri', serif; font-style: italic; color: var(--orange); margin: 20px 0; font-size: 1.25rem; font-weight: 700; text-align: center; line-height: 1.6; }
 
-        .floating-wa {
-            position: fixed; bottom: 25px; right: 25px; background-color: #25D366; color: white;
-            border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center;
-            justify-content: center; font-size: 35px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); z-index: 10000; text-decoration: none;
-        }
-
-        .auth-card, .profile-card, .review-card { background: #fff; border-radius: 20px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 20px; }
-        .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 15px; font-family: 'Cairo'; text-align: center; font-size: 1rem; outline: none; }
-        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1.1rem; }
+        /* مشغل الفيديو المطور */
+        .player-container { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        #yt-player { width: 100%; height: 100%; pointer-events: none; }
+        .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; cursor: default; }
         
-        .grades-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .grades-table th { background: var(--navy); color: #fff; padding: 12px; border-radius: 5px; }
-        .grades-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-weight: 600; }
+        .custom-controls { background: var(--navy); padding: 10px; display: flex; align-items: center; gap: 10px; border-radius: 0 0 15px 15px; color: #fff; }
+        .ctrl-btn { background: none; border: none; color: #fff; cursor: pointer; font-size: 1.2rem; }
+        .progress-bar { flex-grow: 1; height: 5px; background: rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; position: relative; }
+        .progress-fill { height: 100%; background: var(--orange); border-radius: 5px; width: 0%; }
 
-        .q-box { border-right: 5px solid #ccc; padding: 15px; margin-bottom: 15px; background: #f9f9f9; border-radius: 10px; }
-        .q-box.correct { border-right-color: var(--green); }
-        .q-box.wrong { border-right-color: var(--red); }
-        .opt { padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd; }
-        .opt.user { background: #fff3cd; border-color: #ffeeba; }
-        .opt.correct { background: #d4edda; border-color: #c3e6cb; font-weight: bold; }
+        /* العناصر العائمة */
+        .floating-wa { position: fixed; bottom: 25px; right: 25px; background: #25D366; color: #fff; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10000; text-decoration: none; }
+
+        /* البطاقات والجداول */
+        .auth-card, .profile-card { background: #fff; border-radius: 20px; padding: 25px; box-shadow: var(--card-shadow); margin-bottom: 20px; text-align: center; }
+        .input-group { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 15px; font-family: 'Cairo'; text-align: center; font-size: 1rem; outline: none; }
+        .btn-main { width: 100%; padding: 14px; background: var(--orange); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-family: 'Cairo'; font-size: 1.1rem; transition: 0.3s; }
+        .btn-main:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .grades-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .grades-table th { background: var(--navy); color: #fff; padding: 12px; }
+        .grades-table td { padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -76,7 +78,7 @@
 <div id="app">
     <div id="login-page" class="page active">
         <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy); padding:20px;">
-            <div class="auth-card" style="width:100%; max-width:400px; text-align:center;">
+            <div class="auth-card" style="max-width:400px; width:100%;">
                 <img src="https://i.ibb.co/zT82jk68/image.png" width="80" style="border-radius:50%; margin-bottom:10px;">
                 <div class="poetic-line">"وَمَن لا يَهوى صُعُودَ الجِبالِ <br> يَعِش أَبَدَ الدَّهرِ بَيْنَ الحُفَرِ"</div>
                 <h3>تسجيل الدخول</h3>
@@ -84,21 +86,20 @@
                 <input type="password" id="l-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleLogin()">دخول للمنصة</button>
                 <p onclick="showPage('register-page')" style="margin-top:15px; cursor:pointer; font-weight:bold; color:var(--navy);">إنشاء حساب جديد</p>
-                <a href="https://wa.me/201055427975" target="_blank" style="display:block; margin-top:15px; color:#25D366; text-decoration:none; font-weight:bold;">الدعم الفني <i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
     </div>
 
     <div id="register-page" class="page">
         <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy); padding:20px;">
-            <div class="auth-card" style="width:100%; max-width:400px;">
-                <h3 style="text-align:center;">بيانات طالب جديد</h3>
+            <div class="auth-card" style="max-width:400px; width:100%;">
+                <h3>بيانات طالب جديد</h3>
                 <input type="text" id="r-name" placeholder="الاسم ثلاثي" class="input-group">
                 <input type="tel" id="r-phone" placeholder="رقم موبايلك" class="input-group">
                 <input type="tel" id="r-parent" placeholder="رقم ولي الأمر" class="input-group">
                 <input type="password" id="r-pass" placeholder="كلمة المرور" class="input-group">
                 <button class="btn-main" onclick="handleRegister()">تأكيد الحساب</button>
-                <p onclick="showPage('login-page')" style="text-align:center; margin-top:15px; cursor:pointer;">رجوع</p>
+                <p onclick="showPage('login-page')" style="margin-top:15px; cursor:pointer;">رجوع</p>
             </div>
         </div>
     </div>
@@ -115,114 +116,108 @@
         <div class="container">
             <button onclick="showPage('home-page')" style="border:none; background:none; color:var(--navy); font-weight:bold; cursor:pointer; margin-bottom:15px;"><i class="fas fa-arrow-right"></i> العودة للكورسات</button>
             <h3 id="current-course-title" style="text-align:right;"></h3>
-            <div id="video-section" style="display:none; margin-bottom:20px;">
-                <div style="width:100%; aspect-ratio:16/9; border-radius:15px; overflow:hidden; background:#000;">
+            
+            <div id="video-section" style="display:none;">
+                <div class="player-container">
                     <div id="yt-player"></div>
+                    <div class="video-overlay" onclick="togglePlay()"></div>
+                </div>
+                <div class="custom-controls">
+                    <button class="ctrl-btn" onclick="togglePlay()"><i id="play-icon" class="fas fa-play"></i></button>
+                    <div class="progress-bar" onclick="seek(event)">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                    <span id="video-time" style="font-size:0.8rem;">00:00</span>
                 </div>
             </div>
-            <div id="lessons-list"></div>
+
+            <div id="lessons-list" style="margin-top:20px;"></div>
         </div>
     </div>
 
     <div id="profile-page" class="page">
         <div class="container">
             <div class="profile-card">
-                <h3><i class="fas fa-id-card"></i> بياناتي</h3>
-                <div style="text-align:right; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <p><b>الاسم:</b> <span id="p-name"></span></p>
-                    <p><b>الموبايل:</b> <span id="p-phone"></span></p>
-                    <p><b>ولي الأمر:</b> <span id="p-parent"></span></p>
-                </div>
+                <h3><i class="fas fa-user-graduate"></i> ملف الطالب</h3>
+                <p><b>الاسم:</b> <span id="p-name"></span></p>
+                <p><b>الموبايل:</b> <span id="p-phone"></span></p>
+                <p><b>ولي الأمر:</b> <span id="p-parent"></span></p>
             </div>
-            <h3 style="text-align:right;"><i class="fas fa-star"></i> سجل نتائج الامتحانات</h3>
-            <div style="overflow-x:auto;">
+            <h3 style="text-align:right;"><i class="fas fa-star"></i> سجل الدرجات</h3>
+            <div style="overflow-x:auto; background:#fff; border-radius:15px;">
                 <table class="grades-table">
-                    <thead><tr><th>الامتحان</th><th>الدرجة</th><th>مراجعة</th></tr></thead>
+                    <thead><tr><th>الامتحان</th><th>الدرجة</th></tr></thead>
                     <tbody id="grades-body"></tbody>
                 </table>
             </div>
-        </div>
-    </div>
-
-    <div id="review-page" class="page">
-        <div class="container">
-            <h3 id="review-title" style="text-align:right;"></h3>
-            <div id="review-container"></div>
-            <button class="btn-main" onclick="showPage('profile-page')" style="margin-top:20px; background:var(--navy)">إغلاق المراجعة</button>
         </div>
     </div>
 </div>
 
 <script>
     const sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
-    let ytPlayer, apiReady = false;
+    let ytPlayer, apiReady = false, progressInterval;
 
-    // 1. نظام البصمة: إنشاء معرف فريد للجهاز
+    // 1. بصمة الجهاز
     function getDeviceFingerprint() {
-        return btoa(navigator.userAgent + screen.width + screen.height);
+        return btoa(navigator.userAgent + screen.width + navigator.language);
     }
 
-    // 2. نظام اليوتيوب: التأكد من جاهزية المكتبة
-    function onYouTubeIframeAPIReady() {
-        apiReady = true;
-    }
+    // 2. يوتيوب API
+    function onYouTubeIframeAPIReady() { apiReady = true; }
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', !['login-page', 'register-page'].includes(id));
         if(id === 'profile-page') loadProfile();
+        if(id !== 'content-page' && ytPlayer) ytPlayer.pauseVideo();
     }
 
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value, pass = document.getElementById('l-pass').value;
-        const currentFingerprint = getDeviceFingerprint();
+        const fingerprint = getDeviceFingerprint();
 
         const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
         
         if (data) {
-            // التحقق من الحماية (جهاز واحد فقط)
-            if (data.device_id && data.device_id !== currentFingerprint) {
-                alert("الحساب مفتوح على جهاز آخر. سجل خروج منه أولاً.");
+            if (data.device_id && data.device_id !== fingerprint) {
+                alert("⚠️ الحساب مسجل على جهاز آخر. يرجى تسجيل الخروج من الجهاز الآخر أولاً.");
                 return;
             }
-            // تسجيل البصمة الحالية
-            await sb.from('students').update({ device_id: currentFingerprint }).eq('student_phone', phone);
-            
-            localStorage.setItem('f_user', JSON.stringify(data)); 
-            startApp(data); 
+            await sb.from('students').update({ device_id: fingerprint }).eq('student_phone', phone);
+            localStorage.setItem('f_user', JSON.stringify(data));
+            startApp(data);
         } else {
-            alert("بيانات تسجيل الدخول غير صحيحة");
+            alert("بيانات الدخول غير صحيحة");
         }
     }
 
     async function handleRegister() {
         const name = document.getElementById('r-name').value, phone = document.getElementById('r-phone').value;
         const parent = document.getElementById('r-parent').value, pass = document.getElementById('r-pass').value;
-        const currentFingerprint = getDeviceFingerprint();
+        const fingerprint = getDeviceFingerprint();
 
-        if(!name || !phone || !pass) return alert("أكمل البيانات");
-        
-        const { data, error } = await sb.from('students').insert([{ 
-            full_name: name, student_phone: phone, parent_phone: parent, password: pass, device_id: currentFingerprint 
+        const { data, error } = await sb.from('students').insert([{
+            full_name: name, student_phone: phone, parent_phone: parent, password: pass, device_id: fingerprint
         }]).select().single();
 
-        if (data) { 
-            localStorage.setItem('f_user', JSON.stringify(data)); 
-            startApp(data); 
+        if (data) {
+            localStorage.setItem('f_user', JSON.stringify(data));
+            startApp(data);
         } else {
-            alert("خطأ: ربما الرقم مسجل مسبقاً");
+            alert("الرقم مسجل مسبقاً أو هناك خطأ في البيانات");
         }
     }
 
     async function handleLogout() {
         const user = JSON.parse(localStorage.getItem('f_user'));
         if (user) {
-            // مسح البصمة من السيرفر عند الخروج لإتاحة الدخول من جهاز آخر
+            // تصفير بصمة الجهاز في الداتابيز للسماح بدخول جهاز آخر
             await sb.from('students').update({ device_id: null }).eq('student_phone', user.student_phone);
         }
-        localStorage.clear(); 
-        location.reload(); 
+        localStorage.clear();
+        location.reload();
     }
 
     function startApp(user) {
@@ -237,53 +232,68 @@
         const { data } = await sb.from('courses').select('*');
         document.getElementById('courses-container').innerHTML = (data || []).map(c => `
             <div class="auth-card" style="padding:0; overflow:hidden;">
-                <img src="${c.image_url}" style="width:100%; height:160px; object-fit:cover;">
-                <div style="padding:15px; text-align:right;">
-                    <h4 style="margin:0;">${c.title}</h4>
-                    <p style="color:var(--green); font-weight:800; margin:10px 0;">${parseFloat(c.price) === 0 ? 'كورس مجاني' : 'السعر: ' + c.price + ' ج.م'}</p>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول</button>
-                        <a href="https://wa.me/201055427975" target="_blank" style="background:#25D366; color:#fff; width:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; text-decoration:none;"><i class="fab fa-whatsapp"></i></a>
-                    </div>
+                <img src="${c.image_url}" style="width:100%; height:150px; object-fit:cover;">
+                <div style="padding:15px;">
+                    <h4>${c.title}</h4>
+                    <p style="color:var(--orange); font-weight:bold;">${c.price} ج.م</p>
+                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">دخول المحاضرة</button>
                 </div>
             </div>`).join('');
     }
 
     async function openCourse(id, title) {
-        currentCourseId = id; document.getElementById('current-course-title').innerText = title;
-        showPage('content-page'); loadLessons();
-    }
-
-    async function loadLessons() {
-        const { data } = await sb.from('lessons').select('*').eq('course_id', currentCourseId);
+        document.getElementById('current-course-title').innerText = title;
+        showPage('content-page');
+        const { data } = await sb.from('lessons').select('*').eq('course_id', id);
         document.getElementById('lessons-list').innerHTML = (data || []).map(l => `
             <div style="background:#fff; padding:15px; margin-bottom:10px; border-radius:12px; display:flex; justify-content:space-between; cursor:pointer; border-right:4px solid var(--orange);" onclick="playVideo('${l.video_id}')">
                 <span>${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange);"></i>
             </div>`).join('');
     }
 
-    // استخراج ID الفيديو بشكل دقيق
-    function extractVideoID(url) {
-        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[7].length === 11) ? match[7] : url;
+    function playVideo(vId) {
+        if (!apiReady) return;
+        document.getElementById('video-section').style.display = 'block';
+        if (ytPlayer) ytPlayer.destroy();
+        
+        ytPlayer = new YT.Player('yt-player', {
+            videoId: vId,
+            playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0, 'modestbranding': 1, 'disablekb': 1 },
+            events: {
+                'onReady': (e) => {
+                    e.target.playVideo();
+                    startTracking();
+                },
+                'onStateChange': (e) => {
+                    document.getElementById('play-icon').className = e.data === 1 ? 'fas fa-pause' : 'fas fa-play';
+                }
+            }
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function playVideo(vid) {
-        if (!apiReady) return alert("جاري تحميل مشغل الفيديو...");
-        document.getElementById('video-section').style.display = 'block';
-        const vId = extractVideoID(vid);
+    function togglePlay() {
+        if (!ytPlayer) return;
+        ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
+    }
 
-        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-            ytPlayer.loadVideoById(vId);
-        } else {
-            ytPlayer = new YT.Player('yt-player', {
-                height: '100%', width: '100%', videoId: vId,
-                playerVars: { 'autoplay': 1, 'rel': 0, 'modestbranding': 1 },
-                events: { 'onReady': (e) => e.target.playVideo() }
-            });
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    function startTracking() {
+        clearInterval(progressInterval);
+        progressInterval = setInterval(() => {
+            if (ytPlayer && ytPlayer.getCurrentTime) {
+                const cur = ytPlayer.getCurrentTime();
+                const dur = ytPlayer.getDuration();
+                const pct = (cur / dur) * 100;
+                document.getElementById('progress-fill').style.width = pct + '%';
+                document.getElementById('video-time').innerText = Math.floor(cur/60) + ":" + ("0"+Math.floor(cur%60)).slice(-2);
+            }
+        }, 1000);
+    }
+
+    function seek(e) {
+        const bar = e.currentTarget;
+        const pct = (e.pageX - bar.offsetLeft) / bar.offsetWidth;
+        if (ytPlayer) ytPlayer.seekTo(pct * ytPlayer.getDuration());
     }
 
     async function loadProfile() {
@@ -293,34 +303,15 @@
         document.getElementById('p-parent').innerText = user.parent_phone;
 
         const { data } = await sb.from('exam_results').select('*').eq('student_phone', user.student_phone);
-        const tbody = document.getElementById('grades-body');
-        if (!data || data.length === 0) { tbody.innerHTML = "<tr><td colspan='3'>لا يوجد نتائج</td></tr>"; return; }
-        tbody.innerHTML = data.map(g => `
-            <tr>
-                <td>${g.exam_title}</td>
-                <td>${g.score} / ${g.total_mark}</td>
-                <td><button onclick="loadReview('${g.id}', '${g.exam_title}')" style="background:var(--navy); color:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">مراجعة</button></td>
-            </tr>`).join('');
-    }
-
-    async function loadReview(resId, title) {
-        showPage('review-page');
-        document.getElementById('review-title').innerText = "مراجعة: " + title;
-        const { data } = await sb.from('student_answers').select('*').eq('result_id', resId);
-        document.getElementById('review-container').innerHTML = (data || []).map((q, i) => `
-            <div class="q-box ${q.user_answer === q.correct_answer ? 'correct' : 'wrong'}">
-                <p><b>س${i+1}: ${q.question_text}</b></p>
-                <div class="opt ${q.user_answer === 'A' ? 'user' : ''} ${q.correct_answer === 'A' ? 'correct' : ''}">أ) ${q.option_a}</div>
-                <div class="opt ${q.user_answer === 'B' ? 'user' : ''} ${q.correct_answer === 'B' ? 'correct' : ''}">ب) ${q.option_b}</div>
-                <div class="opt ${q.user_answer === 'C' ? 'user' : ''} ${q.correct_answer === 'C' ? 'correct' : ''}">ج) ${q.option_c}</div>
-                <div class="opt ${q.user_answer === 'D' ? 'user' : ''} ${q.correct_answer === 'D' ? 'correct' : ''}">د) ${q.option_d}</div>
-            </div>`).join('');
+        document.getElementById('grades-body').innerHTML = (data || []).map(g => `
+            <tr><td>${g.exam_title}</td><td>${g.score}%</td></tr>
+        `).join('') || "<tr><td colspan='2'>لا يوجد نتائج بعد</td></tr>";
     }
 
     window.onload = () => {
         const user = localStorage.getItem('f_user');
         if (user) startApp(JSON.parse(user));
-    }
+    };
 </script>
 </body>
 </html>
