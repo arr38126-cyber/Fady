@@ -14,6 +14,7 @@
         :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --card-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; direction: rtl; }
         
+        /* العلامة المائية */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06; overflow: hidden; }
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; color: var(--navy); width: 300%; text-align: center; line-height: 5; }
@@ -27,6 +28,7 @@
         .page { display: none; }
         .page.active { display: block; }
 
+        /* مشغل يوتيوب المخصص بالطبقة الشفافة */
         .video-wrapper { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
         #yt-player { width: 100%; height: 100%; position: absolute; top:0; left:0; pointer-events: none; }
         .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; cursor: default; }
@@ -41,9 +43,6 @@
         .input-group { width: 100%; padding: 12px; margin-bottom: 15px; border: 1.5px solid #ddd; border-radius: 10px; font-family: 'Cairo'; text-align: center; outline: none; }
         .btn-main { width: 100%; padding: 12px; background: var(--orange); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
         
-        /* السعر */
-        .price-tag { color: var(--orange); font-weight: 800; font-size: 1.1rem; margin: 10px 0; }
-
         .floating-wa { position: fixed; bottom: 20px; right: 20px; background: #25D366; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; z-index: 1000; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
     </style>
 </head>
@@ -99,7 +98,7 @@
     <div id="content-page" class="page">
         <div class="container">
             <button onclick="showPage('home-page')" style="border:none; background:none; cursor:pointer; font-weight:bold; margin-bottom:10px;">🏠 العودة</button>
-            <div id="video-section" style="display:none; margin-bottom: 20px;">
+            <div id="video-section" style="display:none;">
                 <div class="video-wrapper">
                     <div id="yt-player"></div>
                     <div class="video-overlay" onclick="togglePlay()"></div>
@@ -112,7 +111,7 @@
                     <span id="video-timer" style="font-size:0.8rem;">00:00</span>
                 </div>
             </div>
-            <div id="lessons-list"></div>
+            <div id="lessons-list" style="margin-top:20px;"></div>
         </div>
     </div>
 
@@ -133,35 +132,50 @@
     const sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
     let ytPlayer, apiReady = false;
 
-    function generateFingerprint() { return btoa(navigator.userAgent + screen.width + navigator.vendor); }
+    // 1. توليد بصمة الجهاز الفريدة
+    function generateFingerprint() {
+        return btoa(navigator.userAgent + screen.width + navigator.vendor);
+    }
 
+    // 2. يوتيوب API
     function onYouTubeIframeAPIReady() { apiReady = true; }
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('navbar').classList.toggle('visible', !['login-page', 'register-page'].includes(id));
-        if (id !== 'content-page' && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+        if (id !== 'content-page' && ytPlayer) ytPlayer.pauseVideo();
         if (id === 'profile-page') loadProfile();
+        
+        // فحص الحماية عند كل تنقل
         checkSecurity();
     }
 
+    // فحص هل الحساب مفتوح من جهاز آخر حالياً؟
     async function checkSecurity() {
         const user = JSON.parse(localStorage.getItem('f_user'));
         if (!user) return;
+        
         const { data } = await sb.from('students').select('device_id').eq('student_phone', user.student_phone).single();
         if (data && data.device_id !== generateFingerprint()) {
-            alert("⚠️ الحساب تم فتحه من جهاز آخر.");
-            handleLogout(false);
+            alert("⚠️ الحساب تم فتحه من جهاز آخر. سيتم تسجيل خروجك.");
+            handleLogout(false); // خروج بدون مسح البصمة من السيرفر لأن الجهاز الآخر هو النشط حالياً
         }
     }
 
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value, pass = document.getElementById('l-pass').value;
         const currentFP = generateFingerprint();
-        const { data } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+
+        const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
+        
         if (data) {
-            if (data.device_id && data.device_id !== currentFP) { alert("الحساب نشط على جهاز آخر."); return; }
+            // منع الدخول إذا كان هناك جهاز آخر نشط (ليس له بصمة مسجلة أو بصمته مختلفة)
+            if (data.device_id && data.device_id !== currentFP) {
+                alert("الحساب نشط على جهاز آخر حالياً. سجل خروج منه أولاً.");
+                return;
+            }
+            // تحديث البصمة في السيرفر
             await sb.from('students').update({ device_id: currentFP }).eq('student_phone', phone);
             localStorage.setItem('f_user', JSON.stringify(data));
             startApp(data);
@@ -170,7 +184,10 @@
 
     async function handleLogout(clearOnServer = true) {
         const user = JSON.parse(localStorage.getItem('f_user'));
-        if (user && clearOnServer) await sb.from('students').update({ device_id: null }).eq('student_phone', user.student_phone);
+        if (user && clearOnServer) {
+            // مسح البصمة من السيرفر عند الخروج الاختياري فقط
+            await sb.from('students').update({ device_id: null }).eq('student_phone', user.student_phone);
+        }
         localStorage.clear();
         location.reload();
     }
@@ -190,45 +207,53 @@
     }
 
     async function loadCourses() {
-        const { data } = await sb.from('courses').select('*').order('created_at', { ascending: false });
+        const { data } = await sb.from('courses').select('*');
         document.getElementById('courses-container').innerHTML = (data || []).map(c => `
             <div class="auth-card" style="padding:0; overflow:hidden;">
                 <img src="${c.image_url}" style="width:100%; height:150px; object-fit:cover;">
                 <div style="padding:15px;">
                     <h4>${c.title}</h4>
-                    <div class="price-tag">${c.price || 0} ج.م</div>
-                    <button class="btn-main" onclick="openCourse('${c.id}')">فتح المحتوى</button>
+                    <button class="btn-main" onclick="openCourse('${c.id}', '${c.title}')">فتح المحتوى</button>
                 </div>
             </div>`).join('');
     }
 
-    async function openCourse(id) {
+    async function openCourse(id, title) {
         showPage('content-page');
         const { data } = await sb.from('lessons').select('*').eq('course_id', id);
         document.getElementById('lessons-list').innerHTML = (data || []).map(l => `
-            <div style="background:#fff; padding:15px; margin-bottom:10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="playVideo('${l.video_id}')">
-                <span>${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange); font-size:1.5rem;"></i>
+            <div style="background:#fff; padding:15px; margin-bottom:10px; border-radius:12px; display:flex; justify-content:space-between; cursor:pointer;" onclick="playVideo('${l.video_id}')">
+                <span>${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange);"></i>
             </div>`).join('');
     }
 
     function playVideo(vId) {
-        if (!apiReady) { alert("يتم تحميل مشغل الفيديو، انتظر لحظة..."); return; }
+        if (!apiReady) return;
         document.getElementById('video-section').style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        if (ytPlayer && ytPlayer.destroy) ytPlayer.destroy();
+        if (ytPlayer) ytPlayer.destroy();
         
         ytPlayer = new YT.Player('yt-player', {
             videoId: vId,
-            playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0, 'modestbranding': 1, 'disablekb': 1, 'origin': window.location.origin },
+            playerVars: { 
+                'autoplay': 1, 'controls': 0, 'rel': 0, 'modestbranding': 1, 'disablekb': 1,
+                'origin': window.location.origin // هذا السطر يحل مشكلة رسالة اليوتيوب
+            },
             events: {
-                'onReady': (e) => { e.target.playVideo(); setInterval(updateUI, 1000); },
-                'onStateChange': (e) => { document.getElementById('play-icon').className = (e.data === 1) ? 'fas fa-pause' : 'fas fa-play'; }
+                'onReady': (e) => {
+                    e.target.playVideo();
+                    setInterval(updateUI, 1000);
+                },
+                'onStateChange': (e) => {
+                    document.getElementById('play-icon').className = (e.data === 1) ? 'fas fa-pause' : 'fas fa-play';
+                }
             }
         });
     }
 
-    function togglePlay() { if (ytPlayer && ytPlayer.getPlayerState) (ytPlayer.getPlayerState() === 1) ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
+    function togglePlay() {
+        if (!ytPlayer) return;
+        (ytPlayer.getPlayerState() === 1) ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
+    }
 
     function updateUI() {
         if (ytPlayer && ytPlayer.getCurrentTime) {
@@ -239,10 +264,8 @@
     }
 
     function manualSeek(e) {
-        if (ytPlayer && ytPlayer.getDuration) {
-            const pct = (e.pageX - e.currentTarget.offsetLeft) / e.currentTarget.offsetWidth;
-            ytPlayer.seekTo(pct * ytPlayer.getDuration());
-        }
+        const pct = (e.pageX - e.currentTarget.offsetLeft) / e.currentTarget.offsetWidth;
+        if (ytPlayer) ytPlayer.seekTo(pct * ytPlayer.getDuration());
     }
 
     async function loadProfile() {
