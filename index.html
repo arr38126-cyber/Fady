@@ -14,7 +14,6 @@
         :root { --navy: #1B2347; --orange: #E8581A; --bg: #F0F2F5; --card-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; user-select: none; direction: rtl; }
         
-        /* العلامة المائية */
         #watermark { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06; overflow: hidden; }
         #watermark.active { display: block; }
         #wm-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; font-weight: 900; color: var(--navy); width: 300%; text-align: center; line-height: 5; }
@@ -28,7 +27,6 @@
         .page { display: none; }
         .page.active { display: block; }
 
-        /* مشغل يوتيوب المخصص بالطبقة الشفافة */
         .video-wrapper { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
         #yt-player { width: 100%; height: 100%; position: absolute; top:0; left:0; pointer-events: none; }
         .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; cursor: default; }
@@ -132,12 +130,10 @@
     const sb = supabase.createClient('https://atjzfdlayhfbrdfplkaz.supabase.co', 'sb_publishable_qgPInys2_HADODQ8rRwORg_lYp6Baf8');
     let ytPlayer, apiReady = false;
 
-    // 1. توليد بصمة الجهاز الفريدة
     function generateFingerprint() {
         return btoa(navigator.userAgent + screen.width + navigator.vendor);
     }
 
-    // 2. يوتيوب API
     function onYouTubeIframeAPIReady() { apiReady = true; }
 
     function showPage(id) {
@@ -146,36 +142,28 @@
         document.getElementById('navbar').classList.toggle('visible', !['login-page', 'register-page'].includes(id));
         if (id !== 'content-page' && ytPlayer) ytPlayer.pauseVideo();
         if (id === 'profile-page') loadProfile();
-        
-        // فحص الحماية عند كل تنقل
         checkSecurity();
     }
 
-    // فحص هل الحساب مفتوح من جهاز آخر حالياً؟
     async function checkSecurity() {
         const user = JSON.parse(localStorage.getItem('f_user'));
         if (!user) return;
-        
         const { data } = await sb.from('students').select('device_id').eq('student_phone', user.student_phone).single();
         if (data && data.device_id !== generateFingerprint()) {
-            alert("⚠️ الحساب تم فتحه من جهاز آخر. سيتم تسجيل خروجك.");
-            handleLogout(false); // خروج بدون مسح البصمة من السيرفر لأن الجهاز الآخر هو النشط حالياً
+            alert("⚠️ الحساب تم فتحه من جهاز آخر.");
+            handleLogout(false);
         }
     }
 
     async function handleLogin() {
         const phone = document.getElementById('l-phone').value, pass = document.getElementById('l-pass').value;
         const currentFP = generateFingerprint();
-
-        const { data, error } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
-        
+        const { data } = await sb.from('students').select('*').eq('student_phone', phone).eq('password', pass).single();
         if (data) {
-            // منع الدخول إذا كان هناك جهاز آخر نشط (ليس له بصمة مسجلة أو بصمته مختلفة)
             if (data.device_id && data.device_id !== currentFP) {
-                alert("الحساب نشط على جهاز آخر حالياً. سجل خروج منه أولاً.");
+                alert("الحساب نشط على جهاز آخر حالياً.");
                 return;
             }
-            // تحديث البصمة في السيرفر
             await sb.from('students').update({ device_id: currentFP }).eq('student_phone', phone);
             localStorage.setItem('f_user', JSON.stringify(data));
             startApp(data);
@@ -185,7 +173,6 @@
     async function handleLogout(clearOnServer = true) {
         const user = JSON.parse(localStorage.getItem('f_user'));
         if (user && clearOnServer) {
-            // مسح البصمة من السيرفر عند الخروج الاختياري فقط
             await sb.from('students').update({ device_id: null }).eq('student_phone', user.student_phone);
         }
         localStorage.clear();
@@ -207,7 +194,8 @@
     }
 
     async function loadCourses() {
-        const { data } = await sb.from('courses').select('*');
+        // ترتيب الكورسات من الأحدث للأقدم بناءً على تاريخ الإنشاء
+        const { data } = await sb.from('courses').select('*').order('created_at', { ascending: false });
         document.getElementById('courses-container').innerHTML = (data || []).map(c => `
             <div class="auth-card" style="padding:0; overflow:hidden;">
                 <img src="${c.image_url}" style="width:100%; height:150px; object-fit:cover;">
@@ -220,7 +208,7 @@
 
     async function openCourse(id, title) {
         showPage('content-page');
-        const { data } = await sb.from('lessons').select('*').eq('course_id', id);
+        const { data } = await sb.from('lessons').select('*').eq('course_id', id).order('id', { ascending: true });
         document.getElementById('lessons-list').innerHTML = (data || []).map(l => `
             <div style="background:#fff; padding:15px; margin-bottom:10px; border-radius:12px; display:flex; justify-content:space-between; cursor:pointer;" onclick="playVideo('${l.video_id}')">
                 <span>${l.title}</span><i class="fas fa-play-circle" style="color:var(--orange);"></i>
@@ -231,29 +219,17 @@
         if (!apiReady) return;
         document.getElementById('video-section').style.display = 'block';
         if (ytPlayer) ytPlayer.destroy();
-        
         ytPlayer = new YT.Player('yt-player', {
             videoId: vId,
-            playerVars: { 
-                'autoplay': 1, 'controls': 0, 'rel': 0, 'modestbranding': 1, 'disablekb': 1,
-                'origin': window.location.origin // هذا السطر يحل مشكلة رسالة اليوتيوب
-            },
+            playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0, 'modestbranding': 1, 'disablekb': 1, 'origin': window.location.origin },
             events: {
-                'onReady': (e) => {
-                    e.target.playVideo();
-                    setInterval(updateUI, 1000);
-                },
-                'onStateChange': (e) => {
-                    document.getElementById('play-icon').className = (e.data === 1) ? 'fas fa-pause' : 'fas fa-play';
-                }
+                'onReady': (e) => { e.target.playVideo(); setInterval(updateUI, 1000); },
+                'onStateChange': (e) => { document.getElementById('play-icon').className = (e.data === 1) ? 'fas fa-pause' : 'fas fa-play'; }
             }
         });
     }
 
-    function togglePlay() {
-        if (!ytPlayer) return;
-        (ytPlayer.getPlayerState() === 1) ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
-    }
+    function togglePlay() { if (ytPlayer) (ytPlayer.getPlayerState() === 1) ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
 
     function updateUI() {
         if (ytPlayer && ytPlayer.getCurrentTime) {
@@ -272,7 +248,7 @@
         const user = JSON.parse(localStorage.getItem('f_user'));
         document.getElementById('p-name').innerText = "الاسم: " + user.full_name;
         document.getElementById('p-phone').innerText = "الموبايل: " + user.student_phone;
-        const { data } = await sb.from('exam_results').select('*').eq('student_phone', user.student_phone);
+        const { data } = await sb.from('exam_results').select('*').eq('student_phone', user.student_phone).order('created_at', { ascending: false });
         document.getElementById('grades-list').innerHTML = (data || []).map(g => `<p>${g.exam_title}: <b>${g.score}%</b></p>`).join('');
     }
 
